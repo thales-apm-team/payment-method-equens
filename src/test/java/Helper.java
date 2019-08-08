@@ -1,4 +1,3 @@
-import org.tomitribe.auth.signatures.Base64;
 import org.tomitribe.auth.signatures.Signature;
 import org.tomitribe.auth.signatures.Signer;
 
@@ -10,28 +9,25 @@ import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class Main {
+import static org.tomitribe.auth.signatures.Algorithm.RSA_SHA256;
+
+public class Helper {
 
     private static final String REL_PATH_AUTHORIZATION = "/authorize/token";
     private static final String REL_PATH_PAYMENT_INIT = "/pis/v1/payments";
     private static final String REL_PATH_PAYMENT_CONFIRM = "/pis/v1/payments/{paymentId}/confirmation";
     private static final String REL_PATH_PAYMENT_STATUS = "/pis/v1/payments/{paymentId}/status";
 
-    private static String accessToken(){
-        return "7B5cCVcHT6eNHg8RvMr6o9vWlv7wETnV3GDgCiy7J1mDUEZ2qFzeEs";
-    }
-
     public static void main( String[] args ) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
-        // Method conf
-        String endpoint = REL_PATH_AUTHORIZATION;
+        System.out.println("AUTHORIZATION");
 
         // Configuration (partner / contract)
         String keyStoreType = "pkcs12";
-        String keyStorePath = "D:\\Monext.Payline\\MdP\\Equens (Instant Payments)\\EquensWorldlineTest.p12";
+        String keyStorePath = "D:\\Monext.Payline\\MdP\\Equens (Instant Payments)\\EquensWorldlineTest_20190704.p12";
         char[] passwd = "EquensCert2019".toCharArray();
         String alias = "selfsigned";
         String paymentsApiBaseUrl = "https://xs2a.awltest.de/xs2a/routingservice/services";
-        String onboardingID = "123456";
+        String onboardingID = "000061";
 
         // Load the keystore and recover the private key
         // @see https://www.baeldung.com/java-keystore
@@ -44,11 +40,11 @@ public class Main {
 
         // Request headers
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("app", "PIS");
+        headers.put("App", "PIS");
         SimpleDateFormat df = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.US);
-        headers.put("client", "MarketPay");
-        headers.put("date", df.format(new Date()));
-        headers.put("id", onboardingID);
+        headers.put("Client", "MarketPay");
+        headers.put("Date", df.format(new Date()));
+        headers.put("Id", onboardingID);
         headers.put("Accept", "application/json");
         headers.put("Content-Type", "application/x-www-form-urlencoded");
 
@@ -56,18 +52,44 @@ public class Main {
             System.out.println( entry.getKey() + ": " + entry.getValue() );
         }
 
-        String requestUri = paymentsApiBaseUrl + endpoint;
+        String requestUri = paymentsApiBaseUrl + REL_PATH_AUTHORIZATION;
         String method = "POST";
 
         // Create a signer
         // @see https://github.com/tomitribe/http-signatures-java
-        Signature signature = new Signature(sha1.replace(":", ""), "rsa-sha256", null, "app", "client", "id", "date");
+        Signature signature = new Signature(sha1.replace(":", ""), RSA_SHA256, null, "app", "client", "id", "date");
         Signer signer = new Signer(pk, signature);
 
         // Sign the HTTP message
         // @see https://github.com/tomitribe/http-signatures-java
         signature = signer.sign(method, requestUri, headers);
-        System.out.println("Authorization: " + signature.toString());
+        System.out.println("Authorization: " + signature.toString().replace(RSA_SHA256.getPortableName(), RSA_SHA256.getJmvName()));
+
+        // PAYMENT INIT
+        System.out.println("\nPAYMENT INIT");
+        String uuid = UUID.randomUUID().toString();
+        System.out.println("X-Request-ID: " + uuid);
+
+        SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        String current = isoDateFormat.format(new Date());
+        String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        String transactionId = "MONEXT" + timestamp;
+        String orderReference = "REF" + timestamp;
+        String jsonBody = "{\n" +
+                "  \"MessageCreateDateTime\": \"" + current + "\",\n" +
+                "  \"MessageId\": \"" + uuid + "\",\n" +
+                "  \"AspspId\": \"506\",\n" +
+                "  \"EndToEndId\": \"" + transactionId + "\",\n" +
+                "  \"InitiatingPartyReferenceId\": \"" + orderReference + "\",\n" +
+                "  \"RemittanceInformationStructured\": {\n" +
+                "    \"Reference\": \"" + orderReference + "\"\n" +
+                "  },\n" +
+                "  \"PaymentAmount\": \"10.00\",\n" +
+                "  \"PaymentCurrency\": \"EUR\",\n" +
+                "  \"PsuId\": \"1\",\n" +
+                "  \"PaymentProduct\": \"Instant\"\n" +
+                "}";
+        System.out.println( "\n" + jsonBody );
     }
 
     private static Date add( Date to, int days ){
