@@ -13,7 +13,6 @@ public class PisHttpClient extends EquensOAuthHttpClient {
     private static final Logger LOGGER = LogManager.getLogger(PisHttpClient.class);
 
     // --- Singleton Holder pattern + initialization BEGIN
-    private AtomicBoolean initialized = new AtomicBoolean();
     PisHttpClient() {
     }
     private static class Holder {

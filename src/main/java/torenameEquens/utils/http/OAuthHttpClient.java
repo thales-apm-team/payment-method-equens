@@ -16,6 +16,7 @@ import torenameEquens.bean.business.authorization.RFC6749AccessTokenSuccessRespo
 import torenameEquens.exception.InvalidDataException;
 import torenameEquens.exception.PluginException;
 import torenameEquens.utils.PluginUtils;
+import torenameEquens.utils.properties.ConfigProperties;
 
 import java.io.IOException;
 import java.net.URI;
@@ -32,6 +33,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 abstract class OAuthHttpClient {
 
     private static final Logger LOGGER = LogManager.getLogger(OAuthHttpClient.class);
+
+    private ConfigProperties config = ConfigProperties.getInstance();
 
     /**
      * Support for the current authorization information.
@@ -70,9 +73,15 @@ abstract class OAuthHttpClient {
             // Set the token endpoint URL
             this.tokenEndpointUrl = tokenEndpointUrl;
 
-            // Get the number of retry attempts from plugin configuration
-            this.retries = 3; // TODO: from conf !
+            try {
+                // Get the number of retry attempts from plugin configuration
+                this.retries = Integer.parseInt(config.get("http.retries"));
+            }
+            catch( NumberFormatException e ){
+                throw new PluginException("plugin error: http.* properties must be integers", e);
+            }
 
+            // TODO: init client !
         }
     }
 
@@ -82,83 +91,66 @@ abstract class OAuthHttpClient {
      * @return A valid authorization
      */
     protected Authorization authorize(){
-        if( !isAuthorized() ){
-            // Init request
-            URI uri;
-            try {
-                uri = new URI(this.tokenEndpointUrl);
-            }
-            catch (URISyntaxException e) {
-                throw new InvalidDataException("Authorization API URL is invalid", e);
-            }
-            HttpPost httpPost = new HttpPost(uri);
-
-            // Authorization header
-            httpPost.setHeader(HttpHeaders.AUTHORIZATION, this.authorizationHeaderValue());
-
-            // Content-Type
-            httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
-
-            // www-form-urlencoded content
-            StringEntity data = new StringEntity("grant_type=client_credentials", StandardCharsets.UTF_8);
-            httpPost.setEntity(data);
-
-            // Execute request
-            StringResponse response = this.execute( httpPost );
-
-            // Handle potential error
-            if( response.getStatusCode() != HttpStatus.SC_OK ){
-                RFC6749AccessTokenErrorResponse errorResponse;
-                try {
-                    errorResponse = RFC6749AccessTokenErrorResponse.fromJson( response.getContent() );
-                }
-                catch( JsonSyntaxException e ){
-                    errorResponse = null;
-                }
-
-                if( errorResponse != null && errorResponse.getError() != null ){
-                    if( errorResponse.getErrorDescription() != null ){
-                        LOGGER.error( "Authorization error: {}", errorResponse.getErrorDescription() );
-                    }
-                    throw new PluginException("Authorization error: " + errorResponse.getError(), FailureCause.INVALID_DATA);
-                }
-                else {
-                    throw new PluginException("Unknown authorization error", FailureCause.PARTNER_UNKNOWN_ERROR);
-                }
-            }
-
-            // Build authorization from response content
-            Authorization.AuthorizationBuilder authBuilder = new Authorization.AuthorizationBuilder();
-            try {
-                // parse response content
-                RFC6749AccessTokenSuccessResponse authResponse = RFC6749AccessTokenSuccessResponse.fromJson( response.getContent() );
-
-                // retrieve access token & token type
-                if( authResponse.getAccessToken() == null ){
-                    throw new PluginException("No access_token in the authorization response", FailureCause.COMMUNICATION_ERROR);
-                }
-                authBuilder.withAccessToken( authResponse.getAccessToken() )
-                        .withTokenType( authResponse.getTokenType() == null ? "Bearer" : authResponse.getTokenType() );
-
-                // expiration date
-                long expiresIn = 60L * 5 * 1000; // 5 minutes default expiration time
-                if( authResponse.getExpiresIn() != null ){
-                    expiresIn = 1000L * authResponse.getExpiresIn();
-                }
-                Date expiresAt = new Date( System.currentTimeMillis() + expiresIn );
-                authBuilder.withExpiresAt( expiresAt );
-
-                this.authorization = authBuilder.build();
-            }
-            catch(JsonSyntaxException | IllegalStateException e){
-                throw new PluginException("Failed to parse authorization response", FailureCause.COMMUNICATION_ERROR, e);
-            }
-        }
-        else {
+        if( this.isAuthorized() ){
             LOGGER.info("Client already contains a valid authorization");
+            return this.authorization;
         }
 
-        return this.authorization;
+        // Init request
+        URI uri;
+        try {
+            uri = new URI(this.tokenEndpointUrl);
+        }
+        catch (URISyntaxException e) {
+            throw new InvalidDataException("Authorization API URL is invalid", e);
+        }
+        HttpPost httpPost = new HttpPost(uri);
+
+        // Authorization header
+        httpPost.setHeader(HttpHeaders.AUTHORIZATION, this.authorizationHeaderValue());
+
+        // Content-Type
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
+
+        // www-form-urlencoded content
+        StringEntity data = new StringEntity("grant_type=client_credentials", StandardCharsets.UTF_8);
+        httpPost.setEntity(data);
+
+        // Execute request
+        StringResponse response = this.execute( httpPost );
+
+        // Handle potential error
+        if( !response.isSuccess() ){
+            throw this.handleAuthorizationErrorResponse( response );
+        }
+
+        // Build authorization from response content
+        Authorization.AuthorizationBuilder authBuilder = new Authorization.AuthorizationBuilder();
+        try {
+            // parse response content
+            RFC6749AccessTokenSuccessResponse authResponse = RFC6749AccessTokenSuccessResponse.fromJson( response.getContent() );
+
+            // retrieve access token & token type
+            if( authResponse.getAccessToken() == null ){
+                throw new PluginException("No access_token in the authorization response", FailureCause.COMMUNICATION_ERROR);
+            }
+            authBuilder.withAccessToken( authResponse.getAccessToken() )
+                    .withTokenType( authResponse.getTokenType() == null ? "Bearer" : authResponse.getTokenType() );
+
+            // expiration date
+            long expiresIn = 60L * 5 * 1000; // 5 minutes default expiration time
+            if( authResponse.getExpiresIn() != null ){
+                expiresIn = 1000L * authResponse.getExpiresIn();
+            }
+            Date expiresAt = new Date( System.currentTimeMillis() + expiresIn );
+            authBuilder.withExpiresAt( expiresAt );
+
+            this.authorization = authBuilder.build();
+            return this.authorization;
+        }
+        catch(JsonSyntaxException | IllegalStateException e){
+            throw new PluginException("Failed to parse authorization response", FailureCause.COMMUNICATION_ERROR, e);
+        }
     }
 
     /**
@@ -213,6 +205,32 @@ abstract class OAuthHttpClient {
         }
         LOGGER.info("Response obtained from partner API [{} {}]", strResponse.getStatusCode(), strResponse.getStatusMessage() );
         return strResponse;
+    }
+
+    /**
+     * Handle error responses with RFC 6749 format.
+     *
+     * @param response The response received, converted as {@link StringResponse}.
+     * @return The {@link PluginException} to throw
+     */
+    PluginException handleAuthorizationErrorResponse( StringResponse response ){
+        RFC6749AccessTokenErrorResponse errorResponse;
+        try {
+            errorResponse = RFC6749AccessTokenErrorResponse.fromJson( response.getContent() );
+        }
+        catch( JsonSyntaxException e ){
+            errorResponse = null;
+        }
+
+        if( errorResponse != null && errorResponse.getError() != null ){
+            if( errorResponse.getErrorDescription() != null ){
+                LOGGER.error( "Authorization error: {}", errorResponse.getErrorDescription() );
+            }
+            return new PluginException("authorization error: " + errorResponse.getError(), FailureCause.INVALID_DATA);
+        }
+        else {
+            return new PluginException("unknown authorization error", FailureCause.PARTNER_UNKNOWN_ERROR);
+        }
     }
 
 }

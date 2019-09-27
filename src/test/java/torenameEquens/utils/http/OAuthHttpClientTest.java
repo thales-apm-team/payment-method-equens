@@ -186,6 +186,8 @@ public class OAuthHttpClientTest {
         assertThrows( PluginException.class, spiedClient::authorize );
     }
 
+    // --- Test OAuthHttpClient#execute ---
+
     @Test
     void execute_nominal() throws IOException {
         // given: a properly formatted request, which gets a proper response
@@ -241,6 +243,8 @@ public class OAuthHttpClientTest {
         // when: sending the request, a PluginException is thrown
         assertThrows( PluginException.class, () -> oAuthHttpClient.execute( request ) );
     }
+
+    // --- Test OAuthHttpClient#isAuthorized ---
 
     @Test
     void isAuthorized_valid() throws NoSuchFieldException {

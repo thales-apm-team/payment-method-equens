@@ -13,7 +13,6 @@ public class PsuHttpclient extends EquensOAuthHttpClient {
     private static final Logger LOGGER = LogManager.getLogger(PsuHttpclient.class);
 
     // --- Singleton Holder pattern + initialization BEGIN
-    private AtomicBoolean initialized = new AtomicBoolean();
     PsuHttpclient() {
     }
     private static class Holder {
