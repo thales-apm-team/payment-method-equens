@@ -23,11 +23,17 @@ public class Helper {
 
         // Configuration (partner / contract)
         String keyStoreType = "pkcs12";
-        String keyStorePath = "D:\\Monext.Payline\\MdP\\Equens (Instant Payments)\\EquensWorldlineTest_20190704.p12";
+        //String keyStorePath = "D:\\Monext.Payline\\MdP\\Equens (Instant Payments)\\EquensWorldlineTest_20190704.p12";
+        String keyStorePath = "/home/vagrant/Documents/Monext/Mdp/Equens_Worldline/Equens20190912.p12";
         char[] passwd = "EquensCert2019".toCharArray();
         String alias = "selfsigned";
         String paymentsApiBaseUrl = "https://xs2a.awltest.de/xs2a/routingservice/services";
         String onboardingID = "000061";
+
+        // URI
+        String requestUri = paymentsApiBaseUrl + REL_PATH_AUTHORIZATION;
+        String method = "POST";
+        System.out.println( method + " " + requestUri );
 
         // Load the keystore and recover the private key
         // @see https://www.baeldung.com/java-keystore
@@ -51,9 +57,6 @@ public class Helper {
         for(Map.Entry<String, String> entry : headers.entrySet() ){
             System.out.println( entry.getKey() + ": " + entry.getValue() );
         }
-
-        String requestUri = paymentsApiBaseUrl + REL_PATH_AUTHORIZATION;
-        String method = "POST";
 
         // Create a signer
         // @see https://github.com/tomitribe/http-signatures-java
@@ -86,7 +89,7 @@ public class Helper {
                 "  },\n" +
                 "  \"PaymentAmount\": \"10.00\",\n" +
                 "  \"PaymentCurrency\": \"EUR\",\n" +
-                "  \"PsuId\": \"1\",\n" +
+                "  \"PsuId\": \"21\",\n" +
                 "  \"PaymentProduct\": \"Instant\"\n" +
                 "}";
         System.out.println( "\n" + jsonBody );

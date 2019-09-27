@@ -23,8 +23,8 @@ public class StringResponse {
     }
 
     public String getHeader(String name){
-        if( headers != null ){
-            return headers.get( name );
+        if( headers != null && name != null ){
+            return headers.get( name.toLowerCase() );
         }
         return null;
     }
@@ -39,6 +39,10 @@ public class StringResponse {
 
     public String getStatusMessage() {
         return statusMessage;
+    }
+
+    public boolean isSuccess(){
+        return statusCode >= 200 && statusCode < 300;
     }
 
     /**
@@ -63,7 +67,7 @@ public class StringResponse {
             instance.headers = new HashMap<>();
             Header[] rawHeaders = httpResponse.getAllHeaders();
             for( int i=0; i<rawHeaders.length; i++ ){
-                instance.headers.put( rawHeaders[i].getName(), rawHeaders[i].getValue() );
+                instance.headers.put( rawHeaders[i].getName().toLowerCase(), rawHeaders[i].getValue() );
             }
         }
 

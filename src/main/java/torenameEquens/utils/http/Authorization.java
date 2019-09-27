@@ -8,7 +8,7 @@ public class Authorization {
     private Date expiresAt;
     private String tokenType;
 
-    Authorization(AuthorizationBuilder builder ){
+    Authorization( AuthorizationBuilder builder ){
         this.accessToken = builder.accessToken;
         this.expiresAt = builder.expiresAt;
         this.tokenType = builder.tokenType;

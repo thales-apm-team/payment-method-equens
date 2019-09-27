@@ -6,14 +6,13 @@ import org.apache.http.message.BasicHeader;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static torenameEquens.utils.http.HttpTestUtils.mockHttpResponse;
 
 class StringResponseTest {
 
     @Test
     void fromHttpResponse_nominal(){
         // given: a complete HTTP response
-        CloseableHttpResponse httpResponse = mockHttpResponse( 200, "OK", "some content",
+        CloseableHttpResponse httpResponse = HttpTestUtils.mockHttpResponse( 200, "OK", "some content",
                 new Header[]{ new BasicHeader("Name", "Value")} );
 
         // when: converting it to StringResponse
@@ -25,6 +24,7 @@ class StringResponseTest {
         assertEquals( "OK", stringResponse.getStatusMessage() );
         assertEquals( "some content", stringResponse.getContent() );
         assertEquals( 1, stringResponse.getHeaders().size() );
+        assertEquals( "Value", stringResponse.getHeader("name") );
     }
 
     @Test

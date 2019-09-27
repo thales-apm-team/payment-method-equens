@@ -18,7 +18,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.internal.util.reflection.FieldSetter;
 import torenameEquens.exception.InvalidDataException;
 import torenameEquens.exception.PluginException;
-import torenameEquens.utils.MockUtils;
+import torenameEquens.MockUtils;
 import torenameEquens.utils.TestUtils;
 
 import java.io.IOException;
