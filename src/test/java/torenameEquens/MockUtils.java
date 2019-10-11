@@ -3,6 +3,7 @@ package torenameEquens;
 import com.payline.pmapi.bean.common.Buyer;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
+import com.payline.pmapi.bean.configuration.request.RetrievePluginConfigurationRequest;
 import com.payline.pmapi.bean.payment.*;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
 import com.payline.pmapi.bean.payment.request.RedirectionPaymentRequest;
@@ -202,19 +203,20 @@ public class MockUtils {
      */
     public static PaymentRequest.Builder aPaylinePaymentRequestBuilder(){
         return PaymentRequest.builder()
-                .withContractConfiguration( aContractConfiguration() )
-                .withEnvironment( anEnvironment() )
-                .withPartnerConfiguration( aPartnerConfiguration() )
-                .withBrowser( aBrowser() )
                 .withAmount( aPaylineAmount() )
-                .withOrder( anOrder() )
-                .withSoftDescriptor( "softDescriptor" )
-                .withTransactionId( "123456789012345678901" )
+                .withBrowser( aBrowser() )
                 .withBuyer( aBuyer() )
-                .withLocale( Locale.getDefault() )
-                .withPaymentFormContext( aPaymentFormContext() )
+                .withCaptureNow( true )
+                .withContractConfiguration( aContractConfiguration() )
                 .withDifferedActionDate( TestUtils.addTime( new Date(), Calendar.DATE, 5) )
-                .withCaptureNow( true );
+                .withEnvironment( anEnvironment() )
+                .withLocale( Locale.getDefault() )
+                .withOrder( anOrder() )
+                .withPartnerConfiguration( aPartnerConfiguration() )
+                .withPaymentFormContext( aPaymentFormContext() )
+                .withPluginConfiguration( aPluginConfiguration() )
+                .withSoftDescriptor( "softDescriptor" )
+                .withTransactionId( "123456789012345678901" );
     }
 
     /**
@@ -234,6 +236,14 @@ public class MockUtils {
      * Generate a valid {@link PaymentFormConfigurationRequest}.
      */
     public static PaymentFormConfigurationRequest aPaymentFormConfigurationRequest(){
+        return aPaymentFormConfigurationRequestBuilder().build();
+    }
+
+    /**
+     * Generate a builder for a valid {@link PaymentFormConfigurationRequest}.
+     * This way, some attributes may be overridden to match specific test needs.
+     */
+    public static PaymentFormConfigurationRequest.PaymentFormConfigurationRequestBuilder aPaymentFormConfigurationRequestBuilder(){
         return PaymentFormConfigurationRequest.PaymentFormConfigurationRequestBuilder.aPaymentFormConfigurationRequest()
                 .withAmount( aPaylineAmount() )
                 .withBuyer( aBuyer() )
@@ -242,7 +252,7 @@ public class MockUtils {
                 .withLocale( Locale.getDefault() )
                 .withOrder( anOrder() )
                 .withPartnerConfiguration( aPartnerConfiguration() )
-                .build();
+                .withPluginConfiguration( aPluginConfiguration() );
     }
 
     /**
@@ -255,6 +265,14 @@ public class MockUtils {
                 .withPartnerConfiguration( aPartnerConfiguration() )
                 .withLocale( Locale.getDefault() )
                 .build();
+    }
+
+    /**
+     * Generate a valid plugin configuration, as a <code>String</code>.
+     */
+    public static String aPluginConfiguration(){
+        // TODO
+        return null;
     }
 
     /**
@@ -339,6 +357,25 @@ public class MockUtils {
      */
     public static RequestConfiguration aRequestConfiguration(){
         return new RequestConfiguration( aContractConfiguration(), anEnvironment(), aPartnerConfiguration() );
+    }
+
+    /**
+     * Generate a valid {@link RetrievePluginConfigurationRequest}.
+     */
+    public static RetrievePluginConfigurationRequest aRetrievePluginConfigurationRequest(){
+        return aRetrievePluginConfigurationRequestBuilder().build();
+    }
+
+    /**
+     * Generate a builder for a valid {@link RetrievePluginConfigurationRequest}.
+     * This way, some attributes may be overridden to match specific test needs.
+     */
+    public static RetrievePluginConfigurationRequest.RetrieveConfigurationRequestBuilder aRetrievePluginConfigurationRequestBuilder(){
+        return RetrievePluginConfigurationRequest.RetrieveConfigurationRequestBuilder.aRetrieveConfigurationRequest()
+                .withContractConfiguration( aContractConfiguration() )
+                .withEnvironment( anEnvironment() )
+                .withPartnerConfiguration( aPartnerConfiguration() )
+                .withPluginConfiguration( aPluginConfiguration() );
     }
 
     /**

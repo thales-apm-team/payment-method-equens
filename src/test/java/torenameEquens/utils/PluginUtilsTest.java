@@ -1,7 +1,11 @@
 package torenameEquens.utils;
 
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.junit.jupiter.api.Test;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -9,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class PluginUtilsTest {
 
     @Test
-    void requestToString(){
+    void requestToString_get(){
         // given: a HTTP request with headers
         HttpGet request = new HttpGet( "http://domain.test.fr/endpoint" );
         request.setHeader("Authorization", "Basic sensitiveStringThatShouldNotAppear");
@@ -23,6 +27,24 @@ class PluginUtilsTest {
         String expected = "GET http://domain.test.fr/endpoint" + ln
                 + "Authorization: Basic *****" + ln
                 + "Other: This is safe to display";
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void requestToString_post(){
+        // given: a HTTP request with headers
+        HttpPost request = new HttpPost( "http://domain.test.fr/endpoint" );
+        request.setHeader("SomeHeader", "Header value");
+        request.setEntity( new StringEntity( "{\"name\":\"Jean Martin\",\"age\":\"28\"}", StandardCharsets.UTF_8 ));
+
+        // when: converting the request to String for display
+        String result = PluginUtils.requestToString( request );
+
+        // then: the result is as expected
+        String ln = System.lineSeparator();
+        String expected = "POST http://domain.test.fr/endpoint" + ln
+                + "SomeHeader: Header value" + ln
+                + "{\"name\":\"Jean Martin\",\"age\":\"28\"}";
         assertEquals(expected, result);
     }
 
