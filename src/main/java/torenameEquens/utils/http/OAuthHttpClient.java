@@ -2,26 +2,35 @@ package torenameEquens.utils.http;
 
 import com.google.gson.JsonSyntaxException;
 import com.payline.pmapi.bean.common.FailureCause;
+import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.logger.LogManager;
+import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.logging.log4j.Logger;
 import torenameEquens.bean.business.authorization.RFC6749AccessTokenErrorResponse;
 import torenameEquens.bean.business.authorization.RFC6749AccessTokenSuccessResponse;
 import torenameEquens.exception.InvalidDataException;
 import torenameEquens.exception.PluginException;
+import torenameEquens.utils.Constants;
 import torenameEquens.utils.PluginUtils;
 import torenameEquens.utils.properties.ConfigProperties;
+import torenameEquens.utils.security.RSAHolder;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -68,7 +77,7 @@ abstract class OAuthHttpClient {
      *
      * @param tokenEndpointUrl the full URL of the endpoint that delivers access tokens
      */
-    protected void init( String tokenEndpointUrl ){
+    protected void init( String tokenEndpointUrl, SSLContext sslContext ){
         if( this.initialized.compareAndSet(false, true) ){
             // Set the token endpoint URL
             this.tokenEndpointUrl = tokenEndpointUrl;
@@ -81,7 +90,20 @@ abstract class OAuthHttpClient {
                 throw new PluginException("plugin error: http.* properties must be integers", e);
             }
 
-            // TODO: init client !
+            // TODO: remove / modify
+            // --- Temporary code ---
+            // Instantiate Apache HTTP client
+            this.client = HttpClientBuilder.create()
+                    .useSystemProperties()
+                    .setDefaultRequestConfig(RequestConfig.custom()
+                            .setConnectionRequestTimeout(5000)
+                            .setConnectTimeout(5000)
+                            .setSocketTimeout(10000)
+                            .build()
+                    )
+                    .setSSLContext( sslContext )
+                    .build();
+            // --- Temporary code ---
         }
     }
 
@@ -90,7 +112,8 @@ abstract class OAuthHttpClient {
      *
      * @return A valid authorization
      */
-    protected Authorization authorize(){
+    // TODO: change back to protected !
+    public Authorization authorize(){
         if( this.isAuthorized() ){
             LOGGER.info("Client already contains a valid authorization");
             return this.authorization;
@@ -107,7 +130,7 @@ abstract class OAuthHttpClient {
         HttpPost httpPost = new HttpPost(uri);
 
         // Authorization header
-        httpPost.setHeader(HttpHeaders.AUTHORIZATION, this.authorizationHeaderValue());
+        httpPost.setHeaders( this.authorizationHeaders() );
 
         // Content-Type
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
@@ -154,11 +177,11 @@ abstract class OAuthHttpClient {
     }
 
     /**
-     * Build the 'Authorization' header required to obtain an access token, which varies from one Instant Payment to another.
+     * Build the request headers required to obtain an access token, which vary from one Instant Payment to another.
      * This method should be overridden by children classes, specific to each Instant Payment method.
-     * @return the 'Authorization' header value
+     * @return the authorization request headers
      */
-    protected abstract String authorizationHeaderValue();
+    protected abstract Header[] authorizationHeaders();
 
     /**
      * Check if there is a current valid authorization.

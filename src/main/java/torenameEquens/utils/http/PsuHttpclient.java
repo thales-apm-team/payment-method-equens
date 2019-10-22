@@ -22,7 +22,7 @@ public class PsuHttpclient extends EquensOAuthHttpClient {
         return PsuHttpclient.Holder.instance;
     }
 
-    // TODO: init
+    // TODO: init (?)
     // --- Singleton Holder pattern + initialization END
 
     @Override

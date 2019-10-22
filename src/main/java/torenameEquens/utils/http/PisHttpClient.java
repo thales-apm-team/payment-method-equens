@@ -22,7 +22,7 @@ public class PisHttpClient extends EquensOAuthHttpClient {
         return Holder.instance;
     }
 
-    // TODO: init
+    // TODO: init (?)
     // --- Singleton Holder pattern + initialization END
 
     @Override

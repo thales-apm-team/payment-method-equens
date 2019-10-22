@@ -1,5 +1,6 @@
 package torenameEquens.utils.http;
 
+import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -37,8 +38,8 @@ public class OAuthHttpClientTest {
      */
     private class TestableHttpClient extends OAuthHttpClient {
         @Override
-        protected String authorizationHeaderValue() {
-            return null;
+        protected Header[] authorizationHeaders() {
+            return new Header[0];
         }
     }
 
