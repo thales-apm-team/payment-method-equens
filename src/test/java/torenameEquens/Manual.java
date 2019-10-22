@@ -21,9 +21,9 @@ import java.util.Map;
  *
  * This information being sensitive, it must not appear in the source code !
  */
-public class MainTest {
+public class Manual {
 
-    private static final Logger LOGGER = LogManager.getLogger(MainTest.class);
+    private static final Logger LOGGER = LogManager.getLogger(Manual.class);
     private static PisHttpClient pisHttpClient = PisHttpClient.getInstance();
 
     public static void main( String[] args ){
