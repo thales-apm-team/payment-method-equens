@@ -3,6 +3,7 @@ package torenameEquens.service.impl;
 import com.payline.pmapi.bean.configuration.ReleaseInformation;
 import com.payline.pmapi.bean.configuration.parameter.AbstractParameter;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
+import com.payline.pmapi.bean.configuration.request.RetrievePluginConfigurationRequest;
 import com.payline.pmapi.logger.LogManager;
 import com.payline.pmapi.service.ConfigurationService;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +36,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public String getName(Locale locale) {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public String retrievePluginConfiguration(RetrievePluginConfigurationRequest retrievePluginConfigurationRequest) {
         // TODO
         return null;
     }
