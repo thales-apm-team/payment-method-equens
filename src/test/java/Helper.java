@@ -22,6 +22,7 @@ public class Helper {
         System.out.println("AUTHORIZATION");
 
         // Configuration (partner / contract)
+        // TODO: ne pas utiliser ceci hors de cette classe, mais des chaînes PEM dans ParterConfiguration (voir la classe Manual).
         String keyStoreType = "pkcs12";
         //String keyStorePath = "D:\\Monext.Payline\\MdP\\Equens (Instant Payments)\\EquensWorldlineTest_20190704.p12";
         String keyStorePath = "/home/vagrant/Documents/Monext/Mdp/Equens_Worldline/Equens20190912.p12";

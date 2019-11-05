@@ -17,6 +17,12 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Generic HTTP client for to contact Equens Worldline API.
+ * It's based upon OAuthHttpClient as Equens API uses this authorization protocol.
+ * This class must be extended because the construction of the headers for the authorization call needs an app name.
+ * Each Equens API has its proper name and access tokens.
+ */
 abstract class EquensOAuthHttpClient extends OAuthHttpClient {
 
     /**

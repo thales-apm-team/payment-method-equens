@@ -96,7 +96,7 @@ abstract class OAuthHttpClient {
             this.client = HttpClientBuilder.create()
                     .useSystemProperties()
                     .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectionRequestTimeout(5000)
+                            .setConnectionRequestTimeout(5000) // TODO: from config !
                             .setConnectTimeout(5000)
                             .setSocketTimeout(10000)
                             .build()
