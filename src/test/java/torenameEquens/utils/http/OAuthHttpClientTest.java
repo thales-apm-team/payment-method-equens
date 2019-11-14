@@ -7,7 +7,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +26,7 @@ import torenameEquens.MockUtils;
 import torenameEquens.utils.TestUtils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -95,15 +98,6 @@ public class OAuthHttpClientTest {
 
         // then: no HTTP request is built
         verify( oAuthHttpClient, never() ).post( anyString(), anyList(), any(HttpEntity.class) );
-    }
-
-    @Test
-    void authorize_invalidApiUrl() throws NoSuchFieldException {
-        // given: the API base URL is invalid
-        FieldSetter.setField( oAuthHttpClient, OAuthHttpClient.class.getDeclaredField("tokenEndpointUrl"), "https:||authorization.domain.org/token");
-
-        // when calling the authorize method, an exception is thrown
-        assertThrows(InvalidDataException.class, () -> oAuthHttpClient.authorize( MockUtils.aRequestConfiguration() ));
     }
 
     /**
@@ -275,6 +269,38 @@ public class OAuthHttpClientTest {
         assertThrows( PluginException.class, () -> oAuthHttpClient.execute( request ) );
     }
 
+    // --- Test OAuthHttpClient#get ---
+
+    @Test
+    void get_invalidUrl(){
+        // given: the API URL is invalid
+        String url = "https:||authorization.domain.org/token";
+
+        // when calling the get() method, an exception is thrown
+        assertThrows(InvalidDataException.class, () -> oAuthHttpClient.get( url, new ArrayList<>() ));
+
+        // assert the mock is working properly (to avoid false negative)
+        verify( oAuthHttpClient, never() ).execute( any( HttpRequestBase.class ) );
+    }
+
+    @Test
+    void get_nominal() throws IOException {
+        // given: properly formatted request elements, that would return an OK response
+        String url = "https://authorization.domain.org/token";
+        List<Header> headers = new ArrayList<>();
+        headers.add(new BasicHeader("SomeHeader", "header-value"));
+        doReturn( mockHttpResponse( 200, "OK", "{\"content\":\"success\"}", null ) )
+                .when( client )
+                .execute( any(HttpRequestBase.class) );
+
+        // when: building and executing the request
+        StringResponse stringResponse = oAuthHttpClient.get( url, headers );
+
+        // then: the content of the StringResponse reflects the content of the HTTP response
+        assertNotNull( stringResponse );
+        assertEquals( 200, stringResponse.getStatusCode() );
+    }
+
     // --- Test OAuthHttpClient#isAuthorized ---
 
     @Test
@@ -306,6 +332,39 @@ public class OAuthHttpClientTest {
 
         // when called, isAuthorized method returns false
         assertFalse( oAuthHttpClient.isAuthorized() );
+    }
+
+    // --- Test OAuthHttpClient#post ---
+
+    @Test
+    void post_invalidUrl(){
+        // given: the API URL is invalid
+        String url = "https:||authorization.domain.org/token";
+
+        // when calling the post() method, an exception is thrown
+        assertThrows(InvalidDataException.class, () -> oAuthHttpClient.post( url, new ArrayList<>(), null ));
+
+        // assert the mock is working properly (to avoid false negative)
+        verify( oAuthHttpClient, never() ).execute( any( HttpRequestBase.class ) );
+    }
+
+    @Test
+    void post_nominal() throws IOException {
+        // given: properly formatted request elements, that would return an OK response
+        String url = "https://authorization.domain.org/token";
+        List<Header> headers = new ArrayList<>();
+        headers.add(new BasicHeader("SomeHeader", "header-value"));
+        StringEntity body = new StringEntity("toto", StandardCharsets.UTF_8);
+        doReturn( mockHttpResponse( 200, "OK", "{\"content\":\"success\"}", null ) )
+                .when( client )
+                .execute( any(HttpRequestBase.class) );
+
+        // when: building and posting the request
+        StringResponse stringResponse = oAuthHttpClient.post( url, headers, body );
+
+        // then: the content of the StringResponse reflects the content of the HTTP response
+        assertNotNull( stringResponse );
+        assertEquals( 200, stringResponse.getStatusCode() );
     }
 
 }
