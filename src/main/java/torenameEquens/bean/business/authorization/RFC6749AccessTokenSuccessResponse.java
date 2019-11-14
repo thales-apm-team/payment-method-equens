@@ -1,7 +1,6 @@
 package torenameEquens.bean.business.authorization;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -62,7 +61,7 @@ public class RFC6749AccessTokenSuccessResponse {
         return scope;
     }
 
-    public static RFC6749AccessTokenSuccessResponse fromJson(String json ) throws JsonSyntaxException {
+    public static RFC6749AccessTokenSuccessResponse fromJson(String json ){
         return new Gson().fromJson( json, RFC6749AccessTokenSuccessResponse.class );
     }
 }
