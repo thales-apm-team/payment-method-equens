@@ -121,10 +121,15 @@ public class MockUtils {
      * Generate a valid {@link ContractConfiguration}.
      */
     public static ContractConfiguration aContractConfiguration(){
-        // TODO: change it
-        ContractConfiguration contractConfiguration = new ContractConfiguration("ChangeMe", new HashMap<>());
-        // TODO: complete it
-        return contractConfiguration;
+        Map<String, ContractProperty> contractProperties = new HashMap<>();
+        contractProperties.put(Constants.ContractConfigurationKeys.CHANNEL_TYPE, new ContractProperty( "ECommerce" ));
+        contractProperties.put(Constants.ContractConfigurationKeys.CHARGE_BEARER, new ContractProperty( "SLEV" ));
+        contractProperties.put(Constants.ContractConfigurationKeys.CLIENT_NAME, new ContractProperty( "MarketPay" ));
+        contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_IBAN, new ContractProperty( "FR33BBBBBGGGGGCCCCCCCCCCC00" ));
+        contractProperties.put(Constants.ContractConfigurationKeys.ONBOARDING_ID, new ContractProperty( "XXXXXX" ));
+        contractProperties.put(Constants.ContractConfigurationKeys.SCA_METHOD, new ContractProperty( "Redirect" ));
+
+        return new ContractConfiguration("INST EquensWorldline", contractProperties);
     }
 
     /**
@@ -173,12 +178,12 @@ public class MockUtils {
      */
     public static PartnerConfiguration aPartnerConfiguration(){
         Map<String, String> partnerConfigurationMap = new HashMap<>();
-        // TODO: complete it
+        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.API_BASE_URL, "https://xs2a.awltest.de/xs2a/routingservice/services" );
+        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT, "Instant" );
 
         Map<String, String> sensitiveConfigurationMap = new HashMap<>();
         sensitiveConfigurationMap.put( Constants.PartnerConfigurationKeys.CLIENT_CERTIFICATE, aClientCertificatePem() );
         sensitiveConfigurationMap.put( Constants.PartnerConfigurationKeys.CLIENT_PRIVATE_KEY, aPrivateKeyPem() );
-        // TODO: complete it
 
         return new PartnerConfiguration( partnerConfigurationMap, sensitiveConfigurationMap );
     }

@@ -3,12 +3,10 @@ package torenameEquens.utils.http;
 import com.payline.pmapi.logger.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * HTTP client in charge of requesting the PIS (Payment Initiation Service) API.
  */
-public class PisHttpClient extends EquensOAuthHttpClient {
+public class PisHttpClient extends EquensHttpClient {
 
     private static final Logger LOGGER = LogManager.getLogger(PisHttpClient.class);
 

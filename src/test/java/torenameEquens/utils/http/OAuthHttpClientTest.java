@@ -1,30 +1,34 @@
 package torenameEquens.utils.http;
 
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.protocol.HttpContext;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.internal.util.reflection.FieldSetter;
+import torenameEquens.bean.configuration.RequestConfiguration;
 import torenameEquens.exception.InvalidDataException;
 import torenameEquens.exception.PluginException;
 import torenameEquens.MockUtils;
 import torenameEquens.utils.TestUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,11 +42,12 @@ public class OAuthHttpClientTest {
      */
     private class TestableHttpClient extends OAuthHttpClient {
         @Override
-        protected Header[] authorizationHeaders() {
-            return new Header[0];
+        protected List<Header> authorizationHeaders(String uri, RequestConfiguration requestConfiguration) {
+            return new ArrayList<>();
         }
     }
 
+    @Spy
     @InjectMocks
     private TestableHttpClient oAuthHttpClient;
 
@@ -58,19 +63,38 @@ public class OAuthHttpClientTest {
         // Manual init of private attributes
         FieldSetter.setField( oAuthHttpClient, OAuthHttpClient.class.getDeclaredField("retries"), 3);
         FieldSetter.setField( oAuthHttpClient, OAuthHttpClient.class.getDeclaredField("tokenEndpointUrl"), "https://authorization.domain.org/token");
+        FieldSetter.setField( oAuthHttpClient, OAuthHttpClient.class.getDeclaredField("initialized"), new AtomicBoolean(true));
+    }
+
+    @AfterEach
+    void verifyMocks() throws IOException {
+        /* verify that no HTTP call is ever made ! it ensures the mocks are working properly and there is no
+        false negative that could be related to a failed request to the partner API. */
+        verify( client, never() ).execute( any( HttpRequestBase.class ), any(HttpContext.class) );
+    }
+
+    @Test
+    void authorize_notInitialized() throws NoSuchFieldException {
+        // given: the HTTP client has not been properly initialized before use
+        FieldSetter.setField( oAuthHttpClient, OAuthHttpClient.class.getDeclaredField("initialized"), new AtomicBoolean(false));
+
+        // when: calling the authorize method, then: an exception is thrown
+        assertThrows(PluginException.class, () -> oAuthHttpClient.authorize( MockUtils.aRequestConfiguration() ));
+
+        // verify isAuthorized method is never called
+        verify( oAuthHttpClient, never() ).isAuthorized();
     }
 
     @Test
     void authorize_alreadyAuthorized(){
         // given: a valid authorization is already stored in the client
-        TestableHttpClient spiedClient = Mockito.spy( oAuthHttpClient );
-        doReturn( true ).when( spiedClient ).isAuthorized();
+        doReturn( true ).when( oAuthHttpClient ).isAuthorized();
 
         // when: calling the authorize method
-        spiedClient.authorize();
+        oAuthHttpClient.authorize( MockUtils.aRequestConfiguration() );
 
-        // then: no HTTP call is made
-        verify( spiedClient, never() ).execute( any( HttpRequestBase.class ) );
+        // then: no HTTP request is built
+        verify( oAuthHttpClient, never() ).post( anyString(), anyList(), any(HttpEntity.class) );
     }
 
     @Test
@@ -79,7 +103,7 @@ public class OAuthHttpClientTest {
         FieldSetter.setField( oAuthHttpClient, OAuthHttpClient.class.getDeclaredField("tokenEndpointUrl"), "https:||authorization.domain.org/token");
 
         // when calling the authorize method, an exception is thrown
-        assertThrows(InvalidDataException.class, () -> oAuthHttpClient.authorize());
+        assertThrows(InvalidDataException.class, () -> oAuthHttpClient.authorize( MockUtils.aRequestConfiguration() ));
     }
 
     /**
@@ -103,15 +127,17 @@ public class OAuthHttpClientTest {
     @MethodSource("authorize_blockingResponseContent_set")
     void authorize_blockingResponseContent( String responseContent ) throws NoSuchFieldException {
         // given: the server returns a response with a non-sufficient content
-        TestableHttpClient spiedClient = Mockito.spy( oAuthHttpClient );
         StringResponse response = new StringResponse();
         FieldSetter.setField( response, StringResponse.class.getDeclaredField("content"), responseContent);
         FieldSetter.setField( response, StringResponse.class.getDeclaredField("statusCode"), HttpStatus.SC_OK);
         FieldSetter.setField( response, StringResponse.class.getDeclaredField("statusMessage"), "OK");
-        doReturn( response ).when( spiedClient ).execute( any(HttpPost.class) );
+        doReturn( response ).when( oAuthHttpClient ).post( anyString(), anyList(), any(HttpEntity.class) );
 
         // when: calling the authorize method, an exception is thrown
-        assertThrows( PluginException.class, spiedClient::authorize );
+        assertThrows( PluginException.class, () -> oAuthHttpClient.authorize( MockUtils.aRequestConfiguration() ) );
+
+        // assert the mock is working properly (to avoid false negative)
+        verify( oAuthHttpClient, never() ).execute( any( HttpRequestBase.class ) );
     }
 
     /**
@@ -138,18 +164,20 @@ public class OAuthHttpClientTest {
     @MethodSource("authorize_nonBlockingResponseContent_set")
     void authorize_nonBlockingResponseContent( String responseContent ) throws NoSuchFieldException {
         // given: the server returns a response with a sufficient content
-        TestableHttpClient spiedClient = Mockito.spy( oAuthHttpClient );
         StringResponse response = new StringResponse();
         FieldSetter.setField( response, StringResponse.class.getDeclaredField("content"), responseContent);
         FieldSetter.setField( response, StringResponse.class.getDeclaredField("statusCode"), HttpStatus.SC_OK);
         FieldSetter.setField( response, StringResponse.class.getDeclaredField("statusMessage"), "OK");
-        doReturn( response ).when( spiedClient ).execute( any(HttpPost.class) );
+        doReturn( response ).when( oAuthHttpClient ).post( anyString(), anyList(), any(HttpEntity.class) );
 
         // when: calling the authorize method
-        spiedClient.authorize();
+        oAuthHttpClient.authorize( MockUtils.aRequestConfiguration() );
 
         // then: the client now contains a valid authorization
-        assertTrue( spiedClient.isAuthorized() );
+        assertTrue( oAuthHttpClient.isAuthorized() );
+
+        // assert the mock is working properly
+        verify( oAuthHttpClient, never() ).execute( any( HttpRequestBase.class ) );
     }
 
     /**
@@ -176,15 +204,17 @@ public class OAuthHttpClientTest {
     @MethodSource("authorize_error_set")
     void authorize_error( String content, int statusCode, String statusMessage ) throws NoSuchFieldException {
         // given: the server returns an error
-        TestableHttpClient spiedClient = Mockito.spy( oAuthHttpClient );
         StringResponse response = new StringResponse();
         FieldSetter.setField( response, StringResponse.class.getDeclaredField("content"), content);
         FieldSetter.setField( response, StringResponse.class.getDeclaredField("statusCode"), statusCode);
         FieldSetter.setField( response, StringResponse.class.getDeclaredField("statusMessage"), statusMessage);
-        doReturn( response ).when( spiedClient ).execute( any(HttpPost.class) );
+        doReturn( response ).when( oAuthHttpClient ).post( anyString(), anyList(), any(HttpEntity.class) );
 
         // when: calling the authorize method, an exception is thrown
-        assertThrows( PluginException.class, spiedClient::authorize );
+        assertThrows( PluginException.class, () -> oAuthHttpClient.authorize( MockUtils.aRequestConfiguration() ) );
+
+        // assert the mock is working properly (to avoid false negative)
+        verify( oAuthHttpClient, never() ).execute( any( HttpRequestBase.class ) );
     }
 
     // --- Test OAuthHttpClient#execute ---

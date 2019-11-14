@@ -2,41 +2,41 @@ package torenameEquens.utils.http;
 
 import com.google.gson.JsonSyntaxException;
 import com.payline.pmapi.bean.common.FailureCause;
-import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.logger.LogManager;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.ssl.SSLContexts;
+import org.apache.http.message.BasicHeader;
 import org.apache.logging.log4j.Logger;
 import torenameEquens.bean.business.authorization.RFC6749AccessTokenErrorResponse;
 import torenameEquens.bean.business.authorization.RFC6749AccessTokenSuccessResponse;
+import torenameEquens.bean.configuration.RequestConfiguration;
 import torenameEquens.exception.InvalidDataException;
 import torenameEquens.exception.PluginException;
-import torenameEquens.utils.Constants;
 import torenameEquens.utils.PluginUtils;
 import torenameEquens.utils.properties.ConfigProperties;
-import torenameEquens.utils.security.RSAHolder;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Client dedicated to OAuth 2.0 authorization process : the recovering of a valid access token.
  * The class handles the storage and renewal of this token, and must be extended to use it.
+ *
  * It also provides a generic method to execute HTTP requests, with a retry system.
  */
 abstract class OAuthHttpClient {
@@ -113,34 +113,24 @@ abstract class OAuthHttpClient {
      * @return A valid authorization
      */
     // TODO: change back to protected !
-    public Authorization authorize(){
+    public Authorization authorize( RequestConfiguration requestConfiguration ){
+        if( !this.initialized.get() ){
+            throw new PluginException("Illegal state: client must be initialized");
+        }
         if( this.isAuthorized() ){
             LOGGER.info("Client already contains a valid authorization");
             return this.authorization;
         }
 
-        // Init request
-        URI uri;
-        try {
-            uri = new URI(this.tokenEndpointUrl);
-        }
-        catch (URISyntaxException e) {
-            throw new InvalidDataException("Authorization API URL is invalid", e);
-        }
-        HttpPost httpPost = new HttpPost(uri);
-
-        // Authorization header
-        httpPost.setHeaders( this.authorizationHeaders() );
-
-        // Content-Type
-        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
+        // Headers
+        List<Header> headers = this.authorizationHeaders( this.tokenEndpointUrl, requestConfiguration );
+        headers.add( new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded") );
 
         // www-form-urlencoded content
-        StringEntity data = new StringEntity("grant_type=client_credentials", StandardCharsets.UTF_8);
-        httpPost.setEntity(data);
+        StringEntity body = new StringEntity("grant_type=client_credentials", StandardCharsets.UTF_8);
 
         // Execute request
-        StringResponse response = this.execute( httpPost );
+        StringResponse response = this.post( this.tokenEndpointUrl, headers, body );
 
         // Handle potential error
         if( !response.isSuccess() ){
@@ -177,11 +167,14 @@ abstract class OAuthHttpClient {
     }
 
     /**
-     * Build the request headers required to obtain an access token, which vary from one Instant Payment to another.
+     * Build the request headers required to obtain an access token, which can vary from one Instant Payment to another.
      * This method should be overridden by children classes, specific to each Instant Payment method.
+     *
+     * @param uri The request URI
+     * @param requestConfiguration The request configuration
      * @return the authorization request headers
      */
-    protected abstract Header[] authorizationHeaders();
+    protected abstract List<Header> authorizationHeaders( String uri, RequestConfiguration requestConfiguration );
 
     /**
      * Check if there is a current valid authorization.
@@ -192,6 +185,32 @@ abstract class OAuthHttpClient {
                 && this.authorization.getExpiresAt().compareTo( new Date() ) > 0;
         /* Warning: the token can be valid at the time this method is called but not anymore 1 second later...
         Maybe add some time (5 minutes ?) to the current time, to be sure. */
+    }
+
+    /**
+     * Handle error responses with RFC 6749 format.
+     *
+     * @param response The response received, converted as {@link StringResponse}.
+     * @return The {@link PluginException} to throw
+     */
+    PluginException handleAuthorizationErrorResponse( StringResponse response ){
+        RFC6749AccessTokenErrorResponse errorResponse;
+        try {
+            errorResponse = RFC6749AccessTokenErrorResponse.fromJson( response.getContent() );
+        }
+        catch( JsonSyntaxException e ){
+            errorResponse = null;
+        }
+
+        if( errorResponse != null && errorResponse.getError() != null ){
+            if( errorResponse.getErrorDescription() != null ){
+                LOGGER.error( "Authorization error: {}", errorResponse.getErrorDescription() );
+            }
+            return new PluginException("authorization error: " + errorResponse.getError(), FailureCause.INVALID_DATA);
+        }
+        else {
+            return new PluginException("unknown authorization error", FailureCause.PARTNER_UNKNOWN_ERROR);
+        }
     }
 
     /**
@@ -231,29 +250,65 @@ abstract class OAuthHttpClient {
     }
 
     /**
-     * Handle error responses with RFC 6749 format.
+     * Performs an HTTP request on the given url using GET method.
      *
-     * @param response The response received, converted as {@link StringResponse}.
-     * @return The {@link PluginException} to throw
+     * @param url The target URL
+     * @param headers The request headers
+     * @return The response from the call
      */
-    PluginException handleAuthorizationErrorResponse( StringResponse response ){
-        RFC6749AccessTokenErrorResponse errorResponse;
+    protected StringResponse get( String url, List<Header> headers ){
+        // Instantiate URI from given url
+        URI uri;
         try {
-            errorResponse = RFC6749AccessTokenErrorResponse.fromJson( response.getContent() );
+            uri = new URI( url );
         }
-        catch( JsonSyntaxException e ){
-            errorResponse = null;
+        catch (URISyntaxException e) {
+            throw new InvalidDataException("Target URL is invalid : " + url, e);
         }
 
-        if( errorResponse != null && errorResponse.getError() != null ){
-            if( errorResponse.getErrorDescription() != null ){
-                LOGGER.error( "Authorization error: {}", errorResponse.getErrorDescription() );
-            }
-            return new PluginException("authorization error: " + errorResponse.getError(), FailureCause.INVALID_DATA);
+        // Create request
+        HttpGet request = new HttpGet( uri );
+
+        // Add headers
+        Header[] headersArray = new Header[headers.size()];
+        headers.toArray( headersArray );
+        request.setHeaders( headersArray );
+
+        // Execute request
+        return this.execute( request );
+    }
+
+    /**
+     * Performs an HTTP request on the given url using POST method.
+     *
+     * @param url The target url
+     * @param headers The request headers
+     * @param body The request body
+     * @return The response from the call
+     */
+    protected StringResponse post(String url, List<Header> headers, HttpEntity body ){
+        // Instantiate URI from given url
+        URI uri;
+        try {
+            uri = new URI( url );
         }
-        else {
-            return new PluginException("unknown authorization error", FailureCause.PARTNER_UNKNOWN_ERROR);
+        catch (URISyntaxException e) {
+            throw new InvalidDataException("Target URL is invalid : " + url, e);
         }
+
+        // Create request
+        HttpPost request = new HttpPost( uri );
+
+        // Add headers
+        Header[] headersArray = new Header[headers.size()];
+        headers.toArray( headersArray );
+        request.setHeaders( headersArray );
+
+        // Add body
+        request.setEntity( body );
+
+        // Execute request
+        return this.execute( request );
     }
 
 }

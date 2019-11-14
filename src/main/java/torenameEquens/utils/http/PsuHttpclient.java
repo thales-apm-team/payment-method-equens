@@ -3,12 +3,10 @@ package torenameEquens.utils.http;
 import com.payline.pmapi.logger.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * HTTP client in charge of requesting the PSU Management API.
  */
-public class PsuHttpclient extends EquensOAuthHttpClient {
+public class PsuHttpclient extends EquensHttpClient {
 
     private static final Logger LOGGER = LogManager.getLogger(PsuHttpclient.class);
 
