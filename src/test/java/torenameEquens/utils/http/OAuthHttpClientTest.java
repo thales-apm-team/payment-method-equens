@@ -4,7 +4,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.StringEntity;
@@ -27,10 +26,7 @@ import torenameEquens.utils.TestUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
@@ -45,8 +41,8 @@ public class OAuthHttpClientTest {
      */
     private class TestableHttpClient extends OAuthHttpClient {
         @Override
-        protected List<Header> authorizationHeaders(String uri, RequestConfiguration requestConfiguration) {
-            return new ArrayList<>();
+        protected Map<String, String> authorizationHeaders(String uri, RequestConfiguration requestConfiguration) {
+            return new HashMap<>();
         }
     }
 
@@ -75,6 +71,8 @@ public class OAuthHttpClientTest {
         false negative that could be related to a failed request to the partner API. */
         verify( client, never() ).execute( any( HttpRequestBase.class ), any(HttpContext.class) );
     }
+
+    // --- Test OAuthHttpClient#authorize ---
 
     @Test
     void authorize_notInitialized() throws NoSuchFieldException {

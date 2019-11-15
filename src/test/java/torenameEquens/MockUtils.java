@@ -22,6 +22,7 @@ import torenameEquens.utils.security.RSAHolder;
 
 import java.math.BigInteger;
 import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -87,6 +88,18 @@ public class MockUtils {
         return Buyer.BuyerBuilder.aBuyer()
                 .withFullName( new Buyer.FullName( "Marie", "Durand", "1" ) )
                 .build();
+    }
+
+    /**
+     * @return A fake but valid client certiicate.
+     */
+    public static Certificate aClientCertificate(){
+        try {
+            return anRsaHolder().getClientCertificate();
+        } catch (Exception e) {
+            // this would happen in testing context: ignore the exception
+            return null;
+        }
     }
 
     /**
@@ -392,7 +405,7 @@ public class MockUtils {
         try {
             signature = signer.sign( "POST", "/some/path", new HashMap<>() );
         } catch (Exception e) {
-            // This would happen in a testing context: spare the exception throwing. The test case will probably fail anyway.
+            // This would happen in a testing context: spare the exception throwing, the test case will probably fail anyway.
             return null;
         }
 

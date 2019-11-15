@@ -29,8 +29,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -82,28 +84,36 @@ abstract class OAuthHttpClient {
             // Set the token endpoint URL
             this.tokenEndpointUrl = tokenEndpointUrl;
 
+            // Retrieve config properties
+            int connectionRequestTimeout;
+            int connectTimeout;
+            int socketTimeout;
             try {
-                // Get the number of retry attempts from plugin configuration
+                // request config timeouts (in seconds)
+                connectionRequestTimeout = Integer.parseInt(config.get("http.connectionRequestTimeout"));
+                connectTimeout = Integer.parseInt(config.get("http.connectTimeout"));
+                socketTimeout = Integer.parseInt(config.get("http.socketTimeout"));
+
+                // number of retry attempts
                 this.retries = Integer.parseInt(config.get("http.retries"));
             }
             catch( NumberFormatException e ){
                 throw new PluginException("plugin error: http.* properties must be integers", e);
             }
 
-            // TODO: remove / modify
-            // --- Temporary code ---
+            // Create RequestConfig
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setConnectionRequestTimeout(connectionRequestTimeout * 1000)
+                    .setConnectTimeout(connectTimeout * 1000)
+                    .setSocketTimeout(socketTimeout * 1000)
+                    .build();
+
             // Instantiate Apache HTTP client
             this.client = HttpClientBuilder.create()
                     .useSystemProperties()
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectionRequestTimeout(5000) // TODO: from config !
-                            .setConnectTimeout(5000)
-                            .setSocketTimeout(10000)
-                            .build()
-                    )
+                    .setDefaultRequestConfig( requestConfig )
                     .setSSLContext( sslContext )
                     .build();
-            // --- Temporary code ---
         }
     }
 
@@ -122,8 +132,12 @@ abstract class OAuthHttpClient {
             return this.authorization;
         }
 
-        // Headers
-        List<Header> headers = this.authorizationHeaders( this.tokenEndpointUrl, requestConfiguration );
+        // Headers: convert the map of authorization headers to a list of Header
+        List<Header> headers = new ArrayList<>();
+        for (Map.Entry<String, String> h : this.authorizationHeaders( this.tokenEndpointUrl, requestConfiguration ).entrySet()) {
+            headers.add( new BasicHeader(h.getKey(), h.getValue()) );
+        }
+        // Add Content-Type header
         headers.add( new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded") );
 
         // www-form-urlencoded content
@@ -174,7 +188,7 @@ abstract class OAuthHttpClient {
      * @param requestConfiguration The request configuration
      * @return the authorization request headers
      */
-    protected abstract List<Header> authorizationHeaders( String uri, RequestConfiguration requestConfiguration );
+    protected abstract Map<String, String> authorizationHeaders(String uri, RequestConfiguration requestConfiguration );
 
     /**
      * Check if there is a current valid authorization.

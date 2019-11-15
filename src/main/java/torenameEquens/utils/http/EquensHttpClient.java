@@ -3,9 +3,7 @@ package torenameEquens.utils.http;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
-import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.ssl.SSLContexts;
 import org.tomitribe.auth.signatures.Signature;
 import org.tomitribe.auth.signatures.Signer;
@@ -20,7 +18,10 @@ import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
 
 import static org.tomitribe.auth.signatures.Algorithm.RSA_SHA256;
 
@@ -32,14 +33,18 @@ import static org.tomitribe.auth.signatures.Algorithm.RSA_SHA256;
  */
 abstract class EquensHttpClient extends OAuthHttpClient {
 
+    public static final String AUTH_HEADER_APP = "App";
+    public static final String AUTH_HEADER_CLIENT = "Client";
+    public static final String AUTH_HEADER_DATE = "Date";
+    public static final String AUTH_HEADER_ID = "Id";
+
     /**
      * Holder containing the keystore data (keys or certificates).
      */
     private RSAHolder rsaHolder;
 
     public void init(PartnerConfiguration partnerConfiguration) {
-        // TODO: remove / modify
-        // --- Temporary code ---
+        // Create security (SSL) elements from the data passed through PartnerConfiguration
         SSLContext sslContext;
         try {
             // Build RSA holder from PartnerConfiguration
@@ -50,6 +55,7 @@ abstract class EquensHttpClient extends OAuthHttpClient {
                 throw new InvalidDataException("Missing client private key from partner configuration (sentitive properties)");
             }
 
+            // Initialize RsaHolder instance
             this.rsaHolder = new RSAHolder.RSAHolderBuilder()
                     .parseChain( partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.CLIENT_CERTIFICATE) )
                     .parsePrivateKey( partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.CLIENT_PRIVATE_KEY) )
@@ -66,12 +72,12 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         // Build authorization endpoint
         String authorizationEndpoint = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.API_BASE_URL) + "/authorize/token";
 
+        // Pass these elements to the parent method initializer
         super.init(authorizationEndpoint, sslContext);
-        // --- Temporary code ---
     }
 
     @Override
-    protected List<Header> authorizationHeaders( String uri, RequestConfiguration requestConfiguration ) {
+    protected Map<String, String> authorizationHeaders(String uri, RequestConfiguration requestConfiguration ) {
         // Check required data
         ContractConfiguration contractConfiguration = requestConfiguration.getContractConfiguration();
         if( contractConfiguration.getProperty( Constants.ContractConfigurationKeys.CLIENT_NAME ) == null
@@ -85,24 +91,19 @@ abstract class EquensHttpClient extends OAuthHttpClient {
 
         // Build headers list
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("App", this.appName());
-        headers.put("Client", contractConfiguration.getProperty( Constants.ContractConfigurationKeys.CLIENT_NAME ).getValue());
-        headers.put("Date", new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.US).format(new Date()));
-        headers.put("Id", contractConfiguration.getProperty( Constants.ContractConfigurationKeys.ONBOARDING_ID ).getValue());
+        headers.put(AUTH_HEADER_APP, this.appName());
+        headers.put(AUTH_HEADER_CLIENT, contractConfiguration.getProperty( Constants.ContractConfigurationKeys.CLIENT_NAME ).getValue());
+        headers.put(AUTH_HEADER_DATE, new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.US).format(new Date()));
+        headers.put(AUTH_HEADER_ID, contractConfiguration.getProperty( Constants.ContractConfigurationKeys.ONBOARDING_ID ).getValue());
 
         // Generate the request signature
         Signature signature = this.generateSignature( uri, headers );
         String finalSignature = signature.toString().replace(RSA_SHA256.getPortableName(), RSA_SHA256.getJmvName());
 
-        // Insert the signature into Authorization header
+        // Insert the signature into the header Authorization
         headers.put(HttpHeaders.AUTHORIZATION, finalSignature);
 
-        // Convert the headers map to a list of Header
-        List<Header> headersList = new ArrayList<>();
-        for (Map.Entry<String, String> h : headers.entrySet()) {
-            headersList.add( new BasicHeader(h.getKey(), h.getValue()) );
-        }
-        return headersList;
+        return headers;
     }
 
     protected abstract String appName();
