@@ -3,6 +3,8 @@ package torenameEquens.utils.http;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.ssl.SSLContexts;
 import org.tomitribe.auth.signatures.Signature;
@@ -18,10 +20,7 @@ import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import static org.tomitribe.auth.signatures.Algorithm.RSA_SHA256;
 

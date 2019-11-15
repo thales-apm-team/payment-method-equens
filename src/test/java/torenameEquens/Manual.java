@@ -5,6 +5,7 @@ import com.payline.pmapi.bean.payment.ContractConfiguration;
 import com.payline.pmapi.bean.payment.ContractProperty;
 import com.payline.pmapi.logger.LogManager;
 import org.apache.logging.log4j.Logger;
+import torenameEquens.bean.business.reachdirectory.GetAspspsResponse;
 import torenameEquens.bean.configuration.RequestConfiguration;
 import torenameEquens.exception.PluginException;
 import torenameEquens.utils.Constants;
@@ -40,10 +41,9 @@ public class Manual {
                     initContractConfiguration(), MockUtils.anEnvironment(), initPartnerConfiguration());
 
             pisHttpClient.init( requestConfiguration.getPartnerConfiguration() );
-            Authorization pisAuth = pisHttpClient.authorize( requestConfiguration );
-
             psuHttpClient.init( requestConfiguration.getPartnerConfiguration() );
-            Authorization psuAuth = psuHttpClient.authorize( requestConfiguration );
+
+            GetAspspsResponse banks = pisHttpClient.getAspsps( requestConfiguration );
 
             LOGGER.info("END");
         }
