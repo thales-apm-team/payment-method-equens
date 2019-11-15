@@ -1,5 +1,6 @@
 package com.payline.payment.equens.utils.http;
 
+import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.logger.LogManager;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
@@ -46,7 +47,7 @@ public class PisHttpClient extends EquensHttpClient {
      */
     public GetAspspsResponse getAspsps( RequestConfiguration requestConfiguration ){
         // Service full URL
-        String url = this.getBaseUrl( requestConfiguration ) + API_PATH_ASPSPS;
+        String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() ) + API_PATH_ASPSPS;
 
         // Init. headers
         List<Header> headers = new ArrayList<>();
@@ -69,11 +70,11 @@ public class PisHttpClient extends EquensHttpClient {
     /**
      * Retrieve the API base URL in PartnerConfiguration. Throws an exception if it's not present.
      *
-     * @param requestConfiguration The request configuration
+     * @param partnerConfiguration The partner configuration
      * @return The API base URL
      */
-    String getBaseUrl( RequestConfiguration requestConfiguration ){
-        String baseUrl = requestConfiguration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.API_BASE_URL);
+    String getBaseUrl( PartnerConfiguration partnerConfiguration ){
+        String baseUrl = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.API_BASE_URL);
         if( baseUrl == null ){
             throw new InvalidDataException( "Missing API base url in PartnerConfiguration" );
         }

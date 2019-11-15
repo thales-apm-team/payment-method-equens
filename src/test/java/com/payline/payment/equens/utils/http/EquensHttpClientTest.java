@@ -59,7 +59,7 @@ public class EquensHttpClientTest {
     @AfterEach
     void verifyMocks() throws IOException {
         /* verify that execute() method is never called ! it ensures the mocks are working properly and there is no
-        false negative that could be related to a failed request to the partner API. */
+        false negative that could be related to a failed HTTP request sent to the partner API. */
         verify( equensHttpClient, never() ).execute( any( HttpRequestBase.class ) );
     }
 
