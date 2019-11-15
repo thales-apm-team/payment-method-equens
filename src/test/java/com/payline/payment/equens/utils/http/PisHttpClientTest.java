@@ -70,24 +70,4 @@ public class PisHttpClientTest {
 
     // TODO: test des cas d'erreur (code HTTP 400, content null, etc.)
 
-    // --- Test EquensHttpClient#getBaseUrl ---
-
-    @Test
-    void getBaseUrl_missing(){
-        // given: the PartnerConfiguration does not contain a base URL (or is empty, it works too)
-        PartnerConfiguration partnerConfiguration = new PartnerConfiguration( new HashMap<>(), new HashMap<>() );
-        // when: calling the method
-        // then: an exception is thrown
-        assertThrows( InvalidDataException.class, () -> pisHttpClient.getBaseUrl( partnerConfiguration ) );
-    }
-
-    @Test
-    void getBaseUrl_nominal(){
-        // when: calling the method with a standard RequestConfiguration
-        String baseUrl = pisHttpClient.getBaseUrl( MockUtils.aPartnerConfiguration() );
-
-        // then: the base URL is not null
-        assertNotNull( baseUrl );
-    }
-
 }

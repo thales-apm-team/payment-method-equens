@@ -49,10 +49,8 @@ public class PisHttpClient extends EquensHttpClient {
         // Service full URL
         String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() ) + API_PATH_ASPSPS;
 
-        // Init. headers
+        // Init. headers with Authorization (access token)
         List<Header> headers = new ArrayList<>();
-
-        // Authorization (access token)
         Authorization auth = this.authorize( requestConfiguration );
         headers.add( new BasicHeader( HttpHeaders.AUTHORIZATION, auth.getHeaderValue() ) );
 
@@ -65,20 +63,6 @@ public class PisHttpClient extends EquensHttpClient {
         }
 
         return GetAspspsResponse.fromJson( response.getContent() );
-    }
-
-    /**
-     * Retrieve the API base URL in PartnerConfiguration. Throws an exception if it's not present.
-     *
-     * @param partnerConfiguration The partner configuration
-     * @return The API base URL
-     */
-    String getBaseUrl( PartnerConfiguration partnerConfiguration ){
-        String baseUrl = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.API_BASE_URL);
-        if( baseUrl == null ){
-            throw new InvalidDataException( "Missing API base url in PartnerConfiguration" );
-        }
-        return baseUrl;
     }
 
 }

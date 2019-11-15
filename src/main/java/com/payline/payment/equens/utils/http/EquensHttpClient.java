@@ -73,6 +73,8 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         super.init(authorizationEndpoint, sslContext);
     }
 
+    protected abstract String appName();
+
     @Override
     protected Map<String, String> authorizationHeaders(String uri, RequestConfiguration requestConfiguration ) {
         // Check required data
@@ -103,7 +105,19 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         return headers;
     }
 
-    protected abstract String appName();
+    /**
+     * Retrieve the API base URL in PartnerConfiguration. Throws an exception if it's not present.
+     *
+     * @param partnerConfiguration The partner configuration
+     * @return The API base URL
+     */
+    String getBaseUrl( PartnerConfiguration partnerConfiguration ){
+        String baseUrl = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.API_BASE_URL);
+        if( baseUrl == null ){
+            throw new InvalidDataException( "Missing API base url in PartnerConfiguration" );
+        }
+        return baseUrl;
+    }
 
     /**
      * Generate a signature, using the private key and client certificate returned by the {@link RSAHolder} instance.

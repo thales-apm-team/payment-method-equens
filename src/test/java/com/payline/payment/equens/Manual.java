@@ -1,5 +1,6 @@
 package com.payline.payment.equens;
 
+import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.utils.http.PisHttpClient;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
@@ -42,7 +43,11 @@ public class Manual {
             pisHttpClient.init( requestConfiguration.getPartnerConfiguration() );
             psuHttpClient.init( requestConfiguration.getPartnerConfiguration() );
 
-            GetAspspsResponse banks = pisHttpClient.getAspsps( requestConfiguration );
+            // GET aspsps
+            //GetAspspsResponse banks = pisHttpClient.getAspsps( requestConfiguration );
+
+            // POST psu
+            psuHttpClient.createPsu( new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration );
 
             LOGGER.info("END");
         }

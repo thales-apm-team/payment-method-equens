@@ -1,6 +1,11 @@
 package com.payline.payment.equens.utils.http;
 
+import com.payline.payment.equens.MockUtils;
+import com.payline.payment.equens.bean.configuration.RequestConfiguration;
+import com.payline.payment.equens.exception.InvalidDataException;
+import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.security.RSAHolder;
+import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -12,15 +17,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.tomitribe.auth.signatures.Signature;
-import com.payline.payment.equens.MockUtils;
-import com.payline.payment.equens.bean.configuration.RequestConfiguration;
-import com.payline.payment.equens.exception.InvalidDataException;
-import com.payline.payment.equens.utils.Constants;
 
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -130,5 +132,25 @@ public class EquensHttpClientTest {
         // then: the signature is valid
         assertNotNull( signature );
         assertTrue( signature.toString().matches( HTTP_SIGNATURE_PATTERN ) );
+    }
+
+    // --- Test EquensHttpClient#getBaseUrl ---
+
+    @Test
+    void getBaseUrl_missing(){
+        // given: the PartnerConfiguration does not contain a base URL (or is empty, it works too)
+        PartnerConfiguration partnerConfiguration = new PartnerConfiguration( new HashMap<>(), new HashMap<>() );
+        // when: calling the method
+        // then: an exception is thrown
+        assertThrows( InvalidDataException.class, () -> equensHttpClient.getBaseUrl( partnerConfiguration ) );
+    }
+
+    @Test
+    void getBaseUrl_nominal(){
+        // when: calling the method with a standard RequestConfiguration
+        String baseUrl = equensHttpClient.getBaseUrl( MockUtils.aPartnerConfiguration() );
+
+        // then: the base URL is not null
+        assertNotNull( baseUrl );
     }
 }
