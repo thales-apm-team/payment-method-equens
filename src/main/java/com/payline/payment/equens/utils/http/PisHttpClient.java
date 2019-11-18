@@ -1,5 +1,6 @@
 package com.payline.payment.equens.utils.http;
 
+import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.logger.LogManager;
 import org.apache.http.Header;
@@ -45,7 +46,7 @@ public class PisHttpClient extends EquensHttpClient {
      * @param requestConfiguration the request configuration
      * @return The list of ASPSPs
      */
-    public GetAspspsResponse getAspsps( RequestConfiguration requestConfiguration ){
+    public List<Aspsp> getAspsps(RequestConfiguration requestConfiguration ){
         // Service full URL
         String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() ) + API_PATH_ASPSPS;
 
@@ -62,7 +63,9 @@ public class PisHttpClient extends EquensHttpClient {
             // TODO: handle errors
         }
 
-        return GetAspspsResponse.fromJson( response.getContent() );
+        return GetAspspsResponse.fromJson( response.getContent() ).getAspsps();
     }
+
+
 
 }

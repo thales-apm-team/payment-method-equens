@@ -6,7 +6,6 @@ import com.google.gson.annotations.SerializedName;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * The Psu create request attributes are the union of the ones from Psu class and the ones from EquensApiMessage class.

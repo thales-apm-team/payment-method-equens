@@ -1,8 +1,8 @@
 package com.payline.payment.equens.utils.http;
 
 import com.google.gson.JsonSyntaxException;
-import com.payline.payment.equens.bean.business.authorization.RFC6749AccessTokenErrorResponse;
-import com.payline.payment.equens.bean.business.authorization.RFC6749AccessTokenSuccessResponse;
+import com.payline.payment.equens.bean.business.oauth.RFC6749AccessTokenErrorResponse;
+import com.payline.payment.equens.bean.business.oauth.RFC6749AccessTokenSuccessResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;

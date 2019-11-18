@@ -104,10 +104,10 @@ public class EquensHttpClientTest {
         // then: every authorization header required by Equens is present AND the header Authorization contains a valid signature
         assertNotNull( headers );
         assertFalse( headers.isEmpty() );
-        assertEquals( equensHttpClient.appName(), headers.get( EquensHttpClient.AUTH_HEADER_APP ) );
-        assertNotNull( headers.get( EquensHttpClient.AUTH_HEADER_CLIENT ) );
-        assertNotNull( headers.get( EquensHttpClient.AUTH_HEADER_DATE ) );
-        assertNotNull( headers.get( EquensHttpClient.AUTH_HEADER_ID ) );
+        assertEquals( equensHttpClient.appName(), headers.get( EquensHttpClient.HEADER_AUTH_APP) );
+        assertNotNull( headers.get( EquensHttpClient.HEADER_AUTH_CLIENT) );
+        assertNotNull( headers.get( EquensHttpClient.HEADER_AUTH_DATE) );
+        assertNotNull( headers.get( EquensHttpClient.HEADER_AUTH_ID) );
         assertNotNull( headers.get( HttpHeaders.AUTHORIZATION ) );
         assertTrue( headers.get( HttpHeaders.AUTHORIZATION ).matches( HTTP_SIGNATURE_PATTERN ) );
     }
@@ -119,10 +119,10 @@ public class EquensHttpClientTest {
         // given: valid input & RsaHolder returns valid pk and certificate
         String uri = "http://test.domain.fr/path";
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put( EquensHttpClient.AUTH_HEADER_APP, "TEST" );
-        headers.put( EquensHttpClient.AUTH_HEADER_CLIENT, "Thales" );
-        headers.put( EquensHttpClient.AUTH_HEADER_DATE, "01/01/2021" );
-        headers.put( EquensHttpClient.AUTH_HEADER_ID, "0" );
+        headers.put( EquensHttpClient.HEADER_AUTH_APP, "TEST" );
+        headers.put( EquensHttpClient.HEADER_AUTH_CLIENT, "Thales" );
+        headers.put( EquensHttpClient.HEADER_AUTH_DATE, "01/01/2021" );
+        headers.put( EquensHttpClient.HEADER_AUTH_ID, "0" );
         doReturn( MockUtils.aPrivateKey() ).when( rsaHolder ).getPrivateKey();
         doReturn( MockUtils.aClientCertificate() ).when( rsaHolder ).getClientCertificate();
 

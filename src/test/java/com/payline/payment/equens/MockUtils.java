@@ -1,5 +1,6 @@
 package com.payline.payment.equens;
 
+import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.utils.security.RSAHolder;
 import com.payline.pmapi.bean.common.Buyer;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
@@ -337,6 +338,13 @@ public class MockUtils {
                 "VNAzHrCYpRtxCNVoatW2lA8AvySWsiEwMTmdNMubjWcSPx8gHVmzGoOnKK44Ytaf\n" +
                 "TZVu0T1HwCkWzUMS7ULfwtw=\n" +
                 "-----END PRIVATE KEY-----";
+    }
+
+    /**
+     * Generate a valid {@link PsuCreateRequest}.
+     */
+    public static PsuCreateRequest aPsuCreateRequest(){
+        return new PsuCreateRequest.PsuCreateRequestBuilder().build();
     }
 
     /**

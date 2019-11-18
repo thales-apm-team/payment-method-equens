@@ -30,10 +30,11 @@ import static org.tomitribe.auth.signatures.Algorithm.RSA_SHA256;
  */
 abstract class EquensHttpClient extends OAuthHttpClient {
 
-    public static final String AUTH_HEADER_APP = "App";
-    public static final String AUTH_HEADER_CLIENT = "Client";
-    public static final String AUTH_HEADER_DATE = "Date";
-    public static final String AUTH_HEADER_ID = "Id";
+    public static final String HEADER_AUTH_APP = "App";
+    public static final String HEADER_AUTH_CLIENT = "Client";
+    public static final String HEADER_AUTH_DATE = "Date";
+    public static final String HEADER_AUTH_ID = "Id";
+    public static final String HEADER_REQUEST_ID = "X-Request-ID";
 
     /**
      * Holder containing the keystore data (keys or certificates).
@@ -90,10 +91,10 @@ abstract class EquensHttpClient extends OAuthHttpClient {
 
         // Build headers list
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(AUTH_HEADER_APP, this.appName());
-        headers.put(AUTH_HEADER_CLIENT, contractConfiguration.getProperty( Constants.ContractConfigurationKeys.CLIENT_NAME ).getValue());
-        headers.put(AUTH_HEADER_DATE, new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.US).format(new Date()));
-        headers.put(AUTH_HEADER_ID, contractConfiguration.getProperty( Constants.ContractConfigurationKeys.ONBOARDING_ID ).getValue());
+        headers.put(HEADER_AUTH_APP, this.appName());
+        headers.put(HEADER_AUTH_CLIENT, contractConfiguration.getProperty( Constants.ContractConfigurationKeys.CLIENT_NAME ).getValue());
+        headers.put(HEADER_AUTH_DATE, new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.US).format(new Date()));
+        headers.put(HEADER_AUTH_ID, contractConfiguration.getProperty( Constants.ContractConfigurationKeys.ONBOARDING_ID ).getValue());
 
         // Generate the request signature
         Signature signature = this.generateSignature( uri, headers );

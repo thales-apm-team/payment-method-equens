@@ -1,4 +1,4 @@
-package com.payline.payment.equens.bean.business.authorization;
+package com.payline.payment.equens.bean.business.oauth;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;

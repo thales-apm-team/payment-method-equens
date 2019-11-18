@@ -14,8 +14,7 @@ public class Psu {
     private String email;
     @SerializedName("PhoneNumber")
     private String phoneNumber;
-    //@SerializedName("Address")
-    // TODO: map the Address
+    // Address field is not mapped as its structure is weird and it's never used in the plugin for now
     @SerializedName("Status")
     private String status;
 

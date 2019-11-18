@@ -1,6 +1,8 @@
 package com.payline.payment.equens.utils.http;
 
+import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
+import com.payline.payment.equens.bean.business.psu.PsuCreateResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.pmapi.logger.LogManager;
 import org.apache.http.Header;
@@ -11,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,7 +43,14 @@ public class PsuHttpclient extends EquensHttpClient {
         return "PSU";
     }
 
-    public StringResponse createPsu( PsuCreateRequest psuCreateRequest, RequestConfiguration requestConfiguration ){
+    /**
+     * Create a PSU.
+     *
+     * @param psuCreateRequest The PSU creation request
+     * @param requestConfiguration The request configuration
+     * @return The API response, normally containing the created PSU data
+     */
+    public Psu createPsu(PsuCreateRequest psuCreateRequest, RequestConfiguration requestConfiguration ){
         // Service full URL
         String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() ) + API_PATH_PSU;
 
@@ -50,6 +58,9 @@ public class PsuHttpclient extends EquensHttpClient {
         List<Header> headers = new ArrayList<>();
         Authorization auth = this.authorize( requestConfiguration );
         headers.add( new BasicHeader( HttpHeaders.AUTHORIZATION, auth.getHeaderValue() ) );
+
+        // Misc headers
+        headers.add( new BasicHeader( HEADER_REQUEST_ID, UUID.randomUUID().toString() ) );
 
         // Body
         StringEntity body = new StringEntity( psuCreateRequest.toString(), StandardCharsets.UTF_8 );
@@ -63,7 +74,7 @@ public class PsuHttpclient extends EquensHttpClient {
             // TODO: handle errors
         }
 
-        return response;
+        return PsuCreateResponse.fromJson( response.getContent() ).getPsu();
     }
 
 }

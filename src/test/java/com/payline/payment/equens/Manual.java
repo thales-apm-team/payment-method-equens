@@ -1,6 +1,9 @@
 package com.payline.payment.equens;
 
+import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
+import com.payline.payment.equens.bean.business.psu.PsuCreateResponse;
+import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.utils.http.PisHttpClient;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
@@ -17,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,10 +48,10 @@ public class Manual {
             psuHttpClient.init( requestConfiguration.getPartnerConfiguration() );
 
             // GET aspsps
-            //GetAspspsResponse banks = pisHttpClient.getAspsps( requestConfiguration );
+            //List<Aspsp> banks = pisHttpClient.getAspsps( requestConfiguration );
 
             // POST psu
-            psuHttpClient.createPsu( new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration );
+            Psu psuCreated = psuHttpClient.createPsu( new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration );
 
             LOGGER.info("END");
         }

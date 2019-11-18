@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
@@ -32,7 +33,7 @@ public abstract class EquensApiMessage {
     public static class EquensApiMessageBuilder {
 
         private Date messageCreateDateTime = new Date();
-        private String messageId = UUID.randomUUID().toString();
+        private String messageId = "PAYLINE" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
 
         public EquensApiMessageBuilder withMessageCreateDateTime(Date messageCreateDateTime) {
             this.messageCreateDateTime = messageCreateDateTime;
