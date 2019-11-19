@@ -3,7 +3,9 @@ package com.payline.payment.equens.utils.http;
 import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.InvalidDataException;
+import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.utils.Constants;
+import com.payline.payment.equens.utils.TestUtils;
 import com.payline.payment.equens.utils.security.RSAHolder;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
@@ -12,6 +14,9 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -25,6 +30,7 @@ import java.security.UnrecoverableKeyException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -153,4 +159,50 @@ public class EquensHttpClientTest {
         // then: the base URL is not null
         assertNotNull( baseUrl );
     }
+
+    // --- Test EquensHttpClient#handleError ---
+
+    @ParameterizedTest
+    @MethodSource("handleError_set")
+    void handleError( StringResponse apiResponse ){
+        // when: handling the error
+        PluginException exception = equensHttpClient.handleError( apiResponse );
+
+        // then: no matter the error response provided by the API, the resulting PluginException must have an error code and a failure cause.
+        assertNotNull( exception );
+        assertNotNull( exception.getErrorCode() );
+        assertNotNull( exception.getFailureCause() );
+    }
+    static Stream<StringResponse> handleError_set(){
+        Stream.Builder<StringResponse> builder = Stream.builder();
+
+        // The API returns a response which content matches the specification
+        String contentMatchingSpec = "{" +
+                "  \"MessageCreateDateTime\":\"2019-11-19T08:56:24.181+0000\"," +
+                "  \"MessageId\":\"8793c366c134477fb6499b061c7b638a\"," +
+                "  \"code\":\"002\"," +
+                "  \"message\":\"The message does not comply the schema definition\"," +
+                "  \"details\":\"Unrecognized field \\\"toto\\\" (class com.equensworldline.psu.v1.model.PsuCreateRequest), not marked as ignorable\"" +
+                "}";
+        builder.accept( HttpTestUtils.mockStringResponse( 400, "Bad Request", contentMatchingSpec ) );
+
+        // The API returns a response which content does not match the specification
+        String contentNotMatchingSpec = "[{" +
+                "  \"errorCode\":\"002\"," +
+                "  \"errorMessage\":\"This message does not comply the schema definition\"" +
+                "}]";
+        builder.accept( HttpTestUtils.mockStringResponse( 400, "Bad Request", contentNotMatchingSpec ) );
+
+        // The API returns a response with an invalid content
+        builder.accept( HttpTestUtils.mockStringResponse( 500, "Internal Server Error", "{/}" ) );
+
+        // The API returns a response with an empty content
+        builder.accept( HttpTestUtils.mockStringResponse( 401, "Unauthorized", "" ) );
+
+        // The API returns a response without content
+        builder.accept( HttpTestUtils.mockStringResponse( 404, "Not Found", null ) );
+
+        return builder.build();
+    }
+
 }

@@ -206,6 +206,7 @@ abstract class OAuthHttpClient {
      * @param response The response received, converted as {@link StringResponse}.
      * @return The {@link PluginException} to throw
      */
+    // TODO: simuler cette erreur ! (l'API semble avoir changé)
     PluginException handleAuthorizationErrorResponse( StringResponse response ){
         RFC6749AccessTokenErrorResponse errorResponse;
         try {

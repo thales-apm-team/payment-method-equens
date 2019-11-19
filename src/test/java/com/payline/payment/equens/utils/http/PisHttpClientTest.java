@@ -4,6 +4,7 @@ import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
+import com.payline.payment.equens.exception.PluginException;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +57,7 @@ public class PisHttpClientTest {
                 "      \"BIC\":\"TODO\"}" +
                 "  ]" +
                 "}";
-        doReturn( HttpTestUtils.mockStringResponse(200, "OK", responseBody, null ) )
+        doReturn( HttpTestUtils.mockStringResponse(200, "OK", responseBody ) )
                 .when( pisHttpClient )
                 .get( anyString(), anyList() );
 
@@ -76,7 +77,7 @@ public class PisHttpClientTest {
                 "  \"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"," +
                 "  \"Application\":\"PIS\"" +
                 "}";
-        doReturn( HttpTestUtils.mockStringResponse(200, "OK", responseBody, null ) )
+        doReturn( HttpTestUtils.mockStringResponse(200, "OK", responseBody ) )
                 .when( pisHttpClient )
                 .get( anyString(), anyList() );
 
@@ -85,6 +86,17 @@ public class PisHttpClientTest {
 
         // then: resulting list is null
         assertNull( response );
+    }
+
+    @Test
+    void getAspsps_error(){
+        // given: the partner API returns a valid error response
+        doReturn( HttpTestUtils.mockStringResponse(401, "Unauthorized", "" ) )
+                .when( pisHttpClient )
+                .get( anyString(), anyList() );
+
+        // when: calling the method, then: an exception is thrown
+        assertThrows( PluginException.class, () -> pisHttpClient.getAspsps( MockUtils.aRequestConfiguration() ) );
     }
 
     // TODO: test des cas d'erreur (code HTTP 400, content null, etc.)

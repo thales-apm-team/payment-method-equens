@@ -40,7 +40,19 @@ class HttpTestUtils {
     }
 
     /**
-     * Moch a StringResponse with the given elements.
+     * Mock a StringResponse with the given elements (no headers).
+     *
+     * @param statusCode The HTTP status code (ex: 200, 403)
+     * @param statusMessage The HTTP status message (ex: "OK", "Forbidden")
+     * @param content The response content as a string
+     * @return A mocked StringResponse
+     */
+    public static StringResponse mockStringResponse( int statusCode, String statusMessage, String content ){
+        return mockStringResponse( statusCode, statusMessage, content, null );
+    }
+
+    /**
+     * Mock a StringResponse with the given elements.
      *
      * @param statusCode The HTTP status code (ex: 200, 403)
      * @param statusMessage The HTTP status message (ex: "OK", "Forbidden")

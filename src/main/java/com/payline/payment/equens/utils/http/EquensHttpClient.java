@@ -1,5 +1,7 @@
 package com.payline.payment.equens.utils.http;
 
+import com.google.gson.JsonSyntaxException;
+import com.payline.payment.equens.bean.business.EquensErrorResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
@@ -107,20 +109,6 @@ abstract class EquensHttpClient extends OAuthHttpClient {
     }
 
     /**
-     * Retrieve the API base URL in PartnerConfiguration. Throws an exception if it's not present.
-     *
-     * @param partnerConfiguration The partner configuration
-     * @return The API base URL
-     */
-    String getBaseUrl( PartnerConfiguration partnerConfiguration ){
-        String baseUrl = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.API_BASE_URL);
-        if( baseUrl == null ){
-            throw new InvalidDataException( "Missing API base url in PartnerConfiguration" );
-        }
-        return baseUrl;
-    }
-
-    /**
      * Generate a signature, using the private key and client certificate returned by the {@link RSAHolder} instance.
      *
      * @param uri the request URI
@@ -166,6 +154,50 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         }
 
         return signature;
+    }
+
+    /**
+     * Retrieve the API base URL in PartnerConfiguration. Throws an exception if it's not present.
+     *
+     * @param partnerConfiguration The partner configuration
+     * @return The API base URL
+     */
+    String getBaseUrl( PartnerConfiguration partnerConfiguration ){
+        String baseUrl = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.API_BASE_URL);
+        if( baseUrl == null ){
+            throw new InvalidDataException( "Missing API base url in PartnerConfiguration" );
+        }
+        return baseUrl;
+    }
+
+    /**
+     * Handle error responses with the specified format (see swagger description files of the API)
+     *
+     * @param apiResponse The raw response received from the API, as a <code>StringResponse</code>.
+     * @return The <code>PluginException</code> to throw
+     */
+    PluginException handleError( StringResponse apiResponse ){
+        // Try to parse the error response with the specified format
+        EquensErrorResponse errorResponse;
+        try {
+            errorResponse = EquensErrorResponse.fromJson( apiResponse.getContent() );
+        }
+        catch( JsonSyntaxException e ){
+            errorResponse = null;
+        }
+
+        // Default message built from the HTTP code and status
+        String message = "partner error: " + apiResponse.getStatusCode() + " " + apiResponse.getStatusMessage();
+        // Default FailureCause : partner unknown error
+        FailureCause failureCause = FailureCause.PARTNER_UNKNOWN_ERROR;
+
+        // TODO ! (mapping partner codes => payline elements)
+
+        if( errorResponse != null ){
+            // TODO: log details
+        }
+
+        return new PluginException(message, failureCause);
     }
 
     private static String sha1( byte[] block ){

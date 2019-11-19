@@ -54,7 +54,7 @@ public class PsuHttpClientTest {
                 "    \"Status\":\"ACTIVE\"" +
                 "  }" +
                 "}";
-        doReturn( HttpTestUtils.mockStringResponse(201, "Created", responseBody, null ) )
+        doReturn( HttpTestUtils.mockStringResponse(201, "Created", responseBody ) )
                 .when( psuHttpClient )
                 .post( anyString(), anyList(), any(HttpEntity.class) );
 
@@ -74,7 +74,7 @@ public class PsuHttpClientTest {
                 "  \"MessageCreateDateTime\":\"2019-11-18T09:50:32.724+0000\"," +
                 "  \"MessageId\":\"d43a25cd1f29436ca40597429c9242fc\"" +
                 "}";
-        doReturn( HttpTestUtils.mockStringResponse(201, "Created", responseBody, null ) )
+        doReturn( HttpTestUtils.mockStringResponse(201, "Created", responseBody ) )
                 .when( psuHttpClient )
                 .post( anyString(), anyList(), any(HttpEntity.class) );
 

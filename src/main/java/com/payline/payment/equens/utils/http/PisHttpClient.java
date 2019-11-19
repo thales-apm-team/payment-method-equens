@@ -60,12 +60,10 @@ public class PisHttpClient extends EquensHttpClient {
 
         // Handle potential errors
         if( !response.isSuccess() || response.getContent() == null ){
-            // TODO: handle errors
+            throw this.handleError( response );
         }
 
         return GetAspspsResponse.fromJson( response.getContent() ).getAspsps();
     }
-
-
 
 }

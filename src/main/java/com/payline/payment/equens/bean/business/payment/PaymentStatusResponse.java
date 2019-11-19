@@ -1,5 +1,6 @@
 package com.payline.payment.equens.bean.business.payment;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.payline.payment.equens.bean.business.EquensApiMessage;
 
@@ -137,6 +138,10 @@ public class PaymentStatusResponse extends EquensApiMessage {
             return new PaymentStatusResponse( this );
         }
 
+    }
+
+    public static PaymentStatusResponse fromJson( String json ){
+        return new Gson().fromJson( json, PaymentStatusResponse.class );
     }
 
 }
