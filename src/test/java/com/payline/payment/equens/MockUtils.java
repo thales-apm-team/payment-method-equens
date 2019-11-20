@@ -1,5 +1,6 @@
 package com.payline.payment.equens;
 
+import com.payline.payment.equens.bean.business.payment.PaymentInitiationRequest;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.utils.security.RSAHolder;
 import com.payline.pmapi.bean.common.Buyer;
@@ -284,6 +285,14 @@ public class MockUtils {
                 .withPartnerConfiguration( aPartnerConfiguration() )
                 .withLocale( Locale.getDefault() )
                 .build();
+    }
+
+    /**
+     * Generate a valid {@link PaymentInitiationRequest}.
+     */
+    public static PaymentInitiationRequest aPaymentInitiationRequest(){
+        // TODO !
+        return new PaymentInitiationRequest.PaymentInitiationRequestBuilder().build();
     }
 
     /**
