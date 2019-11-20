@@ -294,7 +294,7 @@ public class MockUtils {
      * Generate a valid {@link PaymentInitiationRequest}.
      */
     public static PaymentInitiationRequest aPaymentInitiationRequest(){
-        // TODO !
+        // TODO: ensure this method returns a STANDARD instance
         String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
         return new PaymentInitiationRequest.PaymentInitiationRequestBuilder()
                 .withAspspId("1202")

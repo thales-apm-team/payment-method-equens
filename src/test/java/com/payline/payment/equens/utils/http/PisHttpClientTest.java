@@ -2,6 +2,7 @@ package com.payline.payment.equens.utils.http;
 
 import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.business.payment.PaymentInitiationResponse;
+import com.payline.payment.equens.bean.business.payment.PaymentStatusResponse;
 import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
@@ -137,6 +138,44 @@ public class PisHttpClientTest {
         verify( pisHttpClient, times(1) ).post( anyString(), headersCaptor.capture(), bodyCaptor.capture() );
         this.verifyAuthorizationHeader( headersCaptor.getValue() );
         assertNotNull( bodyCaptor.getValue() );
+    }
+
+    // TODO: test des cas en erreur
+
+    // --- Test PisHttpClient#paymentStatus ---
+
+    @Test
+    void paymentStatus_nominal(){
+        // given: the partner API returns a valid success response
+        String paymentId = "130676";
+        String responseContent = "{\n" +
+                "    \"MessageCreateDateTime\": \"2019-11-20T13:44:35.115+0000\",\n" +
+                "    \"MessageId\": \"ca58925c-57cc-44b0-a827-cd439fb87f\",\n" +
+                "    \"PaymentId\": \"" + paymentId + "\",\n" +
+                "    \"PaymentStatus\": \"AUTHORISED\",\n" +
+                "    \"AspspPaymentId\": \"im7QC5rZ-jyNr237sJb6VqEnBd8uNDnU6b9-rnAYVxTNub1NwmkrY3CBGDMRXsx5BeH6HIP2qhdTTZ1HINXSkg==_=_psGLvQpt9Q\",\n" +
+                "    \"InitiatingPartyReferenceId\": \"REF1574257016\",\n" +
+                "    \"DebtorAgent\": \"BNPADEFF\",\n" +
+                "    \"DebtorAccount\": \"AT880000000000000001\"\n" +
+                "}";
+        doReturn( HttpTestUtils.mockStringResponse(200, "OK", responseContent ) )
+                .when( pisHttpClient )
+                .get( anyString(), anyList() );
+
+        // when: retrieving the payment status
+        PaymentStatusResponse response = pisHttpClient.paymentStatus( paymentId, MockUtils.aRequestConfiguration(), false );
+
+        // then: the response contains the status
+        assertNotNull( response );
+        assertNotNull( response.getPaymentStatus() );
+
+        // verify the get() method has been called and the content of the arguments passed
+        ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass( String.class );
+        ArgumentCaptor<List<Header>> headersCaptor = ArgumentCaptor.forClass( List.class );
+        verify( pisHttpClient, times(1) ).get( urlCaptor.capture(), headersCaptor.capture() );
+        assertTrue( urlCaptor.getValue().contains(paymentId) );
+        // TODO: if the use of autoConfirm is confirmed, test the presence of the parameter in the request URL
+        this.verifyAuthorizationHeader( headersCaptor.getValue() );
     }
 
     // TODO: test des cas en erreur

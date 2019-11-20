@@ -65,6 +65,50 @@ public class PaymentStatusResponse extends EquensApiMessage {
         this.multiAuthorizationStatus = builder.multiAuthorizationStatus;
     }
 
+    public String getPaymentId() {
+        return paymentId;
+    }
+
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public PaymentStatus getAspspPaymentId() {
+        return aspspPaymentId;
+    }
+
+    public String getInitiatingPartyReferenceId() {
+        return initiatingPartyReferenceId;
+    }
+
+    public String getDebtorName() {
+        return debtorName;
+    }
+
+    public String getDebtorAgent() {
+        return debtorAgent;
+    }
+
+    public String getDebtorAccount() {
+        return debtorAccount;
+    }
+
+    public ScaChallenge getScaChallenge() {
+        return scaChallenge;
+    }
+
+    public Boolean getFundsAvailable() {
+        return fundsAvailable;
+    }
+
+    public String getApprovalLink() {
+        return approvalLink;
+    }
+
+    public String getMultiAuthorizationStatus() {
+        return multiAuthorizationStatus;
+    }
+
     public static class PaymentStatusResponseBuilder extends EquensApiMessageBuilder {
 
         private String paymentId;

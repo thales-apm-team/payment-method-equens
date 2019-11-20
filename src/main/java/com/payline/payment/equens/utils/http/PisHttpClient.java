@@ -108,6 +108,7 @@ public class PisHttpClient extends EquensHttpClient {
         // Service full URL
         String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() )
                 + API_PATH_PAYMENTS_STATUS.replace("{paymentId}", paymentId);
+        // TODO: verify the usability, and remove if necessary
         if( autoConfirm ){
             url += "?confirm=true";
         }

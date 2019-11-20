@@ -9,6 +9,7 @@ import com.payline.payment.equens.utils.TestUtils;
 import com.payline.payment.equens.utils.security.RSAHolder;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
+import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.junit.jupiter.api.AfterEach;
@@ -29,6 +30,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -203,6 +205,22 @@ public class EquensHttpClientTest {
         builder.accept( HttpTestUtils.mockStringResponse( 404, "Not Found", null ) );
 
         return builder.build();
+    }
+
+    // --- Test EquensHttpClient#initHeaders ---
+    @Test
+    void initHeaders(){
+        // given: authorize() method returns a valid authorization
+        doReturn( MockUtils.anAuthorization() )
+                .when( equensHttpClient )
+                .authorize( any(RequestConfiguration.class) );
+
+        // when: initializing the headers
+        List<Header> headers = equensHttpClient.initHeaders( MockUtils.aRequestConfiguration() );
+
+        // then: headers list contains the header Authorization
+        assertEquals( 1, headers.size() );
+        assertEquals( HttpHeaders.AUTHORIZATION, headers.get(0).getName() );
     }
 
 }
