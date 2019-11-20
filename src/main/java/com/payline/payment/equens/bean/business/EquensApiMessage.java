@@ -3,12 +3,9 @@ package com.payline.payment.equens.bean.business;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
-import com.payline.payment.equens.bean.business.psu.Psu;
-import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.UUID;
 
 public abstract class EquensApiMessage {
 

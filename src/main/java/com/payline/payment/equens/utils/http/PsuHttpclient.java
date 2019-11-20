@@ -12,7 +12,6 @@ import org.apache.http.message.BasicHeader;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 

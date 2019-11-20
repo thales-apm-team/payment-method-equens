@@ -4,20 +4,16 @@ import com.payline.payment.equens.bean.business.payment.PaymentInitiationRequest
 import com.payline.payment.equens.bean.business.payment.PaymentInitiationResponse;
 import com.payline.payment.equens.bean.business.payment.PaymentStatusResponse;
 import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
-import com.payline.pmapi.bean.configuration.PartnerConfiguration;
+import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
+import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.pmapi.logger.LogManager;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.logging.log4j.Logger;
-import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
-import com.payline.payment.equens.bean.configuration.RequestConfiguration;
-import com.payline.payment.equens.exception.InvalidDataException;
-import com.payline.payment.equens.utils.Constants;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

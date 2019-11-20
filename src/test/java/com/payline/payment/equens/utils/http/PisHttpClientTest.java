@@ -4,7 +4,6 @@ import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.business.payment.PaymentInitiationResponse;
 import com.payline.payment.equens.bean.business.payment.PaymentStatusResponse;
 import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
-import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.PluginException;
 import org.apache.http.Header;
