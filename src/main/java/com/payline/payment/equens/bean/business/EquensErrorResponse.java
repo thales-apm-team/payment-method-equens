@@ -39,6 +39,10 @@ public class EquensErrorResponse extends EquensApiMessage {
         Link( String href ){
             this.href = href;
         }
+
+        public String getHref() {
+            return href;
+        }
     }
 
     public static class EquensErrorResponseBuilder extends EquensApiMessageBuilder {
