@@ -10,7 +10,9 @@ import com.payline.payment.equens.utils.security.RSAHolder;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
+import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.ssl.SSLContexts;
 import org.tomitribe.auth.signatures.Signature;
 import org.tomitribe.auth.signatures.Signer;
@@ -198,6 +200,19 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         }
 
         return new PluginException(message, failureCause);
+    }
+
+    /**
+     * Initialize a list of headers with an Authorization header containing the access token.
+     *
+     * @param requestConfiguration The request configuration
+     * @return A list of headers
+     */
+    protected List<Header> initHeaders(RequestConfiguration requestConfiguration ){
+        List<Header> headers = new ArrayList<>();
+        Authorization auth = this.authorize( requestConfiguration );
+        headers.add( new BasicHeader( HttpHeaders.AUTHORIZATION, auth.getHeaderValue() ) );
+        return headers;
     }
 
     private static String sha1( byte[] block ){

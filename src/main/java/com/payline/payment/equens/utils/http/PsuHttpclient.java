@@ -55,9 +55,7 @@ public class PsuHttpclient extends EquensHttpClient {
         String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() ) + API_PATH_PSU;
 
         // Init. headers with Authorization (access token)
-        List<Header> headers = new ArrayList<>();
-        Authorization auth = this.authorize( requestConfiguration );
-        headers.add( new BasicHeader( HttpHeaders.AUTHORIZATION, auth.getHeaderValue() ) );
+        List<Header> headers = this.initHeaders( requestConfiguration );
 
         // Misc headers
         headers.add( new BasicHeader( HEADER_REQUEST_ID, UUID.randomUUID().toString() ) );

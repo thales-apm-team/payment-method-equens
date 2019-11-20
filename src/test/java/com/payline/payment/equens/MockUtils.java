@@ -1,6 +1,9 @@
 package com.payline.payment.equens;
 
+import com.payline.payment.equens.bean.business.fraud.PsuSessionInformation;
+import com.payline.payment.equens.bean.business.payment.Account;
 import com.payline.payment.equens.bean.business.payment.PaymentInitiationRequest;
+import com.payline.payment.equens.bean.business.payment.RemittanceInformationStructured;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.utils.security.RSAHolder;
 import com.payline.pmapi.bean.common.Buyer;
@@ -292,7 +295,38 @@ public class MockUtils {
      */
     public static PaymentInitiationRequest aPaymentInitiationRequest(){
         // TODO !
-        return new PaymentInitiationRequest.PaymentInitiationRequestBuilder().build();
+        String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        return new PaymentInitiationRequest.PaymentInitiationRequestBuilder()
+                .withAspspId("1202")
+                .withEndToEndId( "PAYLINE" + timestamp )
+                .withInitiatingPartyReferenceId( "REF" + timestamp )
+                .withRemittanceInformationStructured(
+                        new RemittanceInformationStructured.RemittanceInformationStructuredBuilder()
+                                .withReference( "REF" + timestamp )
+                                .build()
+                )
+                .withDebtorAccount(
+                        new Account.AccountBuilder()
+                                .withIdentification("AT880000000000000001")
+                                .withCurrency("EUR")
+                                .build()
+                )
+                .withCreditorAccount(
+                        new Account.AccountBuilder()
+                                .withIdentification("ES1400490001510000000002")
+                                .build()
+                )
+                .withCreditorName("Jean Dupont")
+                .withPaymentAmount("10.00")
+                .withPaymentCurrency("EUR")
+                .withAspspPsuId("21")
+                .withPaymentProduct("Instant")
+                .withPsuSessionInformation(
+                        new PsuSessionInformation.PsuSessionInformationBuilder()
+                                .withIpAddress("192.168.0.1")
+                                .build()
+                )
+                .build();
     }
 
     /**
