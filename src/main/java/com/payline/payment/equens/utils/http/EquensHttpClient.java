@@ -5,15 +5,18 @@ import com.payline.payment.equens.bean.business.EquensErrorResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.service.impl.PaymentFormConfigurationServiceImpl;
 import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.security.RSAHolder;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
+import com.payline.pmapi.logger.LogManager;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.ssl.SSLContexts;
+import org.apache.logging.log4j.Logger;
 import org.tomitribe.auth.signatures.Signature;
 import org.tomitribe.auth.signatures.Signer;
 
@@ -23,6 +26,7 @@ import java.security.*;
 import java.security.cert.CertificateEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.tomitribe.auth.signatures.Algorithm.RSA_SHA256;
 
@@ -193,10 +197,57 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         // Default FailureCause : partner unknown error
         FailureCause failureCause = FailureCause.PARTNER_UNKNOWN_ERROR;
 
-        // TODO ! (mapping partner codes => payline elements)
+        // If errorResponse or errorResponse.code is null, no need to go further
+        if( errorResponse == null || errorResponse.getCode() == null ){
+            return new PluginException(message, failureCause);
+        }
+        String errorCode = errorResponse.getCode();
 
-        if( errorResponse != null ){
-            // TODO: log details
+        // Map partner error codes to Payline FailureCause and errorCode
+        if( errorResponse.getMessage() != null ){
+            message = errorResponse.getMessage();
+        }
+        switch( apiResponse.getStatusCode() ){
+            case 400:
+                // Failure cause
+                failureCause = FailureCause.INVALID_DATA;
+                if( Stream.of("108", "109").anyMatch( errorCode::contains ) ){
+                    failureCause = FailureCause.COMMUNICATION_ERROR;
+                }
+                // error code
+                if( Stream.of("001", "002", "133").anyMatch( errorCode::contains ) && errorResponse.getDetails() != null ){
+                    message = errorResponse.getDetails();
+                }
+                break;
+
+            case 403:
+                if( Stream.of("007", "017").anyMatch( errorCode::contains ) ){
+                    failureCause = FailureCause.COMMUNICATION_ERROR;
+                }
+                else if( "107".equals( errorCode ) ){
+                    failureCause = FailureCause.INVALID_DATA;
+                }
+                else if( "120".equals( errorCode ) ){
+                    failureCause = FailureCause.REFUSED;
+                }
+                break;
+
+            case 404:
+                failureCause = FailureCause.INVALID_DATA;
+                break;
+
+            case 405:
+                if( "135".equals( errorCode ) ) {
+                    failureCause = FailureCause.REFUSED;
+                }
+                break;
+
+            case 401:
+            case 502:
+            case 503:
+            case 511:
+                failureCause = FailureCause.COMMUNICATION_ERROR;
+                break;
         }
 
         return new PluginException(message, failureCause);
