@@ -4,6 +4,7 @@ import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.business.payment.PaymentInitiationResponse;
 import com.payline.payment.equens.bean.business.payment.PaymentStatusResponse;
 import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
+import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.PluginException;
 import org.apache.http.Header;
@@ -67,11 +68,11 @@ public class PisHttpClientTest {
                 .get( anyString(), anyList() );
 
         // when: calling the method
-        List<Aspsp> response = pisHttpClient.getAspsps( MockUtils.aRequestConfiguration() );
+        GetAspspsResponse response = pisHttpClient.getAspsps( MockUtils.aRequestConfiguration() );
 
         // then: the list contains 1 Aspsp
         assertNotNull( response );
-        assertEquals( 1, response.size() );
+        assertEquals( 1, response.getAspsps().size() );
     }
 
     @Test
@@ -87,10 +88,10 @@ public class PisHttpClientTest {
                 .get( anyString(), anyList() );
 
         // when: calling the method
-        List<Aspsp> response = pisHttpClient.getAspsps( MockUtils.aRequestConfiguration() );
+        GetAspspsResponse response = pisHttpClient.getAspsps( MockUtils.aRequestConfiguration() );
 
         // then: resulting list is null
-        assertNull( response );
+        assertNull( response.getAspsps() );
     }
 
     @Test

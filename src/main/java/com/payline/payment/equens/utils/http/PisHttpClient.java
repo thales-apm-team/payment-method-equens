@@ -49,7 +49,7 @@ public class PisHttpClient extends EquensHttpClient {
      * @param requestConfiguration the request configuration
      * @return The list of ASPSPs
      */
-    public List<Aspsp> getAspsps(RequestConfiguration requestConfiguration ){
+    public GetAspspsResponse getAspsps(RequestConfiguration requestConfiguration ){
         // Service full URL
         String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() ) + API_PATH_ASPSPS;
 
@@ -61,7 +61,7 @@ public class PisHttpClient extends EquensHttpClient {
             throw this.handleError( response );
         }
 
-        return GetAspspsResponse.fromJson( response.getContent() ).getAspsps();
+        return GetAspspsResponse.fromJson( response.getContent() );
     }
 
     /**

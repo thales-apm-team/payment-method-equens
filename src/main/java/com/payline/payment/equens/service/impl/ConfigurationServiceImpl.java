@@ -1,44 +1,143 @@
 package com.payline.payment.equens.service.impl;
 
+import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
+import com.payline.payment.equens.bean.configuration.RequestConfiguration;
+import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.utils.Constants;
+import com.payline.payment.equens.utils.http.PisHttpClient;
+import com.payline.payment.equens.utils.http.PsuHttpclient;
 import com.payline.payment.equens.utils.i18n.I18nService;
 import com.payline.payment.equens.utils.properties.ReleaseProperties;
 import com.payline.pmapi.bean.configuration.ReleaseInformation;
 import com.payline.pmapi.bean.configuration.parameter.AbstractParameter;
+import com.payline.pmapi.bean.configuration.parameter.impl.InputParameter;
+import com.payline.pmapi.bean.configuration.parameter.impl.ListBoxParameter;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
 import com.payline.pmapi.bean.configuration.request.RetrievePluginConfigurationRequest;
+import com.payline.pmapi.bean.payment.ContractProperty;
 import com.payline.pmapi.logger.LogManager;
 import com.payline.pmapi.service.ConfigurationService;
 import org.apache.logging.log4j.Logger;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class ConfigurationServiceImpl implements ConfigurationService {
 
     private static final Logger LOGGER = LogManager.getLogger(ConfigurationServiceImpl.class);
 
-    private ReleaseProperties releaseProperties = ReleaseProperties.getInstance();
     private I18nService i18n = I18nService.getInstance();
+    private PisHttpClient pisHttpClient = PisHttpClient.getInstance();
+    private PsuHttpclient psuHttpClient = PsuHttpclient.getInstance();
+    private ReleaseProperties releaseProperties = ReleaseProperties.getInstance();
+
 
     @Override
     public List<AbstractParameter> getParameters(Locale locale) {
-        // TODO
-        return null;
+        List<AbstractParameter> parameters = new ArrayList<>();
+
+        // Client name
+        parameters.add( this.newInputParameter( Constants.ContractConfigurationKeys.CLIENT_NAME, true, locale ) );
+
+        // Onboarding ID
+        parameters.add( this.newInputParameter( Constants.ContractConfigurationKeys.ONBOARDING_ID, true, locale ) );
+
+        // mérchant iban
+        parameters.add( this.newInputParameter( Constants.ContractConfigurationKeys.MERCHANT_IBAN, true, locale ) );
+
+        // channel type
+        Map<String, String> channelTypes = new HashMap<>();
+        channelTypes.put("ECommerce", "ECommerce");
+        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.CHANNEL_TYPE, channelTypes, channelTypes.get(0), true, locale ) );
+
+        // SCA method
+        Map<String, String> scaMethods = new HashMap<>();
+        scaMethods.put("Redirect", "Redirect");
+        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.SCA_METHOD, scaMethods, scaMethods.get(0), true, locale ) );
+
+        // Charge bearer
+        Map<String, String> chargeBearers = new HashMap<>();
+        chargeBearers.put("CRED", "CRED");
+        chargeBearers.put("DEBT", "DEBT");
+        chargeBearers.put("SHAR", "SHAR");
+        chargeBearers.put("SLEV", "SLEV");
+        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.CHARGE_BEARER, chargeBearers, "SLEV", true, locale ) );
+
+        // purpose code
+        Map<String, String> purposeCodes = new HashMap<>();
+        purposeCodes.put("Carpark", "Carpark");
+        purposeCodes.put("Commerce", "Commerce");
+        purposeCodes.put("Transport", "Transport");
+        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.PURPOSE_CODE, purposeCodes, "Commerce", true, locale ) );
+
+        return parameters;
     }
 
     @Override
     public Map<String, String> check(ContractParametersCheckRequest contractParametersCheckRequest) {
-        // TODO
-        return null;
+        final Map<String, String> errors = new HashMap<>();
+
+        Map<String, String> accountInfo = contractParametersCheckRequest.getAccountInfo();
+        Locale locale = contractParametersCheckRequest.getLocale();
+
+        // check required fields
+        for( AbstractParameter param : this.getParameters( locale ) ){
+            if( param.isRequired() && accountInfo.get( param.getKey() ) == null ){
+                String message = i18n.getMessage("contract." + param.getKey() + ".requiredError", locale);
+                errors.put( param.getKey(), message );
+            }
+        }
+
+        // Check the clientName and onboarding ID
+        String clientNameKey = Constants.ContractConfigurationKeys.CLIENT_NAME;
+        String onboardingIdKey = Constants.ContractConfigurationKeys.ONBOARDING_ID;
+
+        // If one of them is missing, no need to go further as they are both required to get an access token
+        if( errors.containsKey( clientNameKey ) || errors.containsKey( onboardingIdKey ) ){
+            return errors;
+        }
+
+        // We first need to replace these 2 values in the ContractConfiguration (to override the former validated values)
+        RequestConfiguration altRequestConfiguration = RequestConfiguration.build( contractParametersCheckRequest );
+        Map<String, ContractProperty> contractProperties = altRequestConfiguration.getContractConfiguration().getContractProperties();
+        contractProperties.put( clientNameKey, new ContractProperty( accountInfo.get( clientNameKey ) ) );
+        contractProperties.put( onboardingIdKey, new ContractProperty( accountInfo.get( onboardingIdKey ) ) );
+
+        // Validate the merchant account on the 2 APIs (PIS and PSU) because they have separate subscriptions
+        try {
+            pisHttpClient.init(contractParametersCheckRequest.getPartnerConfiguration());
+            pisHttpClient.authorize( altRequestConfiguration );
+
+            psuHttpClient.init(contractParametersCheckRequest.getPartnerConfiguration());
+            psuHttpClient.authorize( altRequestConfiguration );
+        }
+        catch( PluginException e ){
+            errors.put( clientNameKey, e.getMessage());
+            errors.put( onboardingIdKey, "" );
+        }
+
+        return errors;
     }
 
     @Override
     public String retrievePluginConfiguration(RetrievePluginConfigurationRequest retrievePluginConfigurationRequest) {
-        // TODO
-        return null;
+        try {
+            RequestConfiguration requestConfiguration = RequestConfiguration.build( retrievePluginConfigurationRequest );
+
+            // Init HTTP client
+            pisHttpClient.init( requestConfiguration.getPartnerConfiguration() );
+
+            // Retrieve account service providers list
+            GetAspspsResponse apspsps = pisHttpClient.getAspsps( requestConfiguration );
+
+            // Serialize the list (as JSON)
+            return apspsps.toString();
+        }
+        catch( RuntimeException e ){
+            LOGGER.error("Could not retrieve plugin configuration due to a plugin error", e );
+            return retrievePluginConfigurationRequest.getPluginConfiguration();
+        }
     }
 
     @Override
@@ -52,6 +151,44 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public String getName(Locale locale) {
         return i18n.getMessage("paymentMethod.name", locale);
+    }
+
+    /**
+     * Build and return a new <code>InputParameter</code> for the contract configuration.
+     *
+     * @param key The parameter key
+     * @param required Is this parameter required ?
+     * @param locale The current locale
+     * @return The new input parameter
+     */
+    private InputParameter newInputParameter( String key, boolean required, Locale locale ){
+        InputParameter inputParameter = new InputParameter();
+        inputParameter.setKey( key );
+        inputParameter.setLabel( i18n.getMessage("contract." + key + ".label", locale) );
+        inputParameter.setDescription( i18n.getMessage("contract." + key + ".description", locale) );
+        inputParameter.setRequired( required );
+        return inputParameter;
+    }
+
+    /**
+     * Build and return a new <code>ListBoxParameter</code> for the contract configuration.
+     *
+     * @param key The parameter key
+     * @param values All the possible values for the list box
+     * @param defaultValue The key of the default value (which will be selected by default)
+     * @param required Is this parameter required ?
+     * @param locale The current locale
+     * @return The new list box parameter
+     */
+    private ListBoxParameter newListBoxParameter( String key, Map<String, String> values, String defaultValue, boolean required, Locale locale ){
+        ListBoxParameter listBoxParameter = new ListBoxParameter();
+        listBoxParameter.setKey( key );
+        listBoxParameter.setLabel( i18n.getMessage("contract." + key + ".label", locale) );
+        listBoxParameter.setDescription( i18n.getMessage("contract." + key + ".description", locale) );
+        listBoxParameter.setList( values );
+        listBoxParameter.setRequired( true );
+        listBoxParameter.setValue( defaultValue );
+        return listBoxParameter;
     }
 
 }

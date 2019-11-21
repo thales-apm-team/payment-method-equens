@@ -122,7 +122,7 @@ abstract class OAuthHttpClient {
      *
      * @return A valid authorization
      */
-    protected Authorization authorize( RequestConfiguration requestConfiguration ){
+    public Authorization authorize( RequestConfiguration requestConfiguration ){
         if( !this.initialized.get() ){
             throw new PluginException("Illegal state: client must be initialized");
         }

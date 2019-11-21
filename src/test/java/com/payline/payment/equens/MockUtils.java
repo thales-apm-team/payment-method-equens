@@ -146,6 +146,7 @@ public class MockUtils {
         contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_IBAN, new ContractProperty( "FR33BBBBBGGGGGCCCCCCCCCCC00" ));
         contractProperties.put(Constants.ContractConfigurationKeys.ONBOARDING_ID, new ContractProperty( "XXXXXX" ));
         contractProperties.put(Constants.ContractConfigurationKeys.SCA_METHOD, new ContractProperty( "Redirect" ));
+        contractProperties.put(Constants.ContractConfigurationKeys.PURPOSE_CODE, new ContractProperty( "Commerce" ));
 
         return new ContractConfiguration("INST EquensWorldline", contractProperties);
     }
@@ -333,8 +334,7 @@ public class MockUtils {
      * Generate a valid plugin configuration, as a <code>String</code>.
      */
     public static String aPluginConfiguration(){
-        // TODO
-        return null;
+        return "{\"Application\":\"PIS\",\"ASPSP\":[{\"AspspId\":\"7005\",\"BIC\":\"TODO\",\"CountryCode\":\"NL\",\"Name\":[\"Ing Bank\"]}],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
     }
 
     /**
