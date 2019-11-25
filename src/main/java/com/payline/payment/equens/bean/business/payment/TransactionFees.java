@@ -19,28 +19,11 @@ public class TransactionFees {
     private String amount;
 
 
-    TransactionFees( TransactionFeesBuilder builder ) {
-        this.currency = builder.currency;
-        this.amount = builder.amount;
+    public String getCurrency() {
+        return currency;
     }
 
-    public static class TransactionFeesBuilder {
-
-        private String currency;
-        private String amount;
-
-        public TransactionFeesBuilder withCurrency(String currency) {
-            this.currency = currency;
-            return this;
-        }
-
-        public TransactionFeesBuilder withAmount(String amount) {
-            this.amount = amount;
-            return this;
-        }
-
-        public TransactionFees build(){
-            return new TransactionFees( this );
-        }
+    public String getAmount() {
+        return amount;
     }
 }

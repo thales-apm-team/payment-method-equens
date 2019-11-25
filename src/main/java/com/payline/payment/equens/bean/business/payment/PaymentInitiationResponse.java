@@ -47,18 +47,9 @@ public class PaymentInitiationResponse extends EquensApiMessage {
 
     // ScaMethods field is not mapped because it won't be used for now...
 
-
-    PaymentInitiationResponse( PaymentInitiationResponseBuilder builder ){
+    // This constructor won't be used, since it's a response object : it's instantiated by Gson through the fromJson() method
+    PaymentInitiationResponse( EquensApiMessageBuilder builder ){
         super( builder );
-        this.paymentId = builder.paymentId;
-        this.initiatingPartyReferenceId = builder.initiatingPartyReferenceId;
-        this.paymentStatus = builder.paymentStatus;
-        this.psuMessage = builder.psuMessage;
-        this.aspspRedirectUrl = builder.aspspRedirectUrl;
-        this.scaChallenge = builder.scaChallenge;
-        this.transactionFees = builder.transactionFees;
-        this.transactionFeeIndicator = builder.transactionFeeIndicator;
-        this.authorizationId = builder.authorizationId;
     }
 
     public String getPaymentId() {
@@ -95,69 +86,6 @@ public class PaymentInitiationResponse extends EquensApiMessage {
 
     public String getAuthorizationId() {
         return authorizationId;
-    }
-
-    public static class PaymentInitiationResponseBuilder extends EquensApiMessageBuilder {
-
-        private String paymentId;
-        private String initiatingPartyReferenceId;
-        private PaymentStatus paymentStatus;
-        private String psuMessage;
-        private String aspspRedirectUrl;
-        private ScaChallenge scaChallenge;
-        private TransactionFees transactionFees;
-        private Boolean transactionFeeIndicator;
-        private String authorizationId;
-
-        public PaymentInitiationResponseBuilder withPaymentId(String paymentId) {
-            this.paymentId = paymentId;
-            return this;
-        }
-
-        public PaymentInitiationResponseBuilder withInitiatingPartyReferenceId(String initiatingPartyReferenceId) {
-            this.initiatingPartyReferenceId = initiatingPartyReferenceId;
-            return this;
-        }
-
-        public PaymentInitiationResponseBuilder withPaymentStatus(PaymentStatus paymentStatus) {
-            this.paymentStatus = paymentStatus;
-            return this;
-        }
-
-        public PaymentInitiationResponseBuilder withPsuMessage(String psuMessage) {
-            this.psuMessage = psuMessage;
-            return this;
-        }
-
-        public PaymentInitiationResponseBuilder withAspspRedirectUrl(String aspspRedirectUrl) {
-            this.aspspRedirectUrl = aspspRedirectUrl;
-            return this;
-        }
-
-        public PaymentInitiationResponseBuilder withScaChallenge(ScaChallenge scaChallenge) {
-            this.scaChallenge = scaChallenge;
-            return this;
-        }
-
-        public PaymentInitiationResponseBuilder withTransactionFees(TransactionFees transactionFees) {
-            this.transactionFees = transactionFees;
-            return this;
-        }
-
-        public PaymentInitiationResponseBuilder withTransactionFeeIndicator(boolean transactionFeeIndicator) {
-            this.transactionFeeIndicator = transactionFeeIndicator;
-            return this;
-        }
-
-        public PaymentInitiationResponseBuilder withAuthorizationId(String authorizationId) {
-            this.authorizationId = authorizationId;
-            return this;
-        }
-
-        public PaymentInitiationResponse build(){
-            return new PaymentInitiationResponse( this );
-        }
-
     }
 
     public static PaymentInitiationResponse fromJson( String json ){
