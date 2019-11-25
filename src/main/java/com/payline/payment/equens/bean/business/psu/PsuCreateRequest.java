@@ -24,14 +24,6 @@ public class PsuCreateRequest extends Psu {
         this.messageId = builder.messageId;
     }
 
-    public Date getMessageCreateDateTime() {
-        return messageCreateDateTime;
-    }
-
-    public String getMessageId() {
-        return messageId;
-    }
-
     public static class PsuCreateRequestBuilder extends PsuBuilder {
 
         private Date messageCreateDateTime = new Date();

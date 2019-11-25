@@ -93,54 +93,6 @@ public class PsuSessionInformation {
         this.geoLocation = builder.geoLocation;
     }
 
-    public Date getLastLogin() {
-        return lastLogin;
-    }
-
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public Integer getIpPort() {
-        return ipPort;
-    }
-
-    public String getHttpMethod() {
-        return httpMethod;
-    }
-
-    public String getHeaderUserAgent() {
-        return headerUserAgent;
-    }
-
-    public String getHeaderReferer() {
-        return headerReferer;
-    }
-
-    public String getHeaderAccept() {
-        return headerAccept;
-    }
-
-    public String getHeaderAcceptCharset() {
-        return headerAcceptCharset;
-    }
-
-    public String getHeaderAcceptEncoding() {
-        return headerAcceptEncoding;
-    }
-
-    public String getHeaderAcceptLanguage() {
-        return headerAcceptLanguage;
-    }
-
-    public String getDeviceId() {
-        return deviceId;
-    }
-
-    public String getGeoLocation() {
-        return geoLocation;
-    }
-
     public static final class PsuSessionInformationBuilder {
         private Date lastLogin;
         private String ipAddress;

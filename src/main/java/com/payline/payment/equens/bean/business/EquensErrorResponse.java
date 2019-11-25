@@ -9,12 +9,8 @@ public class EquensErrorResponse extends EquensApiMessage {
     private String details;
     private Link link;
 
-    EquensErrorResponse(EquensErrorResponseBuilder builder) {
+    EquensErrorResponse(EquensApiMessageBuilder builder) {
         super(builder);
-        this.code = builder.code;
-        this.message = builder.message;
-        this.details = builder.details;
-        this.link = builder.link;
     }
 
     public String getCode() {
@@ -36,44 +32,8 @@ public class EquensErrorResponse extends EquensApiMessage {
     private static class Link {
         private String href;
 
-        Link( String href ){
-            this.href = href;
-        }
-
         public String getHref() {
             return href;
-        }
-    }
-
-    public static class EquensErrorResponseBuilder extends EquensApiMessageBuilder {
-
-        private String code;
-        private String message;
-        private String details;
-        private Link link;
-
-        public EquensErrorResponseBuilder withCode(String code) {
-            this.code = code;
-            return this;
-        }
-
-        public EquensErrorResponseBuilder withMessage(String message) {
-            this.message = message;
-            return this;
-        }
-
-        public EquensErrorResponseBuilder withDetails(String details) {
-            this.details = details;
-            return this;
-        }
-
-        public EquensErrorResponseBuilder withLink(String href) {
-            this.link = new Link( href );
-            return this;
-        }
-
-        public EquensErrorResponse build(){
-            return new EquensErrorResponse( this );
         }
     }
 
