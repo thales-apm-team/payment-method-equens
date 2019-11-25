@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.payline.payment.equens.bean.business.EquensApiMessage;
 
+import java.net.URL;
+
 /**
  * Response obtained from the payment initiation request.
  */
@@ -28,7 +30,7 @@ public class PaymentInitiationResponse extends EquensApiMessage {
      * URL to be used by the Initiating Party to redirect the PSU towards the ASPSP.
      */
     @SerializedName("AspspRedirectUrl")
-    private String aspspRedirectUrl;
+    private URL aspspRedirectUrl;
     /** Strong Customer Authentication challenge */
     @SerializedName("ScaChallenge")
     private ScaChallenge scaChallenge;
@@ -68,7 +70,7 @@ public class PaymentInitiationResponse extends EquensApiMessage {
         return psuMessage;
     }
 
-    public String getAspspRedirectUrl() {
+    public URL getAspspRedirectUrl() {
         return aspspRedirectUrl;
     }
 

@@ -128,7 +128,7 @@ public class PisHttpClientTest {
 
         // then: the response contains the redirection URL
         assertNotNull( response );
-        assertEquals( redirectionUrl, response.getAspspRedirectUrl() );
+        assertEquals( redirectionUrl, response.getAspspRedirectUrl().toString() );
 
         // verify the post() method has been called and the content of the arguments passed
         ArgumentCaptor<List<Header>> headersCaptor = ArgumentCaptor.forClass( List.class );
