@@ -334,7 +334,7 @@ public class MockUtils {
      * Generate a valid plugin configuration, as a <code>String</code>.
      */
     public static String aPluginConfiguration(){
-        return "{\"Application\":\"PIS\",\"ASPSP\":[{\"AspspId\":\"7005\",\"BIC\":\"TODO\",\"CountryCode\":\"NL\",\"Name\":[\"Ing Bank\"]}],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
+        return "{\"Application\":\"PIS\",\"ASPSP\":[{\"AspspId\":\"224\",\"BIC\":\"BNPADEFE\",\"CountryCode\":\"DE\",\"Name\":[\"08/15direkt\"]}],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
     }
 
     /**
