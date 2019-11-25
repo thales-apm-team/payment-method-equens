@@ -50,16 +50,16 @@ public class Manual {
             psuHttpClient.init( requestConfiguration.getPartnerConfiguration() );
 
             // GET aspsps
-            //List<Aspsp> banks = pisHttpClient.getAspsps( requestConfiguration );
+            //GetAspspsResponse banks = pisHttpClient.getAspsps( requestConfiguration );
 
             // POST psu
             //Psu psuCreated = psuHttpClient.createPsu( new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration );
 
             // POST payment
-            //PaymentInitiationResponse paymentInitiationResponse = pisHttpClient.initPayment( MockUtils.aPaymentInitiationRequest(), requestConfiguration );
+            PaymentInitiationResponse paymentInitiationResponse = pisHttpClient.initPayment( MockUtils.aPaymentInitiationRequest(), requestConfiguration );
 
             // GET payment
-            PaymentStatusResponse paymentStatusResponse = pisHttpClient.paymentStatus( "130676", requestConfiguration, true );
+            //PaymentStatusResponse paymentStatusResponse = pisHttpClient.paymentStatus( "130676", requestConfiguration, true );
 
             LOGGER.info("END");
         }

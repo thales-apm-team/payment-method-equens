@@ -105,8 +105,6 @@ public class PisHttpClientTest {
         assertThrows( PluginException.class, () -> pisHttpClient.getAspsps( MockUtils.aRequestConfiguration() ) );
     }
 
-    // TODO: test des cas d'erreur (code HTTP 400, content null, etc.)
-
     // --- Test PisHttpClient#initPayment ---
 
     @Test
@@ -138,6 +136,27 @@ public class PisHttpClientTest {
         verify( pisHttpClient, times(1) ).post( anyString(), headersCaptor.capture(), bodyCaptor.capture() );
         this.verifyAuthorizationHeader( headersCaptor.getValue() );
         assertNotNull( bodyCaptor.getValue() );
+    }
+
+    @Test
+    void initPayment_badRequest(){
+        // given: the partner API returns a 400 Bad Request
+        String responseContent = "{" +
+                "    \"code\":\"002\"," +
+                "    \"message\":\"The message does not comply the schema definition\"," +
+                "    \"details\":\"Property paymentAmount : must not be null\"," +
+                "    \"MessageCreateDateTime\":\"2019-11-25T15:02:36.555+0100\"," +
+                "    \"MessageId\":\"c2a4ce10086547019b1d50411ea6a99e\"" +
+                "}";
+        doReturn( HttpTestUtils.mockStringResponse(400, "Bad Request", responseContent ) )
+                .when( pisHttpClient )
+                .post( anyString(), anyList(), any(HttpEntity.class) );
+
+        // when: initializing a payment, then: an exception is thrown
+        PluginException thrown = assertThrows(PluginException.class,
+                () -> pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(), MockUtils.aRequestConfiguration()) );
+        assertNotNull(  thrown.getErrorCode() );
+        assertNotNull(  thrown.getFailureCause() );
     }
 
     // TODO: test des cas en erreur
