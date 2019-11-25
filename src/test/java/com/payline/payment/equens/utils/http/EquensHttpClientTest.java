@@ -208,6 +208,7 @@ public class EquensHttpClientTest {
     }
 
     // --- Test EquensHttpClient#initHeaders ---
+
     @Test
     void initHeaders(){
         // given: authorize() method returns a valid authorization
@@ -219,7 +220,7 @@ public class EquensHttpClientTest {
         List<Header> headers = equensHttpClient.initHeaders( MockUtils.aRequestConfiguration() );
 
         // then: headers list contains the header Authorization
-        assertEquals( 1, headers.size() );
+        assertFalse( headers.isEmpty() );
         assertEquals( HttpHeaders.AUTHORIZATION, headers.get(0).getName() );
     }
 

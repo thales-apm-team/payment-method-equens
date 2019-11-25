@@ -254,7 +254,9 @@ abstract class EquensHttpClient extends OAuthHttpClient {
     }
 
     /**
-     * Initialize a list of headers with an Authorization header containing the access token.
+     * Initialize a list of headers with :
+     * - an Authorization header containing the access token
+     * - a X-Request-ID header containing a unique request identifier
      *
      * @param requestConfiguration The request configuration
      * @return A list of headers
@@ -263,6 +265,7 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         List<Header> headers = new ArrayList<>();
         Authorization auth = this.authorize( requestConfiguration );
         headers.add( new BasicHeader( HttpHeaders.AUTHORIZATION, auth.getHeaderValue() ) );
+        headers.add( new BasicHeader( "X-Request-ID", UUID.randomUUID().toString() ) );
         return headers;
     }
 
