@@ -58,6 +58,21 @@ public class MockUtils {
     }
 
     /**
+     * Generate a valid Payline <code>Address</code>.
+     */
+    public static Buyer.Address anAddress(){
+        return Buyer.Address.AddressBuilder.anAddress()
+                .withCity("Aix-en-Provence")
+                .withCountry("France")
+                .withEmail("john.doe@mythalesgroup.io")
+                .withFullName( new Buyer.FullName("Thales", "Services", "M.") )
+                .withStreet1("150 rue dont le nom est le plus long que j'ai jamais vu. Y'a pas idée d'habiter un endroit pareil !")
+                .withStreet2("Le grand bâtiment orange, avec les fenêtres un peu hautes mais un peu larges aussi, et un toit bleu")
+                .withZipCode("13100")
+                .build();
+    }
+
+    /**
      * Generate a valid {@link Authorization}.
      */
     public static Authorization anAuthorization(){

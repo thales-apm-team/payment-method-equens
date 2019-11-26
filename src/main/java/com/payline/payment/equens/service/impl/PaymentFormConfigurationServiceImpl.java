@@ -2,6 +2,8 @@ package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
+import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.service.LogoPaymentFormConfigurationService;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.paymentform.bean.field.SelectOption;
 import com.payline.pmapi.bean.paymentform.bean.form.BankTransferForm;
@@ -12,8 +14,6 @@ import com.payline.pmapi.bean.paymentform.response.configuration.impl.PaymentFor
 import com.payline.pmapi.bean.paymentform.response.configuration.impl.PaymentFormConfigurationResponseSpecific;
 import com.payline.pmapi.logger.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.payline.payment.equens.exception.PluginException;
-import com.payline.payment.equens.service.LogoPaymentFormConfigurationService;
 
 import java.util.ArrayList;
 import java.util.List;

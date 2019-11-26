@@ -7,6 +7,8 @@ import java.util.List;
 
 public class Address {
 
+    public static final int ADDRESS_LINE_MAX_LENGTH = 70;
+
     @SerializedName("AddressLine")
     private List<String> addressLines;
     @SerializedName("StreetName")
@@ -30,6 +32,34 @@ public class Address {
         this.townName = builder.townName;
         this.countrySubDivisions = builder.countrySubDivisions;
         this.country = builder.country;
+    }
+
+    public List<String> getAddressLines() {
+        return addressLines;
+    }
+
+    public String getStreetName() {
+        return streetName;
+    }
+
+    public String getBuildingNumber() {
+        return buildingNumber;
+    }
+
+    public String getPostCode() {
+        return postCode;
+    }
+
+    public String getTownName() {
+        return townName;
+    }
+
+    public List<String> getCountrySubDivisions() {
+        return countrySubDivisions;
+    }
+
+    public String getCountry() {
+        return country;
     }
 
     public static class AddressBuilder {
