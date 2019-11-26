@@ -3,7 +3,9 @@ package com.payline.payment.equens;
 import com.payline.payment.equens.bean.business.fraud.PsuSessionInformation;
 import com.payline.payment.equens.bean.business.payment.Account;
 import com.payline.payment.equens.bean.business.payment.PaymentInitiationRequest;
+import com.payline.payment.equens.bean.business.payment.PaymentInitiationResponse;
 import com.payline.payment.equens.bean.business.payment.RemittanceInformationStructured;
+import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.utils.security.RSAHolder;
 import com.payline.pmapi.bean.common.Buyer;
@@ -346,6 +348,20 @@ public class MockUtils {
     }
 
     /**
+     * Generate a valid {@link PaymentInitiationResponse}.
+     */
+    public static PaymentInitiationResponse aPaymentInitiationResponse(){
+        return PaymentInitiationResponse.fromJson("{\n" +
+                "    \"MessageCreateDateTime\": \"2019-11-19T16:35:52.244+0000\",\n" +
+                "    \"MessageId\": \"e8683740-38be-4026-b48e-72089b023e\",\n" +
+                "    \"PaymentId\": \"130436\",\n" +
+                "    \"InitiatingPartyReferenceId\": \"REF1574181352\",\n" +
+                "    \"PaymentStatus\": \"OPEN\",\n" +
+                "    \"AspspRedirectUrl\": \"https://xs2a.banking.co.at/xs2a-sandbox/m044/v1/pis/confirmation/btWMz6mTz7I3SOe4lMqXiwciqe6igXBCeebfVWlmZ8N8zVw_qRKMMuhlLLXtPrVcBeH6HIP2qhdTTZ1HINXSkg==_=_psGLvQpt9Q/authorisations/fa8e44a7-3bf7-4543-82d1-5a1163aaaaad\"\n" +
+                "}");
+    }
+
+    /**
      * Generate a valid plugin configuration, as a <code>String</code>.
      */
     public static String aPluginConfiguration(){
@@ -396,6 +412,20 @@ public class MockUtils {
                 "VNAzHrCYpRtxCNVoatW2lA8AvySWsiEwMTmdNMubjWcSPx8gHVmzGoOnKK44Ytaf\n" +
                 "TZVu0T1HwCkWzUMS7ULfwtw=\n" +
                 "-----END PRIVATE KEY-----";
+    }
+
+    /**
+     * Generate a valid {@link Psu}.
+     */
+    public static Psu aPsu(){
+        return new Psu.PsuBuilder()
+                .withPsuId("1")
+                .withFirstName("John")
+                .withLastName("Doe")
+                .withEmail("john.doe@mythalesgroup.io")
+                .withPhoneNumber("0442010101")
+                .withStatus("ACTIVE")
+                .build();
     }
 
     /**

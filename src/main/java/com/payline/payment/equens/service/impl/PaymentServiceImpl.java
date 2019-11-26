@@ -4,13 +4,15 @@ import com.payline.payment.equens.bean.business.fraud.PsuSessionInformation;
 import com.payline.payment.equens.bean.business.payment.*;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
+import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.InvalidDataException;
+import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.http.PisHttpClient;
+import com.payline.payment.equens.utils.http.PsuHttpclient;
 import com.payline.pmapi.bean.common.Amount;
 import com.payline.pmapi.bean.common.Buyer;
 import com.payline.pmapi.bean.common.FailureCause;
-import com.payline.pmapi.bean.payment.RequestContext;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
 import com.payline.pmapi.bean.payment.response.PaymentResponse;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseFailure;
@@ -19,12 +21,12 @@ import com.payline.pmapi.bean.paymentform.bean.form.BankTransferForm;
 import com.payline.pmapi.logger.LogManager;
 import com.payline.pmapi.service.PaymentService;
 import org.apache.logging.log4j.Logger;
-import com.payline.payment.equens.bean.configuration.RequestConfiguration;
-import com.payline.payment.equens.exception.PluginException;
-import com.payline.payment.equens.utils.http.PsuHttpclient;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Currency;
+import java.util.List;
 
 public class PaymentServiceImpl implements PaymentService {
 
@@ -73,6 +75,12 @@ public class PaymentServiceImpl implements PaymentService {
                 }
             });
 
+            // Extract delivery address
+            Address deliveryAddress = null;
+            if( paymentRequest.getBuyer().getAddresses() != null ){
+                deliveryAddress = this.buildAddress( paymentRequest.getBuyer().getAddressForType( Buyer.AddressType.DELIVERY ) );
+            }
+
             // Build PaymentInitiationRequest (Equens) from PaymentRequest (Payline)
             PaymentInitiationRequest request = new PaymentInitiationRequest.PaymentInitiationRequestBuilder()
                     .withAspspId(
@@ -99,7 +107,7 @@ public class PaymentServiceImpl implements PaymentService {
                                     )
                                     .build()
                     )
-                    .withPaymentAmount( convertAmount( paymentRequest.getAmount() ) )
+                    .withPaymentAmount( this.convertAmount( paymentRequest.getAmount() ) )
                     .withPaymentCurrency( paymentRequest.getAmount().getCurrency().getCurrencyCode() )
                     .withPurposeCode(
                             paymentRequest.getContractConfiguration().getProperty( Constants.ContractConfigurationKeys.PURPOSE_CODE ).getValue()
@@ -114,9 +122,7 @@ public class PaymentServiceImpl implements PaymentService {
                             new RiskInformation.RiskInformationBuilder()
                                     .withMerchantCategoryCode( paymentRequest.getSubMerchant() != null ? paymentRequest.getSubMerchant().getSubMerchantMCC() : null )
                                     .withMerchantCustomerId( paymentRequest.getBuyer().getCustomerIdentifier() )
-                                    .withDeliveryAddress(
-                                            buildAddress( paymentRequest.getBuyer().getAddressForType( Buyer.AddressType.DELIVERY ) )
-                                    )
+                                    .withDeliveryAddress( deliveryAddress )
                                     .withChannelType(
                                             paymentRequest.getContractConfiguration().getProperty( Constants.ContractConfigurationKeys.CHANNEL_TYPE ).getValue()
                                     )
@@ -173,7 +179,7 @@ public class PaymentServiceImpl implements PaymentService {
      * @param paylineAddress the Payline address
      * @return The corresponding Equens address.
      */
-    static Address buildAddress( Buyer.Address paylineAddress ){
+    Address buildAddress( Buyer.Address paylineAddress ){
         Address deliveryAddress = null;
 
         if( paylineAddress != null ){
@@ -220,7 +226,7 @@ public class PaymentServiceImpl implements PaymentService {
      * @param amount the amount to convert
      * @return The amount formatted as a string
      */
-    static String convertAmount( Amount amount ){
+    String convertAmount( Amount amount ){
         if (amount == null || amount.getAmountInSmallestUnit() == null || amount.getCurrency() == null) {
             return null;
         }
