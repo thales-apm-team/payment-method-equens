@@ -1,12 +1,6 @@
 package com.payline.payment.equens;
 
 import com.payline.payment.equens.bean.business.payment.PaymentInitiationResponse;
-import com.payline.payment.equens.bean.business.payment.PaymentStatusResponse;
-import com.payline.payment.equens.bean.business.psu.Psu;
-import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
-import com.payline.payment.equens.bean.business.psu.PsuCreateResponse;
-import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
-import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.utils.http.PisHttpClient;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
@@ -16,13 +10,12 @@ import org.apache.logging.log4j.Logger;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.utils.Constants;
-import com.payline.payment.equens.utils.http.PsuHttpclient;
+import com.payline.payment.equens.utils.http.PsuHttpClient;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,7 +31,7 @@ public class Manual {
 
     private static final Logger LOGGER = LogManager.getLogger(Manual.class);
     private static PisHttpClient pisHttpClient = PisHttpClient.getInstance();
-    private static PsuHttpclient psuHttpClient = PsuHttpclient.getInstance();
+    private static PsuHttpClient psuHttpClient = PsuHttpClient.getInstance();
 
     public static void main( String[] args ){
 

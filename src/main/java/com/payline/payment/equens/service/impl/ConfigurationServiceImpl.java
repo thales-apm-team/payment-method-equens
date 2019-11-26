@@ -5,7 +5,7 @@ import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.http.PisHttpClient;
-import com.payline.payment.equens.utils.http.PsuHttpclient;
+import com.payline.payment.equens.utils.http.PsuHttpClient;
 import com.payline.payment.equens.utils.i18n.I18nService;
 import com.payline.payment.equens.utils.properties.ReleaseProperties;
 import com.payline.pmapi.bean.configuration.ReleaseInformation;
@@ -27,9 +27,32 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private static final Logger LOGGER = LogManager.getLogger(ConfigurationServiceImpl.class);
 
+    private static final String I18N_CONTRACT_PREFIX = "contract.";
+
+    private static final class ChannelType {
+        private static final String ECOMMERCE = "ECommerce";
+    }
+
+    private static final class ChargeBearer {
+        private static final String CRED = "CRED";
+        private static final String DEBT = "DEBT";
+        private static final String SHAR = "SHAR";
+        private static final String SLEV = "SLEV";
+    }
+
+    private static final class PurposeCode {
+        private static final String CARPARK = "Carpark";
+        private static final String COMMERCE = "Commerce";
+        private static final String TRANSPORT = "Transport";
+    }
+
+    private static final class ScaMethod {
+        private static final String REDIRECT = "Redirect";
+    }
+
     private I18nService i18n = I18nService.getInstance();
     private PisHttpClient pisHttpClient = PisHttpClient.getInstance();
-    private PsuHttpclient psuHttpClient = PsuHttpclient.getInstance();
+    private PsuHttpClient psuHttpClient = PsuHttpClient.getInstance();
     private ReleaseProperties releaseProperties = ReleaseProperties.getInstance();
 
 
@@ -48,28 +71,28 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         // channel type
         Map<String, String> channelTypes = new HashMap<>();
-        channelTypes.put("ECommerce", "ECommerce");
+        channelTypes.put(ChannelType.ECOMMERCE, ChannelType.ECOMMERCE);
         parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.CHANNEL_TYPE, channelTypes, channelTypes.get(0), true, locale ) );
 
         // SCA method
         Map<String, String> scaMethods = new HashMap<>();
-        scaMethods.put("Redirect", "Redirect");
+        scaMethods.put(ScaMethod.REDIRECT, ScaMethod.REDIRECT);
         parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.SCA_METHOD, scaMethods, scaMethods.get(0), true, locale ) );
 
         // Charge bearer
         Map<String, String> chargeBearers = new HashMap<>();
-        chargeBearers.put("CRED", "CRED");
-        chargeBearers.put("DEBT", "DEBT");
-        chargeBearers.put("SHAR", "SHAR");
-        chargeBearers.put("SLEV", "SLEV");
-        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.CHARGE_BEARER, chargeBearers, "SLEV", true, locale ) );
+        chargeBearers.put(ChargeBearer.CRED, ChargeBearer.CRED);
+        chargeBearers.put(ChargeBearer.DEBT, ChargeBearer.DEBT);
+        chargeBearers.put(ChargeBearer.SHAR, ChargeBearer.SHAR);
+        chargeBearers.put(ChargeBearer.SLEV, ChargeBearer.SLEV);
+        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.CHARGE_BEARER, chargeBearers, ChargeBearer.SLEV, true, locale ) );
 
         // purpose code
         Map<String, String> purposeCodes = new HashMap<>();
-        purposeCodes.put("Carpark", "Carpark");
-        purposeCodes.put("Commerce", "Commerce");
-        purposeCodes.put("Transport", "Transport");
-        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.PURPOSE_CODE, purposeCodes, "Commerce", true, locale ) );
+        purposeCodes.put(PurposeCode.CARPARK, PurposeCode.CARPARK);
+        purposeCodes.put(PurposeCode.COMMERCE, PurposeCode.COMMERCE);
+        purposeCodes.put(PurposeCode.TRANSPORT, PurposeCode.TRANSPORT);
+        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.PURPOSE_CODE, purposeCodes, PurposeCode.COMMERCE, true, locale ) );
 
         return parameters;
     }
@@ -84,7 +107,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // check required fields
         for( AbstractParameter param : this.getParameters( locale ) ){
             if( param.isRequired() && accountInfo.get( param.getKey() ) == null ){
-                String message = i18n.getMessage("contract." + param.getKey() + ".requiredError", locale);
+                String message = i18n.getMessage(I18N_CONTRACT_PREFIX + param.getKey() + ".requiredError", locale);
                 errors.put( param.getKey(), message );
             }
         }
@@ -164,8 +187,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private InputParameter newInputParameter( String key, boolean required, Locale locale ){
         InputParameter inputParameter = new InputParameter();
         inputParameter.setKey( key );
-        inputParameter.setLabel( i18n.getMessage("contract." + key + ".label", locale) );
-        inputParameter.setDescription( i18n.getMessage("contract." + key + ".description", locale) );
+        inputParameter.setLabel( i18n.getMessage(I18N_CONTRACT_PREFIX + key + ".label", locale) );
+        inputParameter.setDescription( i18n.getMessage(I18N_CONTRACT_PREFIX + key + ".description", locale) );
         inputParameter.setRequired( required );
         return inputParameter;
     }
@@ -183,10 +206,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private ListBoxParameter newListBoxParameter( String key, Map<String, String> values, String defaultValue, boolean required, Locale locale ){
         ListBoxParameter listBoxParameter = new ListBoxParameter();
         listBoxParameter.setKey( key );
-        listBoxParameter.setLabel( i18n.getMessage("contract." + key + ".label", locale) );
-        listBoxParameter.setDescription( i18n.getMessage("contract." + key + ".description", locale) );
+        listBoxParameter.setLabel( i18n.getMessage(I18N_CONTRACT_PREFIX + key + ".label", locale) );
+        listBoxParameter.setDescription( i18n.getMessage(I18N_CONTRACT_PREFIX + key + ".description", locale) );
         listBoxParameter.setList( values );
-        listBoxParameter.setRequired( true );
+        listBoxParameter.setRequired( required );
         listBoxParameter.setValue( defaultValue );
         return listBoxParameter;
     }

@@ -4,12 +4,10 @@ import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.bean.business.psu.PsuCreateResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
-import com.payline.pmapi.logger.LogManager;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
-import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -18,20 +16,18 @@ import java.util.UUID;
 /**
  * HTTP client in charge of requesting the PSU Management API.
  */
-public class PsuHttpclient extends EquensHttpClient {
-
-    private static final Logger LOGGER = LogManager.getLogger(PsuHttpclient.class);
+public class PsuHttpClient extends EquensHttpClient {
 
     private static final String API_PATH_PSU = "/psumgmt/v1/psus";
 
     // --- Singleton Holder pattern + initialization BEGIN
-    PsuHttpclient() {
+    PsuHttpClient() {
     }
     private static class Holder {
-        private static final PsuHttpclient instance = new PsuHttpclient();
+        private static final PsuHttpClient instance = new PsuHttpClient();
     }
-    public static PsuHttpclient getInstance() {
-        return PsuHttpclient.Holder.instance;
+    public static PsuHttpClient getInstance() {
+        return PsuHttpClient.Holder.instance;
     }
 
     // TODO: init (?)

@@ -7,7 +7,7 @@ import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.utils.TestUtils;
 import com.payline.payment.equens.utils.http.PisHttpClient;
-import com.payline.payment.equens.utils.http.PsuHttpclient;
+import com.payline.payment.equens.utils.http.PsuHttpClient;
 import com.payline.pmapi.bean.common.Amount;
 import com.payline.pmapi.bean.common.Buyer;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
@@ -32,7 +32,7 @@ public class PaymentServiceImplTest {
     private PaymentServiceImpl service;
 
     @Mock private PisHttpClient pisHttpClient;
-    @Mock private PsuHttpclient psuHttpclient;
+    @Mock private PsuHttpClient psuHttpclient;
 
     @BeforeEach
     void setup(){

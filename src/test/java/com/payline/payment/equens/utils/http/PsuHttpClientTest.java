@@ -2,7 +2,6 @@ package com.payline.payment.equens.utils.http;
 
 import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.business.psu.Psu;
-import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -24,7 +23,7 @@ public class PsuHttpClientTest {
 
     @Spy
     @InjectMocks
-    private PsuHttpclient psuHttpClient = new PsuHttpclient();
+    private PsuHttpClient psuHttpClient = new PsuHttpClient();
 
     @BeforeEach
     void setup(){

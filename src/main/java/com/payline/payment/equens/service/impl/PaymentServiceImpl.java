@@ -9,7 +9,7 @@ import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.http.PisHttpClient;
-import com.payline.payment.equens.utils.http.PsuHttpclient;
+import com.payline.payment.equens.utils.http.PsuHttpClient;
 import com.payline.pmapi.bean.common.Amount;
 import com.payline.pmapi.bean.common.Buyer;
 import com.payline.pmapi.bean.common.FailureCause;
@@ -33,7 +33,7 @@ public class PaymentServiceImpl implements PaymentService {
     private static final Logger LOGGER = LogManager.getLogger(PaymentServiceImpl.class);
 
     private PisHttpClient pisHttpClient = PisHttpClient.getInstance();
-    private PsuHttpclient psuHttpclient = PsuHttpclient.getInstance();
+    private PsuHttpClient psuHttpclient = PsuHttpClient.getInstance();
 
     @Override
     public PaymentResponse paymentRequest(PaymentRequest paymentRequest) {

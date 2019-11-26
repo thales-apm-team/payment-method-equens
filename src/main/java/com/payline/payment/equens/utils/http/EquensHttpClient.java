@@ -5,18 +5,15 @@ import com.payline.payment.equens.bean.business.EquensErrorResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
-import com.payline.payment.equens.service.impl.PaymentFormConfigurationServiceImpl;
 import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.security.RSAHolder;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
-import com.payline.pmapi.logger.LogManager;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.ssl.SSLContexts;
-import org.apache.logging.log4j.Logger;
 import org.tomitribe.auth.signatures.Signature;
 import org.tomitribe.auth.signatures.Signer;
 
@@ -248,6 +245,9 @@ abstract class EquensHttpClient extends OAuthHttpClient {
             case 511:
                 failureCause = FailureCause.COMMUNICATION_ERROR;
                 break;
+
+            default:
+                failureCause = FailureCause.PARTNER_UNKNOWN_ERROR;
         }
 
         return new PluginException(message, failureCause);
@@ -265,7 +265,7 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         List<Header> headers = new ArrayList<>();
         Authorization auth = this.authorize( requestConfiguration );
         headers.add( new BasicHeader( HttpHeaders.AUTHORIZATION, auth.getHeaderValue() ) );
-        headers.add( new BasicHeader( "X-Request-ID", UUID.randomUUID().toString() ) );
+        headers.add( new BasicHeader( HEADER_REQUEST_ID, UUID.randomUUID().toString() ) );
         return headers;
     }
 

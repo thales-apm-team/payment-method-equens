@@ -4,9 +4,8 @@ import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.PluginException;
-import com.payline.payment.equens.service.impl.ConfigurationServiceImpl;
 import com.payline.payment.equens.utils.http.PisHttpClient;
-import com.payline.payment.equens.utils.http.PsuHttpclient;
+import com.payline.payment.equens.utils.http.PsuHttpClient;
 import com.payline.payment.equens.utils.properties.ReleaseProperties;
 import com.payline.pmapi.bean.configuration.ReleaseInformation;
 import com.payline.pmapi.bean.configuration.parameter.AbstractParameter;
@@ -39,7 +38,7 @@ class ConfigurationServiceImplTest {
     /* I18nService is not mocked here on purpose, to validate the existence of all
     the messages related to this class, at least in the default locale */
     @Mock private PisHttpClient pisHttpClient;
-    @Mock private PsuHttpclient psuHttpClient;
+    @Mock private PsuHttpClient psuHttpClient;
     @Mock private ReleaseProperties releaseProperties;
 
     @InjectMocks
