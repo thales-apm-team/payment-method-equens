@@ -5,13 +5,19 @@ import com.payline.payment.equens.bean.business.payment.Address;
 import com.payline.payment.equens.bean.business.payment.PaymentInitiationRequest;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
+import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.TestUtils;
 import com.payline.payment.equens.utils.http.PisHttpClient;
 import com.payline.payment.equens.utils.http.PsuHttpClient;
 import com.payline.pmapi.bean.common.Amount;
 import com.payline.pmapi.bean.common.Buyer;
+import com.payline.pmapi.bean.common.FailureCause;
+import com.payline.pmapi.bean.configuration.PartnerConfiguration;
+import com.payline.pmapi.bean.payment.ContractConfiguration;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
 import com.payline.pmapi.bean.payment.response.PaymentResponse;
+import com.payline.pmapi.bean.payment.response.impl.PaymentResponseFailure;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseRedirect;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +31,7 @@ import java.util.Currency;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 public class PaymentServiceImplTest {
 
@@ -121,6 +128,72 @@ public class PaymentServiceImplTest {
         TestUtils.checkPaymentResponse( (PaymentResponseRedirect) paymentResponse );
     }
 
-    // TODO: more test on KO cases
+    @Test
+    void paymentRequest_pisInitError(){
+        // given: the pisHttpClient init throws an exception (invalid certificate data in PartnerConfiguration, for example)
+        doThrow( new PluginException( "A problem occurred initializing SSL context", FailureCause.INVALID_DATA ) )
+                .when( pisHttpClient )
+                .init( any(PartnerConfiguration.class) );
+
+        // when: calling paymentRequest() method
+        PaymentResponse paymentResponse = service.paymentRequest( MockUtils.aPaylinePaymentRequest() );
+
+        // then: the exception is properly catch and the payment response is a failure
+        assertEquals( PaymentResponseFailure.class, paymentResponse.getClass() );
+        TestUtils.checkPaymentResponse( (PaymentResponseFailure) paymentResponse );
+    }
+
+    @Test
+    void paymentRequest_psuCreateError(){
+        // given: the creation of the PSU fails
+        doThrow( new PluginException("partner error: 500 Internal Server Error") )
+                .when( psuHttpclient )
+                .createPsu( any(PsuCreateRequest.class), any(RequestConfiguration.class) );
+
+        // when: calling paymentRequest() method
+        PaymentResponse paymentResponse = service.paymentRequest( MockUtils.aPaylinePaymentRequest() );
+
+        // then: the exception is properly catch and the payment response is a failure
+        assertEquals( PaymentResponseFailure.class, paymentResponse.getClass() );
+        TestUtils.checkPaymentResponse( (PaymentResponseFailure) paymentResponse );
+    }
+
+    @Test
+    void paymentRequest_paymentInitError(){
+        // given: the payment initiation fails
+        doReturn( MockUtils.aPsu() )
+                .when( psuHttpclient )
+                .createPsu( any(PsuCreateRequest.class), any(RequestConfiguration.class) );
+        doThrow( new PluginException("partner error: 500 Internal Server Error") )
+                .when( pisHttpClient )
+                .initPayment( any(PaymentInitiationRequest.class), any(RequestConfiguration.class) );
+
+        // when: calling paymentRequest() method
+        PaymentResponse paymentResponse = service.paymentRequest( MockUtils.aPaylinePaymentRequest() );
+
+        // then: the exception is properly catch and the payment response is a failure
+        assertEquals( PaymentResponseFailure.class, paymentResponse.getClass() );
+        TestUtils.checkPaymentResponse( (PaymentResponseFailure) paymentResponse );
+    }
+
+    @Test
+    void paymentRequest_missingContractProperty(){
+        // given: a property is missing from ContractConfiguration
+        ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration();
+        contractConfiguration.getContractProperties().remove( Constants.ContractConfigurationKeys.MERCHANT_IBAN );
+        PaymentRequest paymentRequest = MockUtils.aPaylinePaymentRequestBuilder()
+                .withContractConfiguration( contractConfiguration )
+                .build();
+        doReturn( MockUtils.aPsu() )
+                .when( psuHttpclient )
+                .createPsu( any(PsuCreateRequest.class), any(RequestConfiguration.class) );
+
+        // when: calling paymentRequest() method
+        PaymentResponse paymentResponse = service.paymentRequest( paymentRequest );
+
+        // then: the exception is properly catch and the payment response is a failure
+        assertEquals( PaymentResponseFailure.class, paymentResponse.getClass() );
+        TestUtils.checkPaymentResponse( (PaymentResponseFailure) paymentResponse );
+    }
 
 }

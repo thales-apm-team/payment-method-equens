@@ -76,5 +76,7 @@ public class PaymentWithRedirectionServiceImplTest {
         );
     }
 
+    // TODO: more tests on KO cases
+
 
 }

@@ -29,8 +29,6 @@ public class PsuHttpClient extends EquensHttpClient {
     public static PsuHttpClient getInstance() {
         return PsuHttpClient.Holder.instance;
     }
-
-    // TODO: init (?)
     // --- Singleton Holder pattern + initialization END
 
     @Override

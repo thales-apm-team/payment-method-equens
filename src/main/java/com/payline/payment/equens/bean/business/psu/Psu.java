@@ -58,7 +58,7 @@ public class Psu {
         private String lastName;
         private String email;
         private String phoneNumber;
-        // TODO: map the Address
+        // the Address is not mapped because the format described in the swagger file is weird (could change) and we won't use this address anyway
         private String status;
 
         public PsuBuilder withPsuId(String psuId) {

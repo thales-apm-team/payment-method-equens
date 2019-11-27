@@ -42,7 +42,7 @@ public class Constants {
      */
     public static class RequestContextKeys {
 
-        // TODO
+        // TODO: check if there the use of RequestContext is required. Remove this inner class if it's not.
 
         /* Static utility class : no need to instantiate it (Sonar bug fix) */
         private RequestContextKeys(){}
