@@ -180,44 +180,42 @@ public class PaymentServiceImpl implements PaymentService {
      * @return The corresponding Equens address.
      */
     Address buildAddress( Buyer.Address paylineAddress ){
-        Address deliveryAddress = null;
-
-        if( paylineAddress != null ){
-            List<String> lines = new ArrayList<>();
-
-            // concat the full address line to split
-            String toSplit = paylineAddress.getStreet1();
-            if( paylineAddress.getStreet2() != null && !paylineAddress.getStreet2().isEmpty() ){
-                toSplit += " " + paylineAddress.getStreet2();
-            }
-
-            // Split it in chunks of the max allowed length for an address line
-            while( !toSplit.isEmpty() ){
-                int chunkLength = Math.min(Address.ADDRESS_LINE_MAX_LENGTH, toSplit.length());
-
-                // look for the first whitespace from the end of the chunk, to truncate properly
-                int i = chunkLength;
-                while( i > 0 && !Character.isWhitespace( toSplit.charAt(i-1) ) ){
-                    i--;
-                }
-                // no whitespace: truncate brutally
-                if( i == 0 ){
-                    i = chunkLength;
-                }
-                // add the new line and remove the chunk from the initial string
-                lines.add( toSplit.substring(0, i).trim() );
-                toSplit = i == toSplit.length() ? "" : toSplit.substring(i).trim();
-            }
-
-            deliveryAddress = new Address.AddressBuilder()
-                    .withAddressLines( lines )
-                    .withPostCode( paylineAddress.getZipCode() )
-                    .withTownName( paylineAddress.getCity() )
-                    .withCountry( paylineAddress.getCountry() )
-                    .build();
+        if( paylineAddress == null ){
+            return null;
         }
 
-        return deliveryAddress;
+        List<String> lines = new ArrayList<>();
+
+        // concat the full address line to split
+        String toSplit = paylineAddress.getStreet1();
+        if( paylineAddress.getStreet2() != null && !paylineAddress.getStreet2().isEmpty() ){
+            toSplit += " " + paylineAddress.getStreet2();
+        }
+
+        // Split it in chunks of the max allowed length for an address line
+        while( !toSplit.isEmpty() ){
+            int chunkLength = Math.min(Address.ADDRESS_LINE_MAX_LENGTH, toSplit.length());
+
+            // look for the first whitespace from the end of the chunk, to truncate properly
+            int i = chunkLength;
+            while( i > 0 && !Character.isWhitespace( toSplit.charAt(i-1) ) ){
+                i--;
+            }
+            // no whitespace: truncate brutally
+            if( i == 0 ){
+                i = chunkLength;
+            }
+            // add the new line and remove the chunk from the initial string
+            lines.add( toSplit.substring(0, i).trim() );
+            toSplit = i == toSplit.length() ? "" : toSplit.substring(i).trim();
+        }
+
+        return new Address.AddressBuilder()
+                .withAddressLines( lines )
+                .withPostCode( paylineAddress.getZipCode() )
+                .withTownName( paylineAddress.getCity() )
+                .withCountry( paylineAddress.getCountry() )
+                .build();
     }
 
     /**
