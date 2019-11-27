@@ -174,6 +174,83 @@ abstract class EquensHttpClient extends OAuthHttpClient {
     }
 
     /**
+     * Get the Payline <code>errorCode</code> from the HTTP status code and the API error response.
+     *
+     * @param httpStatusCode The HTTP status code
+     * @param apiError The API error response
+     * @return The corresponding <code>errorCode</code>.
+     */
+    String getErrorCode( final int httpStatusCode, final EquensErrorResponse apiError ){
+        if( apiError == null ){
+            return null;
+        }
+        // default value
+        String errorCode = apiError.getMessage();
+
+        // particular cases
+        if( httpStatusCode == 400
+                && apiError.getCode() != null
+                && Stream.of("001", "002", "133").anyMatch( apiError.getCode()::contains )
+                && apiError.getDetails() != null ){
+            errorCode = apiError.getDetails();
+        }
+
+        return errorCode;
+    }
+
+    /**
+     * Get the Payline <code>FailureCause</code> from the HTTP status code and the API error code.
+     *
+     * @param httpStatusCode The HTTP status code (ex: 400)
+     * @param apiErrorCode The API error code (ex: "007")
+     * @return The corresponding <code>FailureCause</code>
+     */
+    FailureCause getFailureCause( final int httpStatusCode, final String apiErrorCode ){
+        FailureCause failureCause = FailureCause.PARTNER_UNKNOWN_ERROR;
+        switch( httpStatusCode ){
+            case 400:
+                failureCause = FailureCause.INVALID_DATA;
+                if( Stream.of("108", "109").anyMatch( apiErrorCode::contains ) ){
+                    failureCause = FailureCause.COMMUNICATION_ERROR;
+                }
+                break;
+
+            case 403:
+                if( Stream.of("007", "017").anyMatch( apiErrorCode::contains ) ){
+                    failureCause = FailureCause.COMMUNICATION_ERROR;
+                }
+                else if( "107".equals( apiErrorCode ) ){
+                    failureCause = FailureCause.INVALID_DATA;
+                }
+                else if( "120".equals( apiErrorCode ) ){
+                    failureCause = FailureCause.REFUSED;
+                }
+                break;
+
+            case 404:
+                failureCause = FailureCause.INVALID_DATA;
+                break;
+
+            case 405:
+                if( "135".equals( apiErrorCode ) ) {
+                    failureCause = FailureCause.REFUSED;
+                }
+                break;
+
+            case 401:
+            case 502:
+            case 503:
+            case 511:
+                failureCause = FailureCause.COMMUNICATION_ERROR;
+                break;
+
+            default:
+                failureCause = FailureCause.PARTNER_UNKNOWN_ERROR;
+        }
+        return failureCause;
+    }
+
+    /**
      * Handle error responses with the specified format (see swagger description files of the API)
      *
      * @param apiResponse The raw response received from the API, as a <code>StringResponse</code>.
@@ -198,59 +275,12 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         if( errorResponse == null || errorResponse.getCode() == null ){
             return new PluginException(message, failureCause);
         }
-        String errorCode = errorResponse.getCode();
 
         // Map partner error codes to Payline FailureCause and errorCode
-        if( errorResponse.getMessage() != null ){
-            message = errorResponse.getMessage();
-        }
-        switch( apiResponse.getStatusCode() ){
-            case 400:
-                // Failure cause
-                failureCause = FailureCause.INVALID_DATA;
-                if( Stream.of("108", "109").anyMatch( errorCode::contains ) ){
-                    failureCause = FailureCause.COMMUNICATION_ERROR;
-                }
-                // error code
-                if( Stream.of("001", "002", "133").anyMatch( errorCode::contains ) && errorResponse.getDetails() != null ){
-                    message = errorResponse.getDetails();
-                }
-                break;
-
-            case 403:
-                if( Stream.of("007", "017").anyMatch( errorCode::contains ) ){
-                    failureCause = FailureCause.COMMUNICATION_ERROR;
-                }
-                else if( "107".equals( errorCode ) ){
-                    failureCause = FailureCause.INVALID_DATA;
-                }
-                else if( "120".equals( errorCode ) ){
-                    failureCause = FailureCause.REFUSED;
-                }
-                break;
-
-            case 404:
-                failureCause = FailureCause.INVALID_DATA;
-                break;
-
-            case 405:
-                if( "135".equals( errorCode ) ) {
-                    failureCause = FailureCause.REFUSED;
-                }
-                break;
-
-            case 401:
-            case 502:
-            case 503:
-            case 511:
-                failureCause = FailureCause.COMMUNICATION_ERROR;
-                break;
-
-            default:
-                failureCause = FailureCause.PARTNER_UNKNOWN_ERROR;
-        }
-
-        return new PluginException(message, failureCause);
+        return new PluginException(
+                this.getErrorCode( apiResponse.getStatusCode(), errorResponse ),
+                this.getFailureCause( apiResponse.getStatusCode(), errorResponse.getCode() )
+        );
     }
 
     /**
