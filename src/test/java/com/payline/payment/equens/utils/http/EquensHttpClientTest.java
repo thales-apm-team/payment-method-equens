@@ -5,7 +5,6 @@ import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.utils.Constants;
-import com.payline.payment.equens.utils.TestUtils;
 import com.payline.payment.equens.utils.security.RSAHolder;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -43,7 +41,7 @@ public class EquensHttpClientTest {
     /**
      * Private class required to test the sbstract class {@link EquensHttpClient}.
      */
-    private class TestableHttpClient extends EquensHttpClient {
+    private static class TestableHttpClient extends EquensHttpClient {
         @Override
         protected String appName() {
             return "TEST";

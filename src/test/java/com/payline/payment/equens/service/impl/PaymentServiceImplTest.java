@@ -55,9 +55,7 @@ public class PaymentServiceImplTest {
         assertNotNull( output.getCountry() );
         assertNotNull( output.getPostCode() );
         assertFalse( output.getAddressLines().isEmpty() );
-        output.getAddressLines().forEach( line -> {
-            assertTrue( line.length() <= Address.ADDRESS_LINE_MAX_LENGTH );
-        });
+        output.getAddressLines().forEach( line -> assertTrue( line.length() <= Address.ADDRESS_LINE_MAX_LENGTH ));
     }
 
     @Test

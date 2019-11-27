@@ -1,10 +1,7 @@
 package com.payline.payment.equens;
 
 import com.payline.payment.equens.bean.business.fraud.PsuSessionInformation;
-import com.payline.payment.equens.bean.business.payment.Account;
-import com.payline.payment.equens.bean.business.payment.PaymentInitiationRequest;
-import com.payline.payment.equens.bean.business.payment.PaymentInitiationResponse;
-import com.payline.payment.equens.bean.business.payment.RemittanceInformationStructured;
+import com.payline.payment.equens.bean.business.payment.*;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.utils.security.RSAHolder;
@@ -188,6 +185,10 @@ public class MockUtils {
                 .withPartnerConfiguration( aPartnerConfiguration() );
     }
 
+    public static String aMessageCreateDateTime(){
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date());
+    }
+
     /**
      * Generate a valid {@link Environment}.
      */
@@ -309,6 +310,13 @@ public class MockUtils {
     }
 
     /**
+     * Generate a valid payment ID, similar to the ones the partner API would return.
+     */
+    public static String aPaymentId(){
+        return "123456";
+    }
+
+    /**
      * Generate a valid {@link PaymentInitiationRequest}.
      */
     public static PaymentInitiationRequest aPaymentInitiationRequest(){
@@ -352,12 +360,29 @@ public class MockUtils {
      */
     public static PaymentInitiationResponse aPaymentInitiationResponse(){
         return PaymentInitiationResponse.fromJson("{\n" +
-                "    \"MessageCreateDateTime\": \"2019-11-19T16:35:52.244+0000\",\n" +
+                "    \"MessageCreateDateTime\": \"" + aMessageCreateDateTime() + "\",\n" +
                 "    \"MessageId\": \"e8683740-38be-4026-b48e-72089b023e\",\n" +
-                "    \"PaymentId\": \"130436\",\n" +
+                "    \"PaymentId\": \"" + MockUtils.aPaymentId() + "\",\n" +
                 "    \"InitiatingPartyReferenceId\": \"REF1574181352\",\n" +
                 "    \"PaymentStatus\": \"OPEN\",\n" +
                 "    \"AspspRedirectUrl\": \"https://xs2a.banking.co.at/xs2a-sandbox/m044/v1/pis/confirmation/btWMz6mTz7I3SOe4lMqXiwciqe6igXBCeebfVWlmZ8N8zVw_qRKMMuhlLLXtPrVcBeH6HIP2qhdTTZ1HINXSkg==_=_psGLvQpt9Q/authorisations/fa8e44a7-3bf7-4543-82d1-5a1163aaaaad\"\n" +
+                "}");
+    }
+
+    /**
+     * Generate a valid {@link PaymentStatusResponse} with the given status.
+     * @param status The payment status.
+     */
+    public static PaymentStatusResponse aPaymentStatusResponse( PaymentStatus status ){
+        return PaymentStatusResponse.fromJson("{\n" +
+                "    \"MessageCreateDateTime\": \"" + aMessageCreateDateTime() + "\",\n" +
+                "    \"MessageId\": \"ca58925c-57cc-44b0-a827-cd439fb87f\",\n" +
+                "    \"PaymentId\": \"" + MockUtils.aPaymentId() + "\",\n" +
+                "    \"PaymentStatus\": \"" + status.name() + "\",\n" +
+                "    \"AspspPaymentId\": \"im7QC5rZ-jyNr237sJb6VqEnBd8uNDnU6b9-rnAYVxTNub1NwmkrY3CBGDMRXsx5BeH6HIP2qhdTTZ1HINXSkg==_=_psGLvQpt9Q\",\n" +
+                "    \"InitiatingPartyReferenceId\": \"REF1574257016\",\n" +
+                "    \"DebtorAgent\": \"BNPADEFF\",\n" +
+                "    \"DebtorAccount\": \"AT880000000000000001\"\n" +
                 "}");
     }
 

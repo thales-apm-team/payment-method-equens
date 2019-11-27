@@ -38,7 +38,7 @@ public class OAuthHttpClientTest {
     /**
      * Private class required to test the Abstract class {@link OAuthHttpClient}.
      */
-    private class TestableHttpClient extends OAuthHttpClient {
+    private static class TestableHttpClient extends OAuthHttpClient {
         @Override
         protected Map<String, String> authorizationHeaders(String uri, RequestConfiguration requestConfiguration) {
             return new HashMap<>();
