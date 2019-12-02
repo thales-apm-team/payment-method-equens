@@ -1,6 +1,11 @@
 package com.payline.payment.equens;
 
+import com.payline.payment.equens.bean.business.payment.PaymentInitiationRequest;
 import com.payline.payment.equens.bean.business.payment.PaymentInitiationResponse;
+import com.payline.payment.equens.bean.business.payment.PaymentStatusResponse;
+import com.payline.payment.equens.bean.business.psu.Psu;
+import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
+import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.utils.http.PisHttpClient;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
@@ -43,16 +48,18 @@ public class Manual {
             psuHttpClient.init( requestConfiguration.getPartnerConfiguration() );
 
             // GET aspsps
-            //GetAspspsResponse banks = pisHttpClient.getAspsps( requestConfiguration );
+            GetAspspsResponse banks = pisHttpClient.getAspsps( requestConfiguration );
 
             // POST psu
-            //Psu psuCreated = psuHttpClient.createPsu( new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration );
+            Psu psuCreated = psuHttpClient.createPsu( new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration );
 
             // POST payment
-            PaymentInitiationResponse paymentInitiationResponse = pisHttpClient.initPayment( MockUtils.aPaymentInitiationRequest(), requestConfiguration );
+            PaymentInitiationRequest.PaymentInitiationRequestBuilder init = MockUtils.aPaymentInitiationRequestBuilder();
+            init.withPsuId( psuCreated.getPsuId() );
+            PaymentInitiationResponse paymentInitiationResponse = pisHttpClient.initPayment( init.build(), requestConfiguration );
 
             // GET payment
-            //PaymentStatusResponse paymentStatusResponse = pisHttpClient.paymentStatus( "130676", requestConfiguration, true );
+            PaymentStatusResponse paymentStatusResponse = pisHttpClient.paymentStatus( paymentInitiationResponse.getPaymentId(), requestConfiguration, true );
 
             LOGGER.info("END");
         }

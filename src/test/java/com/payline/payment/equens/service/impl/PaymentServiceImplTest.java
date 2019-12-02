@@ -52,7 +52,7 @@ public class PaymentServiceImplTest {
     @Test
     void buildAddress_nominal(){
         // given: a Payline address
-        Buyer.Address input = MockUtils.anAddress();
+        Buyer.Address input = MockUtils.aPaylineAddress();
 
         // when: feeding it to the method buildAddress()
         Address output = service.buildAddress( input );

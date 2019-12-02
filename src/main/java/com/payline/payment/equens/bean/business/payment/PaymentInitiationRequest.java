@@ -4,6 +4,9 @@ import com.google.gson.annotations.SerializedName;
 import com.payline.payment.equens.bean.business.EquensApiMessage;
 import com.payline.payment.equens.bean.business.fraud.PsuSessionInformation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Payment initiation request.
  */
@@ -77,7 +80,7 @@ public class PaymentInitiationRequest extends EquensApiMessage {
     private RiskInformation riskInformation;
     /** Payment preferred SCA. */
     @SerializedName("PreferredScaMethod")
-    private String preferredScaMethod;
+    private List<String> preferredScaMethod;
     /** Charge bearer */
     @SerializedName("ChargeBearer")
     private String chargeBearer;
@@ -145,7 +148,7 @@ public class PaymentInitiationRequest extends EquensApiMessage {
         private String purposeCode;
         private PsuSessionInformation psuSessionInformation;
         private RiskInformation riskInformation;
-        private String preferredScaMethod;
+        private List<String> preferredScaMethod;
         private String chargeBearer;
         private String psuId;
         private String aspspPsuId;
@@ -247,8 +250,11 @@ public class PaymentInitiationRequest extends EquensApiMessage {
             return this;
         }
 
-        public PaymentInitiationRequestBuilder withPreferredScaMethod(String preferredScaMethod) {
-            this.preferredScaMethod = preferredScaMethod;
+        public PaymentInitiationRequestBuilder addPreferredScaMethod(String preferredScaMethod) {
+            if( this.preferredScaMethod == null ){
+                this.preferredScaMethod = new ArrayList<>();
+            }
+            this.preferredScaMethod.add( preferredScaMethod );
             return this;
         }
 

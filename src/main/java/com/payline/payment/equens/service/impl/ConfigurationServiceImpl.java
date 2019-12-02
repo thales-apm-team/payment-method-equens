@@ -29,25 +29,25 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private static final String I18N_CONTRACT_PREFIX = "contract.";
 
-    private static final class ChannelType {
-        private static final String ECOMMERCE = "ECommerce";
+    public static final class ChannelType {
+        public static final String ECOMMERCE = "Ecommerce";
     }
 
-    private static final class ChargeBearer {
-        private static final String CRED = "CRED";
-        private static final String DEBT = "DEBT";
-        private static final String SHAR = "SHAR";
-        private static final String SLEV = "SLEV";
+    public static final class ChargeBearer {
+        public static final String CRED = "CRED";
+        public static final String DEBT = "DEBT";
+        public static final String SHAR = "SHAR";
+        public static final String SLEV = "SLEV";
     }
 
-    private static final class PurposeCode {
-        private static final String CARPARK = "Carpark";
-        private static final String COMMERCE = "Commerce";
-        private static final String TRANSPORT = "Transport";
+    public static final class PurposeCode {
+        public static final String CARPARK = "Carpark";
+        public static final String COMMERCE = "Commerce";
+        public static final String TRANSPORT = "Transport";
     }
 
-    private static final class ScaMethod {
-        private static final String REDIRECT = "Redirect";
+    public static final class ScaMethod {
+        public static final String REDIRECT = "Redirect";
     }
 
     private I18nService i18n = I18nService.getInstance();

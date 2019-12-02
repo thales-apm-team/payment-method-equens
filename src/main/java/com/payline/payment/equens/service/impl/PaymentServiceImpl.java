@@ -128,7 +128,7 @@ public class PaymentServiceImpl implements PaymentService {
                                     )
                                     .build()
                     )
-                    .withPreferredScaMethod(
+                    .addPreferredScaMethod(
                             paymentRequest.getContractConfiguration().getProperty( Constants.ContractConfigurationKeys.SCA_METHOD ).getValue()
                     )
                     .withChargeBearer(

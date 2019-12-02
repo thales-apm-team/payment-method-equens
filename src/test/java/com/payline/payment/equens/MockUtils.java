@@ -4,6 +4,7 @@ import com.payline.payment.equens.bean.business.fraud.PsuSessionInformation;
 import com.payline.payment.equens.bean.business.payment.*;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
+import com.payline.payment.equens.service.impl.ConfigurationServiceImpl;
 import com.payline.payment.equens.utils.security.RSAHolder;
 import com.payline.pmapi.bean.common.Buyer;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
@@ -54,21 +55,6 @@ public class MockUtils {
             accountInfo.put(entry.getKey(), entry.getValue().getValue());
         }
         return accountInfo;
-    }
-
-    /**
-     * Generate a valid Payline <code>Address</code>.
-     */
-    public static Buyer.Address anAddress(){
-        return Buyer.Address.AddressBuilder.anAddress()
-                .withCity("Aix-en-Provence")
-                .withCountry("France")
-                .withEmail("john.doe@mythalesgroup.io")
-                .withFullName( new Buyer.FullName("Thales", "Services", "M.") )
-                .withStreet1("150 rue dont le nom est le plus long que j'ai jamais vu. Y'a pas idée d'habiter un endroit pareil !")
-                .withStreet2("Le grand bâtiment orange, avec les fenêtres un peu hautes mais un peu larges aussi, et un toit bleu")
-                .withZipCode("13100")
-                .build();
     }
 
     /**
@@ -226,6 +212,21 @@ public class MockUtils {
     }
 
     /**
+     * Generate a valid Payline <code>Address</code>.
+     */
+    public static Buyer.Address aPaylineAddress(){
+        return Buyer.Address.AddressBuilder.anAddress()
+                .withCity("Aix-en-Provence")
+                .withCountry("FR")
+                .withEmail("john.doe@mythalesgroup.io")
+                .withFullName( new Buyer.FullName("Thales", "Services", "M.") )
+                .withStreet1("150 rue dont le nom est le plus long que j'ai jamais vu. Y'a pas idée d'habiter un endroit pareil !")
+                .withStreet2("Le grand bâtiment orange, avec les fenêtres un peu hautes mais un peu larges aussi, et un toit bleu")
+                .withZipCode("13100")
+                .build();
+    }
+
+    /**
      * Generate a valid Payline Amount.
      */
     public static com.payline.pmapi.bean.common.Amount aPaylineAmount(){
@@ -316,43 +317,70 @@ public class MockUtils {
         return "123456";
     }
 
+
+
     /**
      * Generate a valid {@link PaymentInitiationRequest}.
      */
     public static PaymentInitiationRequest aPaymentInitiationRequest(){
-        // TODO: ensure this method returns a STANDARD instance
+        return aPaymentInitiationRequestBuilder().build();
+    }
+
+    /**
+     * Generate a builder for a valid {@link PaymentInitiationRequest}.
+     * This way, some attributes may be overridden to match specific test needs.
+     */
+    public static PaymentInitiationRequest.PaymentInitiationRequestBuilder aPaymentInitiationRequestBuilder(){
         String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
         return new PaymentInitiationRequest.PaymentInitiationRequestBuilder()
-                .withAspspId("1202")
+                .withAspspId("1402")
                 .withEndToEndId( "PAYLINE" + timestamp )
                 .withInitiatingPartyReferenceId( "REF" + timestamp )
+                .withInitiatingPartyReturnUrl( "http://google.fr?result=success" )
+                .withRemittanceInformation( "softDescriptor" )
                 .withRemittanceInformationStructured(
                         new RemittanceInformationStructured.RemittanceInformationStructuredBuilder()
                                 .withReference( "REF" + timestamp )
                                 .build()
                 )
+                /*
                 .withDebtorAccount(
                         new Account.AccountBuilder()
-                                .withIdentification("AT880000000000000001")
-                                .withCurrency("EUR")
+                                .withIdentification( "AT880000000000000001" )
                                 .build()
                 )
+                */
                 .withCreditorAccount(
                         new Account.AccountBuilder()
                                 .withIdentification("ES1400490001510000000002")
                                 .build()
                 )
-                .withCreditorName("Jean Dupont")
+                .withCreditorName("John Smith")
                 .withPaymentAmount("10.00")
                 .withPaymentCurrency("EUR")
-                .withAspspPsuId("21")
-                .withPaymentProduct("Instant")
+                .withPurposeCode( ConfigurationServiceImpl.PurposeCode.COMMERCE )
                 .withPsuSessionInformation(
                         new PsuSessionInformation.PsuSessionInformationBuilder()
-                                .withIpAddress("192.168.0.1")
+                                .withIpAddress( "192.168.0.1" )
+                                .withHeaderUserAgent( MockUtils.aUserAgent() )
                                 .build()
                 )
-                .build();
+                .withRiskInformation(
+                        new RiskInformation.RiskInformationBuilder()
+                                .withDeliveryAddress(
+                                        new Address.AddressBuilder()
+                                                .withPostCode( "13100" )
+                                                .withTownName( "Aix-en-Provence" )
+                                                .withCountry( "FR" )
+                                                .build()
+                                )
+                                .withChannelType( ConfigurationServiceImpl.ChannelType.ECOMMERCE )
+                                .build()
+                )
+                .addPreferredScaMethod( ConfigurationServiceImpl.ScaMethod.REDIRECT )
+                .withChargeBearer( ConfigurationServiceImpl.ChargeBearer.SLEV )
+                .withPsuId( "1" )
+                .withPaymentProduct( MockUtils.aPartnerConfiguration().getProperty( Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT ) );
     }
 
     /**
