@@ -14,6 +14,7 @@ public class Constants {
         public static final String CHARGE_BEARER = "chargeBearer";
         public static final String CLIENT_NAME = "clientName";
         public static final String MERCHANT_IBAN = "merchantIban";
+        public static final String MERCHANT_NAME = "merchantName";
         public static final String ONBOARDING_ID = "onboardingId";
         public static final String PURPOSE_CODE = "purposeCode";
         public static final String SCA_METHOD = "scaMethod";

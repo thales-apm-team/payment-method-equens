@@ -65,6 +65,7 @@ public class PaymentServiceImpl implements PaymentService {
                     Constants.ContractConfigurationKeys.CHANNEL_TYPE,
                     Constants.ContractConfigurationKeys.CHARGE_BEARER,
                     Constants.ContractConfigurationKeys.MERCHANT_IBAN,
+                    Constants.ContractConfigurationKeys.MERCHANT_NAME,
                     Constants.ContractConfigurationKeys.PURPOSE_CODE,
                     Constants.ContractConfigurationKeys.SCA_METHOD
             );
@@ -101,6 +102,9 @@ public class PaymentServiceImpl implements PaymentService {
                                             paymentRequest.getContractConfiguration().getProperty( Constants.ContractConfigurationKeys.MERCHANT_IBAN ).getValue()
                                     )
                                     .build()
+                    )
+                    .withCreditorName(
+                            paymentRequest.getContractConfiguration().getProperty( Constants.ContractConfigurationKeys.MERCHANT_NAME ).getValue()
                     )
                     .withPaymentAmount( this.convertAmount( paymentRequest.getAmount() ) )
                     .withPaymentCurrency( paymentRequest.getAmount().getCurrency().getCurrencyCode() )

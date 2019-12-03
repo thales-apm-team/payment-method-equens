@@ -70,8 +70,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // Onboarding ID
         parameters.add( this.newInputParameter( Constants.ContractConfigurationKeys.ONBOARDING_ID, true, locale ) );
 
-        // mérchant iban
+        // merchant iban
         parameters.add( this.newInputParameter( Constants.ContractConfigurationKeys.MERCHANT_IBAN, true, locale ) );
+
+        // merchant name
+        parameters.add( this.newInputParameter( Constants.ContractConfigurationKeys.MERCHANT_NAME, true, locale ) );
 
         // channel type
         Map<String, String> channelTypes = new HashMap<>();

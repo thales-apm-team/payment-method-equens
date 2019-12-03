@@ -146,6 +146,7 @@ public class MockUtils {
                 new ContractProperty( ConfigurationServiceImpl.ChargeBearer.SLEV ));
         contractProperties.put(Constants.ContractConfigurationKeys.CLIENT_NAME, new ContractProperty( "MarketPay" ));
         contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_IBAN, new ContractProperty( "FR33BBBBBGGGGGCCCCCCCCCCC00" ));
+        contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_NAME, new ContractProperty( "John Snow" ));
         contractProperties.put(Constants.ContractConfigurationKeys.ONBOARDING_ID, new ContractProperty( "XXXXXX" ));
         contractProperties.put(Constants.ContractConfigurationKeys.SCA_METHOD,
                 new ContractProperty( ConfigurationServiceImpl.ScaMethod.REDIRECT ));
