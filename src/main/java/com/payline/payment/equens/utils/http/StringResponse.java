@@ -81,13 +81,11 @@ public class StringResponse {
         String str = "HTTP " + this.getStatusCode() + " " + this.getStatusMessage() + ln;
 
         final List<String> strHeaders = new ArrayList<>();
-        this.headers.forEach( (key, value) -> {
-            strHeaders.add( key + ": " + value );
-        });
+        this.headers.forEach( (key, value) -> strHeaders.add( key + ": " + value ) );
         str += String.join(ln, strHeaders);
 
         if( this.content != null ){
-            str += this.content;
+            str += ln + this.content;
         }
 
         return str;

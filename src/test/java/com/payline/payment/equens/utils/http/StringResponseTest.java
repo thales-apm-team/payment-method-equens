@@ -5,6 +5,9 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicHeader;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class StringResponseTest {
@@ -34,6 +37,22 @@ class StringResponseTest {
 
         // then: the StringResponse is null
         assertNull( stringResponse );
+    }
+
+    @Test
+    void toStringMethod(){
+        // given: a StringResponse instance
+        String jsonContent = "{\"message\":\"This is an error message\"}";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Test", "This is a test header");
+        StringResponse stringResponse = HttpTestUtils.mockStringResponse( 400, "Bad Request", jsonContent, headers);
+
+        // when: calling toString method, then: the result is as expected
+        String ln = System.lineSeparator();
+        assertEquals( "HTTP 400 Bad Request" + ln
+                + "Test: This is a test header" + ln
+                + jsonContent
+                , stringResponse.toString() );
     }
 
 }
