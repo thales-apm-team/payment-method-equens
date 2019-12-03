@@ -18,7 +18,7 @@ import java.util.UUID;
  */
 public class PsuHttpClient extends EquensHttpClient {
 
-    private static final String API_PATH_PSU = "/psumgmt/v1/psus";
+    private static final String API_PATH_PSU = "api.psu.psus";
 
     // --- Singleton Holder pattern + initialization BEGIN
     PsuHttpClient() {
@@ -45,7 +45,7 @@ public class PsuHttpClient extends EquensHttpClient {
      */
     public Psu createPsu(PsuCreateRequest psuCreateRequest, RequestConfiguration requestConfiguration ){
         // Service full URL
-        String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() ) + API_PATH_PSU;
+        String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() ) + this.getPath(API_PATH_PSU);
 
         // Init. headers with Authorization (access token)
         List<Header> headers = this.initHeaders( requestConfiguration );

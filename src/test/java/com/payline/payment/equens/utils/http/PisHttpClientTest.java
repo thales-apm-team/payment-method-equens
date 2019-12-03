@@ -5,7 +5,9 @@ import com.payline.payment.equens.bean.business.payment.PaymentInitiationRespons
 import com.payline.payment.equens.bean.business.payment.PaymentStatusResponse;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
+import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.utils.properties.ConfigProperties;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -13,10 +15,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import org.mockito.*;
 
 import java.util.List;
 
@@ -30,11 +29,17 @@ public class PisHttpClientTest {
     @InjectMocks
     private PisHttpClient pisHttpClient = new PisHttpClient();
 
+    @Mock private ConfigProperties config;
+
     @BeforeEach
     void setup(){
         MockitoAnnotations.initMocks(this);
         // Mock a valid authorization
         doReturn( MockUtils.anAuthorization() ).when( pisHttpClient ).authorize( any(RequestConfiguration.class) );
+        // Mock the config properties
+        doReturn( "/directory/v1/aspsps" ).when( config ).get( "api.pis.aspsps" );
+        doReturn( "/pis/v1/payments" ).when( config ).get( "api.pis.payments" );
+        doReturn( "/pis/v1/payments/{paymentId}/status" ).when( config ).get( "api.pis.payments.status" );
     }
 
     @AfterEach
@@ -72,6 +77,15 @@ public class PisHttpClientTest {
         // then: the list contains 1 Aspsp
         assertNotNull( response );
         assertEquals( 1, response.getAspsps().size() );
+    }
+
+    @Test
+    void getAspsps_invalidConfig(){
+        // given: the config property containing the path is missing
+        doReturn( null ).when( config ).get( "api.pis.aspsps" );
+
+        // when: calling the method, then: an exception is thrown
+        assertThrows( InvalidDataException.class, () -> pisHttpClient.getAspsps( MockUtils.aRequestConfiguration() ) );
     }
 
     @Test
@@ -138,6 +152,15 @@ public class PisHttpClientTest {
     }
 
     @Test
+    void initPayment_invalidConfig(){
+        // given: the config property containing the path is missing
+        doReturn( null ).when( config ).get( anyString() );
+
+        // when: calling the method, then: an exception is thrown
+        assertThrows( InvalidDataException.class, () -> pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(), MockUtils.aRequestConfiguration()) );
+    }
+
+    @Test
     void initPayment_badRequest(){
         // given: the partner API returns a 400 Bad Request
         String responseContent = "{" +
@@ -195,12 +218,21 @@ public class PisHttpClientTest {
     }
 
     @Test
+    void paymentStatus_invalidConfig(){
+        // given: the config property containing the path is missing
+        doReturn( null ).when( config ).get( anyString() );
+
+        // when: calling the method, then: an exception is thrown
+        assertThrows( InvalidDataException.class, () -> pisHttpClient.paymentStatus( MockUtils.aPaymentId(), MockUtils.aRequestConfiguration(), false ) );
+    }
+
+    @Test
     void paymentStatus_notFound(){
         // given: the partner API returns a 400 Bad Request
         String responseContent = "{" +
                 "    \"code\":\"110\"," +
                 "    \"message\":\"Transaction could not be found\"," +
-                "    \"details\":\"Load operation error: transactionId = 666666, reason:[nothing found]\"," +
+                "    \"details\":\"Load operation error: transactionId = 666, reason:[nothing found]\"," +
                 "    \"MessageCreateDateTime\":\"22019-12-03T15:27:32.629+0000\"," +
                 "    \"MessageId\":\"3274abb431c8410f886a903b88285ebd\"" +
                 "}";

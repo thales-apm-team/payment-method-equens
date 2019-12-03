@@ -3,22 +3,22 @@ package com.payline.payment.equens.utils.http;
 import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
+import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.utils.properties.ConfigProperties;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.doReturn;
 
 public class PsuHttpClientTest {
 
@@ -26,11 +26,15 @@ public class PsuHttpClientTest {
     @InjectMocks
     private PsuHttpClient psuHttpClient = new PsuHttpClient();
 
+    @Mock private ConfigProperties config;
+
     @BeforeEach
     void setup(){
         MockitoAnnotations.initMocks(this);
         // Mock a valid authorization
         doReturn( MockUtils.anAuthorization() ).when( psuHttpClient ).authorize( any(RequestConfiguration.class) );
+        // Mock the config properties
+        doReturn( "/psumgmt/v1/psus" ).when( config ).get( "api.psu.psus" );
     }
 
     @AfterEach
@@ -65,6 +69,15 @@ public class PsuHttpClientTest {
         assertNotNull( createdPsu );
         assertEquals( "303", createdPsu.getPsuId() );
         assertEquals( "ACTIVE", createdPsu.getStatus() );
+    }
+
+    @Test
+    void createPsu_invalidConfig(){
+        // given: the config property containing the path is missing
+        doReturn( null ).when( config ).get( "api.psu.psus" );
+
+        // when: calling the method, then: an exception is thrown
+        assertThrows( InvalidDataException.class, () -> psuHttpClient.createPsu( MockUtils.aPsuCreateRequest(), MockUtils.aRequestConfiguration() ) );
     }
 
     @Test

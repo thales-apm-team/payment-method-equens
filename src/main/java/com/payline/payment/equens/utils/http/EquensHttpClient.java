@@ -165,7 +165,7 @@ abstract class EquensHttpClient extends OAuthHttpClient {
      * @param partnerConfiguration The partner configuration
      * @return The API base URL
      */
-    String getBaseUrl( PartnerConfiguration partnerConfiguration ){
+    protected String getBaseUrl( PartnerConfiguration partnerConfiguration ){
         String baseUrl = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.API_BASE_URL);
         if( baseUrl == null ){
             throw new InvalidDataException( "Missing API base url in PartnerConfiguration" );
@@ -251,12 +251,26 @@ abstract class EquensHttpClient extends OAuthHttpClient {
     }
 
     /**
+     * Retrieve the requested API path in the plugin configuration.
+     * Throws an exception if it's not found.
+     *
+     * @param configProperty The configuration property in which the path should be stored
+     * @return The path
+     */
+    protected String getPath( String configProperty ){
+        if( this.config.get(configProperty) == null ){
+            throw new InvalidDataException("Illegal state: missing config " + configProperty);
+        }
+        return this.config.get(configProperty);
+    }
+
+    /**
      * Handle error responses with the specified format (see swagger description files of the API)
      *
      * @param apiResponse The raw response received from the API, as a <code>StringResponse</code>.
      * @return The <code>PluginException</code> to throw
      */
-    PluginException handleError( StringResponse apiResponse ){
+    protected PluginException handleError( StringResponse apiResponse ){
         // Try to parse the error response with the specified format
         EquensErrorResponse errorResponse;
         try {

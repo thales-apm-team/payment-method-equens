@@ -51,7 +51,7 @@ public class Manual {
             psuHttpClient.init( requestConfiguration.getPartnerConfiguration() );
 
             // GET aspsps
-            //GetAspspsResponse banks = pisHttpClient.getAspsps( requestConfiguration );
+            GetAspspsResponse banks = pisHttpClient.getAspsps( requestConfiguration );
 
             // POST psu
             Psu psuCreated = psuHttpClient.createPsu( new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration );
@@ -61,10 +61,10 @@ public class Manual {
             PaymentInitiationRequest.PaymentInitiationRequestBuilder init = MockUtils.aPaymentInitiationRequestBuilder();
             //init.withPsuId( psuCreated.getPsuId() );
             init.withPsuId( null );
-            //PaymentInitiationResponse paymentInitiationResponse = pisHttpClient.initPayment( init.build(), requestConfiguration );
+            PaymentInitiationResponse paymentInitiationResponse = pisHttpClient.initPayment( init.build(), requestConfiguration );
 
             // GET payment
-            //PaymentStatusResponse paymentStatusResponse = pisHttpClient.paymentStatus( "666666", requestConfiguration, true );
+            PaymentStatusResponse paymentStatusResponse = pisHttpClient.paymentStatus( "666666", requestConfiguration, true );
 
             LOGGER.info("END");
         }

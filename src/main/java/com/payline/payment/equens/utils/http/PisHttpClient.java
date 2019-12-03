@@ -18,9 +18,9 @@ import java.util.List;
  */
 public class PisHttpClient extends EquensHttpClient {
 
-    private static final String API_PATH_ASPSPS = "/directory/v1/aspsps";
-    private static final String API_PATH_PAYMENTS = "/pis/v1/payments";
-    private static final String API_PATH_PAYMENTS_STATUS = "/pis/v1/payments/{paymentId}/status";
+    private static final String API_PATH_ASPSPS = "api.pis.aspsps";
+    private static final String API_PATH_PAYMENTS = "api.pis.payments";
+    private static final String API_PATH_PAYMENTS_STATUS = "api.pis.payments.status";
 
     // --- Singleton Holder pattern + initialization BEGIN
     PisHttpClient() {
@@ -46,7 +46,7 @@ public class PisHttpClient extends EquensHttpClient {
      */
     public GetAspspsResponse getAspsps(RequestConfiguration requestConfiguration ){
         // Service full URL
-        String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() ) + API_PATH_ASPSPS;
+        String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() ) + this.getPath(API_PATH_ASPSPS);
 
         // Send
         StringResponse response = this.get( url, this.initHeaders( requestConfiguration ) );
@@ -68,7 +68,7 @@ public class PisHttpClient extends EquensHttpClient {
      */
     public PaymentInitiationResponse initPayment( PaymentInitiationRequest paymentInitiationRequest, RequestConfiguration requestConfiguration ){
         // Service full URL
-        String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() ) + API_PATH_PAYMENTS;
+        String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() ) + this.getPath(API_PATH_PAYMENTS);
 
         // Init. headers with Authorization (access token)
         List<Header> headers = this.initHeaders( requestConfiguration );
@@ -98,7 +98,7 @@ public class PisHttpClient extends EquensHttpClient {
     public PaymentStatusResponse paymentStatus( String paymentId, RequestConfiguration requestConfiguration, boolean autoConfirm ){
         // Service full URL
         String url = this.getBaseUrl( requestConfiguration.getPartnerConfiguration() )
-                + API_PATH_PAYMENTS_STATUS.replace("{paymentId}", paymentId);
+                + this.getPath(API_PATH_PAYMENTS_STATUS).replace("{paymentId}", paymentId);
         // TODO: verify the usability, and remove if necessary
         if( autoConfirm ){
             url += "?confirm=true";

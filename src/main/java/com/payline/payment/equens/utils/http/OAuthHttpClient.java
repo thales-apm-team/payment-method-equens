@@ -45,7 +45,7 @@ abstract class OAuthHttpClient {
 
     private static final Logger LOGGER = LogManager.getLogger(OAuthHttpClient.class);
 
-    private ConfigProperties config = ConfigProperties.getInstance();
+    protected ConfigProperties config = ConfigProperties.getInstance();
 
     /**
      * Support for the current authorization information.
