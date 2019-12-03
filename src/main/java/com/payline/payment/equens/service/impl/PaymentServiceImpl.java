@@ -95,11 +95,6 @@ public class PaymentServiceImpl implements PaymentService {
                                     .withReference( paymentRequest.getOrder().getReference() )
                                     .build()
                     )
-                    .withDebtorAccount(
-                            new Account.AccountBuilder()
-                                    .withIdentification( "" ) // TODO: where do we find this data ?!
-                                    .build()
-                    )
                     .withCreditorAccount(
                             new Account.AccountBuilder()
                                     .withIdentification(

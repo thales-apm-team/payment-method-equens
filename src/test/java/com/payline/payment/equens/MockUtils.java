@@ -140,13 +140,17 @@ public class MockUtils {
      */
     public static ContractConfiguration aContractConfiguration(){
         Map<String, ContractProperty> contractProperties = new HashMap<>();
-        contractProperties.put(Constants.ContractConfigurationKeys.CHANNEL_TYPE, new ContractProperty( "ECommerce" ));
-        contractProperties.put(Constants.ContractConfigurationKeys.CHARGE_BEARER, new ContractProperty( "SLEV" ));
+        contractProperties.put(Constants.ContractConfigurationKeys.CHANNEL_TYPE,
+                new ContractProperty( ConfigurationServiceImpl.ChannelType.ECOMMERCE ));
+        contractProperties.put(Constants.ContractConfigurationKeys.CHARGE_BEARER,
+                new ContractProperty( ConfigurationServiceImpl.ChargeBearer.SLEV ));
         contractProperties.put(Constants.ContractConfigurationKeys.CLIENT_NAME, new ContractProperty( "MarketPay" ));
         contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_IBAN, new ContractProperty( "FR33BBBBBGGGGGCCCCCCCCCCC00" ));
         contractProperties.put(Constants.ContractConfigurationKeys.ONBOARDING_ID, new ContractProperty( "XXXXXX" ));
-        contractProperties.put(Constants.ContractConfigurationKeys.SCA_METHOD, new ContractProperty( "Redirect" ));
-        contractProperties.put(Constants.ContractConfigurationKeys.PURPOSE_CODE, new ContractProperty( "Commerce" ));
+        contractProperties.put(Constants.ContractConfigurationKeys.SCA_METHOD,
+                new ContractProperty( ConfigurationServiceImpl.ScaMethod.REDIRECT ));
+        contractProperties.put(Constants.ContractConfigurationKeys.PURPOSE_CODE,
+                new ContractProperty( ConfigurationServiceImpl.PurposeCode.COMMERCE ));
 
         return new ContractConfiguration("INST EquensWorldline", contractProperties);
     }

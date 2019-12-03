@@ -30,10 +30,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final String I18N_CONTRACT_PREFIX = "contract.";
 
     public static final class ChannelType {
+        private ChannelType(){} // private constructor to hide the implicit public one (Sonarqube issue)
         public static final String ECOMMERCE = "Ecommerce";
     }
 
     public static final class ChargeBearer {
+        private ChargeBearer(){} // private constructor to hide the implicit public one (Sonarqube issue)
         public static final String CRED = "CRED";
         public static final String DEBT = "DEBT";
         public static final String SHAR = "SHAR";
@@ -41,12 +43,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     public static final class PurposeCode {
+        private PurposeCode(){} // private constructor to hide the implicit public one (Sonarqube issue)
         public static final String CARPARK = "Carpark";
         public static final String COMMERCE = "Commerce";
         public static final String TRANSPORT = "Transport";
     }
 
     public static final class ScaMethod {
+        private ScaMethod(){} // private constructor to hide the implicit public one (Sonarqube issue)
         public static final String REDIRECT = "Redirect";
     }
 

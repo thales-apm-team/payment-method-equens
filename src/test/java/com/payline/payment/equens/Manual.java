@@ -1,11 +1,11 @@
 package com.payline.payment.equens;
 
-import com.payline.payment.equens.bean.business.payment.PaymentInitiationRequest;
-import com.payline.payment.equens.bean.business.payment.PaymentInitiationResponse;
-import com.payline.payment.equens.bean.business.payment.PaymentStatusResponse;
+import com.payline.payment.equens.bean.business.fraud.PsuSessionInformation;
+import com.payline.payment.equens.bean.business.payment.*;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
+import com.payline.payment.equens.service.impl.ConfigurationServiceImpl;
 import com.payline.payment.equens.utils.http.PisHttpClient;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
@@ -20,6 +20,8 @@ import com.payline.payment.equens.utils.http.PsuHttpClient;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +41,7 @@ public class Manual {
     private static PsuHttpClient psuHttpClient = PsuHttpClient.getInstance();
 
     public static void main( String[] args ){
+        String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 
         try {
             RequestConfiguration requestConfiguration = new RequestConfiguration(
@@ -48,18 +51,20 @@ public class Manual {
             psuHttpClient.init( requestConfiguration.getPartnerConfiguration() );
 
             // GET aspsps
-            GetAspspsResponse banks = pisHttpClient.getAspsps( requestConfiguration );
+            //GetAspspsResponse banks = pisHttpClient.getAspsps( requestConfiguration );
 
             // POST psu
-            Psu psuCreated = psuHttpClient.createPsu( new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration );
+            //Psu psuCreated = psuHttpClient.createPsu( new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration );
 
             // POST payment
+
             PaymentInitiationRequest.PaymentInitiationRequestBuilder init = MockUtils.aPaymentInitiationRequestBuilder();
-            init.withPsuId( psuCreated.getPsuId() );
+            //init.withPsuId( psuCreated.getPsuId() );
+            init.withPsuId( null );
             PaymentInitiationResponse paymentInitiationResponse = pisHttpClient.initPayment( init.build(), requestConfiguration );
 
             // GET payment
-            PaymentStatusResponse paymentStatusResponse = pisHttpClient.paymentStatus( paymentInitiationResponse.getPaymentId(), requestConfiguration, true );
+            //PaymentStatusResponse paymentStatusResponse = pisHttpClient.paymentStatus( paymentInitiationResponse.getPaymentId(), requestConfiguration, true );
 
             LOGGER.info("END");
         }

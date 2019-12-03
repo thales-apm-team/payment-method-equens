@@ -259,7 +259,13 @@ abstract class OAuthHttpClient {
         if( strResponse == null ){
             throw new PluginException( "Failed to contact the partner API", FailureCause.COMMUNICATION_ERROR );
         }
-        LOGGER.info("Response obtained from partner API [{} {}]", strResponse.getStatusCode(), strResponse.getStatusMessage() );
+
+        if( LOGGER.isDebugEnabled() ){
+            LOGGER.debug( "Response obtained from partner API :" + System.lineSeparator() + strResponse.toString() );
+        } else {
+            LOGGER.info("Response obtained from partner API [{} {}]", strResponse.getStatusCode(), strResponse.getStatusMessage() );
+        }
+
         return strResponse;
     }
 
