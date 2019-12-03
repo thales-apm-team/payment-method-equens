@@ -17,7 +17,7 @@ public class PaymentStatusResponse extends EquensApiMessage {
     private PaymentStatus paymentStatus;
     /** Id used by the ASPSP to refer to the payment. */
     @SerializedName("AspspPaymentId")
-    private PaymentStatus aspspPaymentId;
+    private String aspspPaymentId;
     /**
      * Reference to the payment created by the Initiating Party.
      * This Id will not be visible to the Payment Service User.
@@ -62,7 +62,7 @@ public class PaymentStatusResponse extends EquensApiMessage {
         return paymentStatus;
     }
 
-    public PaymentStatus getAspspPaymentId() {
+    public String getAspspPaymentId() {
         return aspspPaymentId;
     }
 

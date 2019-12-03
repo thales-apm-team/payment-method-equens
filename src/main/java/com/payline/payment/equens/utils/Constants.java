@@ -43,7 +43,7 @@ public class Constants {
      */
     public static class RequestContextKeys {
 
-        // TODO: check if there the use of RequestContext is required. Remove this inner class if it's not.
+        public static final String PAYMENT_ID = "paymentId";
 
         /* Static utility class : no need to instantiate it (Sonar bug fix) */
         private RequestContextKeys(){}

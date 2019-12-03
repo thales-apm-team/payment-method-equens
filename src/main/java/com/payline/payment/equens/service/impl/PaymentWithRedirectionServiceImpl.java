@@ -3,7 +3,10 @@ package com.payline.payment.equens.service.impl;
 import com.payline.payment.equens.bean.business.payment.PaymentStatus;
 import com.payline.payment.equens.bean.business.payment.PaymentStatusResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
+import com.payline.payment.equens.bean.pmapi.TransactionAdditionalData;
+import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.http.PisHttpClient;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.common.OnHoldCause;
@@ -29,8 +32,16 @@ public class PaymentWithRedirectionServiceImpl implements PaymentWithRedirection
         PaymentResponse paymentResponse;
 
         try {
-            // TODO: check if it's necessary to use RequestContext to get the partner transaction id
-            paymentResponse = this.updatePaymentStatus( redirectionPaymentRequest.getTransactionId(), RequestConfiguration.build( redirectionPaymentRequest ) );
+            // Retrieve payment ID from request context
+            if( redirectionPaymentRequest.getRequestContext() == null
+                    || redirectionPaymentRequest.getRequestContext().getRequestData() == null
+                    || redirectionPaymentRequest.getRequestContext().getRequestData().get(Constants.RequestContextKeys.PAYMENT_ID) == null ){
+                throw new InvalidDataException("Missing payment ID from request context");
+            }
+            String paymentId = redirectionPaymentRequest.getRequestContext().getRequestData().get(Constants.RequestContextKeys.PAYMENT_ID);
+
+            // check and update payment status
+            paymentResponse = this.updatePaymentStatus( paymentId, RequestConfiguration.build( redirectionPaymentRequest ) );
         }
         catch( PluginException e ){
             paymentResponse = e.toPaymentResponseFailureBuilder().build();
@@ -88,6 +99,9 @@ public class PaymentWithRedirectionServiceImpl implements PaymentWithRedirection
                 throw new PluginException("Missing payment status in the partner response", FailureCause.PARTNER_UNKNOWN_ERROR);
             }
 
+            // Build transaction additional data
+            TransactionAdditionalData transactionAdditionalData = new TransactionAdditionalData( paymentStatusResponse.getAspspPaymentId() );
+
             // Build the appropriate response
             switch( status ){
                 case OPEN:
@@ -106,6 +120,7 @@ public class PaymentWithRedirectionServiceImpl implements PaymentWithRedirection
                             .withPartnerTransactionId( paymentId )
                             .withStatusCode( status.name() )
                             .withTransactionDetails( new EmptyTransactionDetails() ) // TODO !!
+                            .withTransactionAdditionalData( transactionAdditionalData.toString() )
                             .build();
                     break;
 
@@ -114,6 +129,7 @@ public class PaymentWithRedirectionServiceImpl implements PaymentWithRedirection
                             .withErrorCode("Payment not approved by PSU or insufficient funds")
                             .withFailureCause( FailureCause.CANCEL )
                             .withPartnerTransactionId( paymentId )
+                            .withTransactionAdditionalData( transactionAdditionalData.toString() )
                             .build();
                     break;
 
@@ -122,6 +138,7 @@ public class PaymentWithRedirectionServiceImpl implements PaymentWithRedirection
                             .withErrorCode("Consent approval has expired")
                             .withFailureCause( FailureCause.SESSION_EXPIRED )
                             .withPartnerTransactionId( paymentId )
+                            .withTransactionAdditionalData( transactionAdditionalData.toString() )
                             .build();
                     break;
 
@@ -131,6 +148,7 @@ public class PaymentWithRedirectionServiceImpl implements PaymentWithRedirection
                             .withErrorCode("Payment was rejected due to an error")
                             .withFailureCause( FailureCause.REFUSED )
                             .withPartnerTransactionId( paymentId )
+                            .withTransactionAdditionalData( transactionAdditionalData.toString() )
                             .build();
                     break;
             }

@@ -13,6 +13,7 @@ import com.payline.payment.equens.utils.http.PsuHttpClient;
 import com.payline.pmapi.bean.common.Amount;
 import com.payline.pmapi.bean.common.Buyer;
 import com.payline.pmapi.bean.common.FailureCause;
+import com.payline.pmapi.bean.payment.RequestContext;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
 import com.payline.pmapi.bean.payment.response.PaymentResponse;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseFailure;
@@ -23,10 +24,7 @@ import com.payline.pmapi.service.PaymentService;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Currency;
-import java.util.List;
+import java.util.*;
 
 public class PaymentServiceImpl implements PaymentService {
 
@@ -147,13 +145,19 @@ public class PaymentServiceImpl implements PaymentService {
                     .withUrl( paymentInitResponse.getAspspRedirectUrl() );
 
             // request context
-            // TODO: check if there is a need for RequestContext (see Natixis integration results)
+            Map<String, String> requestData = new HashMap<>();
+            requestData.put(Constants.RequestContextKeys.PAYMENT_ID, paymentInitResponse.getPaymentId());
+            RequestContext requestContext = RequestContext.RequestContextBuilder.aRequestContext()
+                    .withRequestData( requestData )
+                    .withSensitiveRequestData( new HashMap<>() )
+                    .build();
 
             // Build PaymentResponse
             paymentResponse = PaymentResponseRedirect.PaymentResponseRedirectBuilder.aPaymentResponseRedirect()
                     .withPartnerTransactionId( paymentInitResponse.getPaymentId() )
                     .withStatusCode( paymentInitResponse.getPaymentStatus().name() )
                     .withRedirectionRequest( new PaymentResponseRedirect.RedirectionRequest( redirectionRequestBuilder ) )
+                    .withRequestContext( requestContext )
                     .build();
         }
         catch( PluginException e ){
