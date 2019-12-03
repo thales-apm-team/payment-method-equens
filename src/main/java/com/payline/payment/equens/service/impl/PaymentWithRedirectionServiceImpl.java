@@ -13,6 +13,8 @@ import com.payline.pmapi.bean.common.OnHoldCause;
 import com.payline.pmapi.bean.payment.request.RedirectionPaymentRequest;
 import com.payline.pmapi.bean.payment.request.TransactionStatusRequest;
 import com.payline.pmapi.bean.payment.response.PaymentResponse;
+import com.payline.pmapi.bean.payment.response.buyerpaymentidentifier.BankAccount;
+import com.payline.pmapi.bean.payment.response.buyerpaymentidentifier.impl.BankTransfer;
 import com.payline.pmapi.bean.payment.response.buyerpaymentidentifier.impl.EmptyTransactionDetails;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseFailure;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseOnHold;
@@ -102,6 +104,12 @@ public class PaymentWithRedirectionServiceImpl implements PaymentWithRedirection
             // Build transaction additional data
             TransactionAdditionalData transactionAdditionalData = new TransactionAdditionalData( paymentStatusResponse.getAspspPaymentId() );
 
+            // Retrieve merchant IBAN
+            String merchantIban = null;
+            if( requestConfiguration.getContractConfiguration().getProperty( Constants.ContractConfigurationKeys.MERCHANT_IBAN ) != null ){
+                merchantIban = requestConfiguration.getContractConfiguration().getProperty( Constants.ContractConfigurationKeys.MERCHANT_IBAN ).getValue();
+            }
+
             // Build the appropriate response
             switch( status ){
                 case OPEN:
@@ -119,7 +127,10 @@ public class PaymentWithRedirectionServiceImpl implements PaymentWithRedirection
                     paymentResponse = PaymentResponseSuccess.PaymentResponseSuccessBuilder.aPaymentResponseSuccess()
                             .withPartnerTransactionId( paymentId )
                             .withStatusCode( status.name() )
-                            .withTransactionDetails( new EmptyTransactionDetails() ) // TODO !!
+                            .withTransactionDetails( new BankTransfer(
+                                    this.getOwnerBankAccount( paymentStatusResponse ),
+                                    this.getReceiverBankAccount( merchantIban )
+                            ))
                             .withTransactionAdditionalData( transactionAdditionalData.toString() )
                             .build();
                     break;
@@ -164,5 +175,57 @@ public class PaymentWithRedirectionServiceImpl implements PaymentWithRedirection
         }
 
         return paymentResponse;
+    }
+
+    /**
+     * Extract the owner bank account data from the given PaymentStatusResponse.
+     *
+     * @param paymentStatusResponse the payment status response
+     * @return the owner bank account
+     */
+    BankAccount getOwnerBankAccount( PaymentStatusResponse paymentStatusResponse ){
+        // pre-fill a builder with empty strings (null values not authorized)
+        BankAccount.BankAccountBuilder ownerBuilder = BankAccount.BankAccountBuilder.aBankAccount()
+                .withHolder("")
+                .withAccountNumber("")
+                .withIban("")
+                .withBic("")
+                .withCountryCode("")
+                .withBankName("")
+                .withBankCode("");
+
+        // Fill available data
+        if( paymentStatusResponse.getDebtorName() != null ){
+            ownerBuilder.withHolder( paymentStatusResponse.getDebtorName() );
+        }
+        if( paymentStatusResponse.getDebtorAccount() != null ){
+            ownerBuilder.withHolder( paymentStatusResponse.getDebtorAccount() );
+        }
+        if( paymentStatusResponse.getDebtorAgent() != null ){
+            ownerBuilder.withBic( paymentStatusResponse.getDebtorAgent() );
+        }
+
+        return ownerBuilder.build();
+    }
+
+    /**
+     * Build the receiver bank account with the given merchant IBAN.
+     * Every other field is filled with an empty string.
+     *
+     * @param merchantIban the merchant IBAN
+     * @return the receiver bank account
+     */
+    BankAccount getReceiverBankAccount( String merchantIban ){
+        // pre-fill a builder fwith empty strings (null values not authorized)
+        BankAccount.BankAccountBuilder receiverBuilder = BankAccount.BankAccountBuilder.aBankAccount()
+                .withHolder("")
+                .withAccountNumber("")
+                .withIban( merchantIban )
+                .withBic("")
+                .withCountryCode("")
+                .withBankName("")
+                .withBankCode("");
+
+        return receiverBuilder.build();
     }
 }
