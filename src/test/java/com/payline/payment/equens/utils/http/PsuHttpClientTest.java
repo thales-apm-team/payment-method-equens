@@ -3,6 +3,7 @@ package com.payline.payment.equens.utils.http;
 import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
+import com.payline.payment.equens.exception.PluginException;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.junit.jupiter.api.AfterEach;
@@ -84,6 +85,25 @@ public class PsuHttpClientTest {
         assertNull( createdPsu );
     }
 
-    // TODO: test des cas d'erreur (code HTTP 400, content null, etc.)
+    @Test
+    void createPsu_missingMessageId(){
+        // given: the partner API returns an error response
+        String responseBody = "{\n" +
+                "    \"MessageCreateDateTime\": \"2019-12-03T15:39:47.226+0000\",\n" +
+                "    \"MessageId\": \"a6c264d15f1a40f0800e4667bebff622\",\n" +
+                "    \"code\": \"002\",\n" +
+                "    \"message\": \"The message does not comply the schema definition\",\n" +
+                "    \"details\": \"Property messageId : must not be null\"\n" +
+                "}";
+        doReturn( HttpTestUtils.mockStringResponse(400, "Bad Request", responseBody ) )
+                .when( psuHttpClient )
+                .post( anyString(), anyList(), any(HttpEntity.class) );
+
+        // when: calling the method
+        PluginException thrown = assertThrows(PluginException.class,
+                () -> psuHttpClient.createPsu( MockUtils.aPsuCreateRequest(), MockUtils.aRequestConfiguration() ) );
+        assertNotNull(  thrown.getErrorCode() );
+        assertNotNull(  thrown.getFailureCause() );
+    }
 
 }

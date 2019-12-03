@@ -158,8 +158,6 @@ public class PisHttpClientTest {
         assertNotNull(  thrown.getFailureCause() );
     }
 
-    // TODO: test des cas en erreur
-
     // --- Test PisHttpClient#paymentStatus ---
 
     @Test
@@ -196,7 +194,27 @@ public class PisHttpClientTest {
         this.verifyAuthorizationHeader( headersCaptor.getValue() );
     }
 
-    // TODO: test des cas en erreur
+    @Test
+    void paymentStatus_notFound(){
+        // given: the partner API returns a 400 Bad Request
+        String responseContent = "{" +
+                "    \"code\":\"110\"," +
+                "    \"message\":\"Transaction could not be found\"," +
+                "    \"details\":\"Load operation error: transactionId = 666666, reason:[nothing found]\"," +
+                "    \"MessageCreateDateTime\":\"22019-12-03T15:27:32.629+0000\"," +
+                "    \"MessageId\":\"3274abb431c8410f886a903b88285ebd\"" +
+                "}";
+        doReturn( HttpTestUtils.mockStringResponse(404, "Not Found", responseContent ) )
+                .when( pisHttpClient )
+                .get( anyString(), anyList() );
+
+        // when: iretrieving the payment status, then: an exception is thrown
+        PluginException thrown = assertThrows(PluginException.class,
+                () -> pisHttpClient.paymentStatus( "666", MockUtils.aRequestConfiguration(), false ) );
+        assertNotNull(  thrown.getErrorCode() );
+        assertNotNull(  thrown.getFailureCause() );
+    }
+
 
     private void verifyAuthorizationHeader( List<Header> headers ){
         boolean headerPresent = false;

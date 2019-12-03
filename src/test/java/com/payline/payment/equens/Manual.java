@@ -54,17 +54,17 @@ public class Manual {
             //GetAspspsResponse banks = pisHttpClient.getAspsps( requestConfiguration );
 
             // POST psu
-            //Psu psuCreated = psuHttpClient.createPsu( new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration );
+            Psu psuCreated = psuHttpClient.createPsu( new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration );
 
             // POST payment
 
             PaymentInitiationRequest.PaymentInitiationRequestBuilder init = MockUtils.aPaymentInitiationRequestBuilder();
             //init.withPsuId( psuCreated.getPsuId() );
             init.withPsuId( null );
-            PaymentInitiationResponse paymentInitiationResponse = pisHttpClient.initPayment( init.build(), requestConfiguration );
+            //PaymentInitiationResponse paymentInitiationResponse = pisHttpClient.initPayment( init.build(), requestConfiguration );
 
             // GET payment
-            //PaymentStatusResponse paymentStatusResponse = pisHttpClient.paymentStatus( paymentInitiationResponse.getPaymentId(), requestConfiguration, true );
+            //PaymentStatusResponse paymentStatusResponse = pisHttpClient.paymentStatus( "666666", requestConfiguration, true );
 
             LOGGER.info("END");
         }
