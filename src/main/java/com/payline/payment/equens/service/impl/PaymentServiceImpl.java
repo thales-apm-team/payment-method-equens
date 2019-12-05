@@ -142,6 +142,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             // URL
             PaymentResponseRedirect.RedirectionRequest.RedirectionRequestBuilder redirectionRequestBuilder = PaymentResponseRedirect.RedirectionRequest.RedirectionRequestBuilder.aRedirectionRequest()
+                    .withRequestType( PaymentResponseRedirect.RedirectionRequest.RequestType.GET )
                     .withUrl( paymentInitResponse.getAspspRedirectUrl() );
 
             // request context
@@ -156,7 +157,7 @@ public class PaymentServiceImpl implements PaymentService {
             paymentResponse = PaymentResponseRedirect.PaymentResponseRedirectBuilder.aPaymentResponseRedirect()
                     .withPartnerTransactionId( paymentInitResponse.getPaymentId() )
                     .withStatusCode( paymentInitResponse.getPaymentStatus().name() )
-                    .withRedirectionRequest( new PaymentResponseRedirect.RedirectionRequest( redirectionRequestBuilder ) )
+                    .withRedirectionRequest( redirectionRequestBuilder.build() )
                     .withRequestContext( requestContext )
                     .build();
         }
