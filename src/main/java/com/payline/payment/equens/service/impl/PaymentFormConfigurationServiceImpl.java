@@ -2,6 +2,7 @@ package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
+import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.service.LogoPaymentFormConfigurationService;
 import com.payline.pmapi.bean.common.FailureCause;
@@ -30,6 +31,9 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
             Locale locale = paymentFormConfigurationRequest.getLocale();
 
             // retrieve the banks list from the plugin configuration
+            if( paymentFormConfigurationRequest.getPluginConfiguration() == null ){
+                throw new InvalidDataException("Plugin configuration must not be null");
+            }
             final List<SelectOption> aspsps = new ArrayList<>();
             for( Aspsp aspsp : GetAspspsResponse.fromJson( paymentFormConfigurationRequest.getPluginConfiguration() ).getAspsps() ){
                 String value = aspsp.getBic();
