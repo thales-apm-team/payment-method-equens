@@ -77,6 +77,30 @@ public class PaymentFormConfigurationServiceImplTest {
         assertNotNull( ((PaymentFormConfigurationResponseFailure)response).getFailureCause() );
     }
 
+    @Test
+    void getPaymentFormConfiguration_aspspWithoutBic(){
+        // @see https://payline.atlassian.net/browse/PAYLAPMEXT-204
+        // given: in the PluginConfiguration, one ASPSP has no BIC (null), i18n service behaves normally
+        doReturn( "message" )
+                .when( i18n )
+                .getMessage( anyString(), any(Locale.class) );
+        PaymentFormConfigurationRequest request = MockUtils.aPaymentFormConfigurationRequestBuilder()
+                .withPluginConfiguration( "{\"Application\":\"PIS\"," +
+                        "\"ASPSP\":[" +
+                            "{\"AspspId\":\"224\",\"CountryCode\":\"DE\",\"Name\":[\"08/15direkt\"]}" +
+                        "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}"
+                )
+                .build();
 
+        // when: calling getPaymentFormConfiguration method
+        PaymentFormConfigurationResponse response = service.getPaymentFormConfiguration( request );
+
+        // then: the entry label contains only the bank name (no BIC, ni dash)
+        assertEquals(PaymentFormConfigurationResponseSpecific.class, response.getClass());
+        AbstractPaymentForm form = ((PaymentFormConfigurationResponseSpecific) response).getPaymentForm();
+        assertEquals(BankTransferForm.class, form.getClass());
+        BankTransferForm bankTransferForm = (BankTransferForm) form;
+        assertEquals("08/15direkt", bankTransferForm.getBanks().get(0).getValue());
+    }
 
 }
