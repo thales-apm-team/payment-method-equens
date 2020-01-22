@@ -4,7 +4,11 @@ import com.payline.payment.equens.bean.business.fraud.PsuSessionInformation;
 import com.payline.payment.equens.bean.business.payment.*;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
+import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.service.impl.ConfigurationServiceImpl;
+import com.payline.payment.equens.utils.Constants;
+import com.payline.payment.equens.utils.TestUtils;
+import com.payline.payment.equens.utils.http.Authorization;
 import com.payline.payment.equens.utils.security.RSAHolder;
 import com.payline.pmapi.bean.common.Buyer;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
@@ -20,10 +24,6 @@ import com.payline.pmapi.bean.paymentform.request.PaymentFormLogoRequest;
 import org.tomitribe.auth.signatures.Algorithm;
 import org.tomitribe.auth.signatures.Signature;
 import org.tomitribe.auth.signatures.Signer;
-import com.payline.payment.equens.bean.configuration.RequestConfiguration;
-import com.payline.payment.equens.utils.Constants;
-import com.payline.payment.equens.utils.TestUtils;
-import com.payline.payment.equens.utils.http.Authorization;
 
 import java.math.BigInteger;
 import java.security.PrivateKey;
@@ -207,6 +207,8 @@ public class MockUtils {
     public static PartnerConfiguration aPartnerConfiguration(){
         Map<String, String> partnerConfigurationMap = new HashMap<>();
         partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.API_BASE_URL, "https://xs2a.awltest.de/xs2a/routingservice/services" );
+        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME, "MarketPay" );
+        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYLINE_ONBOARDING_ID, "XXXXXX" );
         partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT, "Instant" );
 
         Map<String, String> sensitiveConfigurationMap = new HashMap<>();

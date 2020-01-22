@@ -4,20 +4,25 @@ import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.http.PisHttpClient;
 import com.payline.payment.equens.utils.http.PsuHttpClient;
 import com.payline.payment.equens.utils.properties.ReleaseProperties;
+import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.configuration.ReleaseInformation;
 import com.payline.pmapi.bean.configuration.parameter.AbstractParameter;
 import com.payline.pmapi.bean.configuration.parameter.impl.ListBoxParameter;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
 import com.payline.pmapi.bean.configuration.request.RetrievePluginConfigurationRequest;
+import com.payline.pmapi.bean.payment.ContractConfiguration;
+import com.payline.pmapi.bean.payment.ContractProperty;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -188,6 +193,8 @@ class ConfigurationServiceImplTest {
         String input = MockUtils.aPluginConfiguration();
         doReturn( GetAspspsResponse.fromJson( input ) ).when( pisHttpClient ).getAspsps( any(RequestConfiguration.class) );
 
+        ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration();
+        contractConfiguration.getContractProperties().put(Constants.ContractConfigurationKeys.ONBOARDING_ID, new ContractProperty( "000000" ));
         RetrievePluginConfigurationRequest request = MockUtils.aRetrievePluginConfigurationRequestBuilder()
                 .withPluginConfiguration("initial configuration")
                 .build();
@@ -203,6 +210,13 @@ class ConfigurationServiceImplTest {
         Matcher m2 = aspspListExtractor.matcher( result );
         assertTrue( m2.find() );
         assertEquals( m1.group(1), m2.group(1) );
+
+        // verify the ContractConfiguration passed to the HTTP client is a fake one (@see comment in retrievePluginConfiguration method)
+        ArgumentCaptor<RequestConfiguration> requestConfigurationCaptor = ArgumentCaptor.forClass( RequestConfiguration.class );
+        verify( pisHttpClient, times(1) ).getAspsps( requestConfigurationCaptor.capture() );
+        ContractConfiguration ccArg = requestConfigurationCaptor.getValue().getContractConfiguration();
+        assertEquals( 2, ccArg.getContractProperties().size() );
+        assertNotEquals( "000000", ccArg.getProperty( Constants.ContractConfigurationKeys.ONBOARDING_ID ) );
     }
 
     @Test
@@ -219,6 +233,62 @@ class ConfigurationServiceImplTest {
         String result = service.retrievePluginConfiguration( request );
 
         // then: the returned value contains the initial plugin configuration
+        assertEquals( initialConfiguration, result );
+    }
+
+    @Test
+    void retrievePluginConfiguration_missingPaylineClientName(){
+        // given: the PartnerConfiguration is missing the paylineClientName
+        Map<String, String> partnerConfigurationMap = new HashMap<>();
+        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.API_BASE_URL, "https://xs2a.awltest.de/xs2a/routingservice/services" );
+        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYLINE_ONBOARDING_ID, "XXXXXX" );
+        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT, "Instant" );
+
+        Map<String, String> sensitiveConfigurationMap = new HashMap<>();
+        sensitiveConfigurationMap.put( Constants.PartnerConfigurationKeys.CLIENT_CERTIFICATE, MockUtils.aClientCertificatePem() );
+        sensitiveConfigurationMap.put( Constants.PartnerConfigurationKeys.CLIENT_PRIVATE_KEY, MockUtils.aPrivateKeyPem() );
+        PartnerConfiguration partnerConfiguration = new PartnerConfiguration( partnerConfigurationMap, sensitiveConfigurationMap );
+
+        String initialConfiguration = "initial configuration";
+        RetrievePluginConfigurationRequest request = MockUtils.aRetrievePluginConfigurationRequestBuilder()
+                .withPluginConfiguration(initialConfiguration)
+                .withPartnerConfiguration( partnerConfiguration )
+                .build();
+
+        // when: calling the method retrievePluginConfiguration
+        String result = service.retrievePluginConfiguration( request );
+
+        // then: the HTTP client is never called, and the result equals the initial configuration
+        verify( pisHttpClient, never() ).init( any(PartnerConfiguration.class) );
+        verify( pisHttpClient, never() ).getAspsps( any(RequestConfiguration.class) );
+        assertEquals( initialConfiguration, result );
+    }
+
+    @Test
+    void retrievePluginConfiguration_missingPaylineOnboardingId(){
+        // given: the PartnerConfiguration is missing the paylineOnboardingId
+        Map<String, String> partnerConfigurationMap = new HashMap<>();
+        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.API_BASE_URL, "https://xs2a.awltest.de/xs2a/routingservice/services" );
+        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME, "MarketPay" );
+        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT, "Instant" );
+
+        Map<String, String> sensitiveConfigurationMap = new HashMap<>();
+        sensitiveConfigurationMap.put( Constants.PartnerConfigurationKeys.CLIENT_CERTIFICATE, MockUtils.aClientCertificatePem() );
+        sensitiveConfigurationMap.put( Constants.PartnerConfigurationKeys.CLIENT_PRIVATE_KEY, MockUtils.aPrivateKeyPem() );
+        PartnerConfiguration partnerConfiguration = new PartnerConfiguration( partnerConfigurationMap, sensitiveConfigurationMap );
+
+        String initialConfiguration = "initial configuration";
+        RetrievePluginConfigurationRequest request = MockUtils.aRetrievePluginConfigurationRequestBuilder()
+                .withPluginConfiguration(initialConfiguration)
+                .withPartnerConfiguration( partnerConfiguration )
+                .build();
+
+        // when: calling the method retrievePluginConfiguration
+        String result = service.retrievePluginConfiguration( request );
+
+        // then: the HTTP client is never called, and the result equals the initial configuration
+        verify( pisHttpClient, never() ).init( any(PartnerConfiguration.class) );
+        verify( pisHttpClient, never() ).getAspsps( any(RequestConfiguration.class) );
         assertEquals( initialConfiguration, result );
     }
 
