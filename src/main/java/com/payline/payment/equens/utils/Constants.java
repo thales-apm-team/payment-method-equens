@@ -29,7 +29,7 @@ public class Constants {
      */
     public static class PartnerConfigurationKeys {
 
-        public static final String API_BASE_URL = "apiAuthBaseUrl";
+        public static final String API_BASE_URL = "apisUrl";
         public static final String CLIENT_CERTIFICATE = "clientCertificate";
         public static final String CLIENT_PRIVATE_KEY = "clientPrivateKey";
         public static final String PAYMENT_PRODUCT = "paymentProduct";
