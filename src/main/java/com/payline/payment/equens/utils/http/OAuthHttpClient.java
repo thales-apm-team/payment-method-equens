@@ -239,7 +239,7 @@ abstract class OAuthHttpClient {
 
         while( strResponse == null && attempts <= this.retries ){
             if( LOGGER.isDebugEnabled() ){
-                LOGGER.debug( "Start call to partner API (attempt {}) :" + System.lineSeparator() + PluginUtils.requestToString( httpRequest ), attempts );
+                LOGGER.debug( "Start call to partner API (attempt {}) :{}", attempts, System.lineSeparator() + PluginUtils.requestToString( httpRequest ) );
             } else {
                 LOGGER.info( "Start call to partner API [{} {}] (attempt {})", httpRequest.getMethod(), httpRequest.getURI(), attempts );
             }
@@ -260,7 +260,7 @@ abstract class OAuthHttpClient {
         }
 
         if( LOGGER.isDebugEnabled() ){
-            LOGGER.debug( "Response obtained from partner API :" + System.lineSeparator() + strResponse.toString() );
+            LOGGER.debug( "Response obtained from partner API :{}", System.lineSeparator() + strResponse.toString() );
         } else {
             LOGGER.info("Response obtained from partner API [{} {}]", strResponse.getStatusCode(), strResponse.getStatusMessage() );
         }
