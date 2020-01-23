@@ -30,26 +30,33 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
         try {
             Locale locale = paymentFormConfigurationRequest.getLocale();
 
-            // retrieve the banks list from the plugin configuration
+            // build the banks list from the plugin configuration
             if( paymentFormConfigurationRequest.getPluginConfiguration() == null ){
                 throw new InvalidDataException("Plugin configuration must not be null");
             }
             final List<SelectOption> aspsps = new ArrayList<>();
             for( Aspsp aspsp : GetAspspsResponse.fromJson( paymentFormConfigurationRequest.getPluginConfiguration() ).getAspsps() ){
-                List<String> values = new ArrayList<>();
-                if( aspsp.getBic() != null && !aspsp.getBic().isEmpty() ){
-                    values.add( aspsp.getBic() );
+                // filter by country code
+                // TODO: validate that the filter is performed using the locale (@see PAYLAPMEXT-203). Correct if necessary.
+                if( aspsp.getCountryCode() != null &&
+                        ( locale.getCountry() == null || locale.getCountry().equalsIgnoreCase(  aspsp.getCountryCode()) )){
+                    // build the string to display in the select option value
+                    List<String> values = new ArrayList<>();
+                    if( aspsp.getBic() != null && !aspsp.getBic().isEmpty() ){
+                        values.add( aspsp.getBic() );
+                    }
+                    if( aspsp.getName() != null && !aspsp.getName().isEmpty() ){
+                        values.add( aspsp.getName().get(0) );
+                    }
+                    // add the ASPSP to the select choices
+                    aspsps.add( SelectOption.SelectOptionBuilder.aSelectOption()
+                            .withKey( aspsp.getAspspId() )
+                            .withValue( String.join(" - ", values) )
+                            .build() );
                 }
-                if( aspsp.getName() != null && !aspsp.getName().isEmpty() ){
-                    values.add( aspsp.getName().get(0) );
-                }
-                aspsps.add( SelectOption.SelectOptionBuilder.aSelectOption()
-                        .withKey( aspsp.getAspspId() )
-                        .withValue( String.join(" - ", values) )
-                        .build() );
             }
 
-            // Build form
+            // Build the payment form
             CustomForm form = BankTransferForm.builder()
                     .withBanks( aspsps )
                     .withDescription( i18n.getMessage( "paymentForm.description", locale ) )
