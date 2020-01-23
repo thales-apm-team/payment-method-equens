@@ -1,9 +1,8 @@
 package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.MockUtils;
-import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
-import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.utils.i18n.I18nService;
+import com.payline.pmapi.bean.paymentform.bean.field.SelectOption;
 import com.payline.pmapi.bean.paymentform.bean.form.AbstractPaymentForm;
 import com.payline.pmapi.bean.paymentform.bean.form.BankTransferForm;
 import com.payline.pmapi.bean.paymentform.request.PaymentFormConfigurationRequest;
@@ -87,49 +86,37 @@ public class PaymentFormConfigurationServiceImplTest {
     }
 
     @Test
-    void getPaymentFormConfiguration_aspspWithoutBic(){
+    void getBanks_aspspWithoutBic(){
         // @see https://payline.atlassian.net/browse/PAYLAPMEXT-204
         // given: in the PluginConfiguration, one ASPSP has no BIC (null)
-        PaymentFormConfigurationRequest request = MockUtils.aPaymentFormConfigurationRequestBuilder()
-                .withLocale( Locale.GERMANY )
-                .withPluginConfiguration( "{\"Application\":\"PIS\"," +
-                        "\"ASPSP\":[" +
-                            "{\"AspspId\":\"224\",\"CountryCode\":\"DE\",\"Name\":[\"08/15direkt\"]}" +
-                        "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}"
-                )
-                .build();
+        String pluginConfiguration = "{\"Application\":\"PIS\"," +
+                "\"ASPSP\":[" +
+                    "{\"AspspId\":\"224\",\"CountryCode\":\"DE\",\"Name\":[\"08/15direkt\"]}" +
+                "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
 
-        // when: calling getPaymentFormConfiguration method
-        PaymentFormConfigurationResponse response = service.getPaymentFormConfiguration( request );
+        // when: calling getBanks method
+        List<SelectOption> result = service.getBanks( pluginConfiguration, Locale.GERMANY.getCountry() );
 
         // then: the entry label contains only the bank name (no BIC, ni dash)
-        assertEquals(PaymentFormConfigurationResponseSpecific.class, response.getClass());
-        AbstractPaymentForm form = ((PaymentFormConfigurationResponseSpecific) response).getPaymentForm();
-        assertEquals(BankTransferForm.class, form.getClass());
-        BankTransferForm bankTransferForm = (BankTransferForm) form;
-        assertEquals("08/15direkt", bankTransferForm.getBanks().get(0).getValue());
+        assertEquals( 1, result.size() );
+        assertEquals("08/15direkt", result.get(0).getValue());
     }
 
     @Test
-    void getPaymentFormConfiguration_filterAspspByCountryCode() {
+    void getBanks_filterAspspByCountryCode() {
         // @see: https://payline.atlassian.net/browse/PAYLAPMEXT-203
-        // given: the PluginConfiguration contains 3 banks (1 FR, 1 ES, 1 without CountryCode) and the locale is FRANCE
-        PaymentFormConfigurationRequest request = MockUtils.aPaymentFormConfigurationRequestBuilder()
-                .withLocale( Locale.FRANCE )
-                .withPluginConfiguration( "{\"Application\":\"PIS\"," +
-                        "\"ASPSP\":[" +
-                            "{\"AspspId\": \"1402\", \"Name\": [\"Banque Fédérative du Crédit Mutuel\"], \"CountryCode\": \"FR\", \"BIC\": \"CMCIFRPA\"}," +
-                            "{\"AspspId\": \"1601\", \"Name\": [\"BBVA\"], \"CountryCode\": \"ES\", \"BIC\": \"BBVAESMM\"}," +
-                            "{\"AspspId\": \"1409\", \"Name\": [\"La Banque Postale\"], \"BIC\": \"PSSTFRPP\"}" +
-                        "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}"
-                )
-                .build();
+        // given: the PluginConfiguration contains 3 banks (1 FR, 1 ES, 1 without CountryCode) and the given country code if "FR"
+        String pluginConfiguration = "{\"Application\":\"PIS\"," +
+                "\"ASPSP\":[" +
+                    "{\"AspspId\": \"1402\", \"Name\": [\"Banque Fédérative du Crédit Mutuel\"], \"CountryCode\": \"FR\", \"BIC\": \"CMCIFRPA\"}," +
+                    "{\"AspspId\": \"1601\", \"Name\": [\"BBVA\"], \"CountryCode\": \"ES\", \"BIC\": \"BBVAESMM\"}," +
+                    "{\"AspspId\": \"1409\", \"Name\": [\"La Banque Postale\"], \"BIC\": \"PSSTFRPP\"}" +
+                "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
 
-        // when: calling getPaymentFormConfiguration method
-        PaymentFormConfigurationResponse response = service.getPaymentFormConfiguration( request );
+        // when: calling getBanks method
+        List<SelectOption> result = service.getBanks( pluginConfiguration, Locale.FRANCE.getCountry() );
 
-        // then: response is a success and there is only 1 bank choice
-        BankTransferForm bankTransferForm = (BankTransferForm) ((PaymentFormConfigurationResponseSpecific) response).getPaymentForm();
-        assertEquals(1, bankTransferForm.getBanks().size());
+        // then: there is only 1 bank choice at the end
+        assertEquals(1, result.size());
     }
 }
