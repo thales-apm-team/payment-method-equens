@@ -50,7 +50,7 @@ public class LogoPaymentFormConfigurationServiceTest {
         PaymentFormLogoRequest paymentFormLogoRequest = MockUtils.aPaymentFormLogoRequest();
         doReturn("64").when( config ).get("logo.height");
         doReturn("64").when( config ).get("logo.width");
-        doReturn( "Natixis" ).when( i18n ).getMessage("paymentMethod.name", paymentFormLogoRequest.getLocale() );
+        doReturn( "EquensWorldline" ).when( i18n ).getMessage("paymentMethod.name", paymentFormLogoRequest.getLocale() );
 
         // when: calling method getPaymentFormLogo()
         PaymentFormLogoResponse logoResponse = testService.getPaymentFormLogo( paymentFormLogoRequest );
@@ -59,8 +59,8 @@ public class LogoPaymentFormConfigurationServiceTest {
         assertTrue( logoResponse instanceof PaymentFormLogoResponseFile );
         assertEquals( 64, ((PaymentFormLogoResponseFile) logoResponse).getHeight() );
         assertEquals( 64, ((PaymentFormLogoResponseFile) logoResponse).getWidth() );
-        assertTrue( ((PaymentFormLogoResponseFile) logoResponse).getTitle().contains("Natixis") );
-        assertTrue( ((PaymentFormLogoResponseFile) logoResponse).getAlt().contains("Natixis") );
+        assertTrue( ((PaymentFormLogoResponseFile) logoResponse).getTitle().contains("EquensWorldline") );
+        assertTrue( ((PaymentFormLogoResponseFile) logoResponse).getAlt().contains("EquensWorldline") );
     }
 
     @Test
@@ -69,7 +69,7 @@ public class LogoPaymentFormConfigurationServiceTest {
         PaymentFormLogoRequest paymentFormLogoRequest = MockUtils.aPaymentFormLogoRequest();
         doReturn("abc").when( config ).get("logo.height");
         doReturn("64").when( config ).get("logo.width");
-        doReturn( "Natixis" ).when( i18n ).getMessage("paymentMethod.name", paymentFormLogoRequest.getLocale() );
+        doReturn( "EquensWorldline" ).when( i18n ).getMessage("paymentMethod.name", paymentFormLogoRequest.getLocale() );
 
         // when: calling method getPaymentFormLogo()
         assertThrows( PluginException.class, () -> testService.getPaymentFormLogo( paymentFormLogoRequest ) );
@@ -81,7 +81,7 @@ public class LogoPaymentFormConfigurationServiceTest {
         PaymentFormLogoRequest paymentFormLogoRequest = MockUtils.aPaymentFormLogoRequest();
         doReturn("64").when( config ).get("logo.height");
         doReturn("abc").when( config ).get("logo.width");
-        doReturn( "Natixis" ).when( i18n ).getMessage("paymentMethod.name", paymentFormLogoRequest.getLocale() );
+        doReturn( "EquensWorldline" ).when( i18n ).getMessage("paymentMethod.name", paymentFormLogoRequest.getLocale() );
 
         // when: calling method getPaymentFormLogo()
         assertThrows( PluginException.class, () -> testService.getPaymentFormLogo( paymentFormLogoRequest ) );
