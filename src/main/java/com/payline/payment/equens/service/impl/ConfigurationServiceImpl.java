@@ -8,12 +8,14 @@ import com.payline.payment.equens.utils.http.PisHttpClient;
 import com.payline.payment.equens.utils.http.PsuHttpClient;
 import com.payline.payment.equens.utils.i18n.I18nService;
 import com.payline.payment.equens.utils.properties.ReleaseProperties;
+import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.configuration.ReleaseInformation;
 import com.payline.pmapi.bean.configuration.parameter.AbstractParameter;
 import com.payline.pmapi.bean.configuration.parameter.impl.InputParameter;
 import com.payline.pmapi.bean.configuration.parameter.impl.ListBoxParameter;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
 import com.payline.pmapi.bean.configuration.request.RetrievePluginConfigurationRequest;
+import com.payline.pmapi.bean.payment.ContractConfiguration;
 import com.payline.pmapi.bean.payment.ContractProperty;
 import com.payline.pmapi.logger.LogManager;
 import com.payline.pmapi.service.ConfigurationService;
@@ -153,7 +155,32 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public String retrievePluginConfiguration(RetrievePluginConfigurationRequest retrievePluginConfigurationRequest) {
         try {
-            RequestConfiguration requestConfiguration = RequestConfiguration.build( retrievePluginConfigurationRequest );
+            /*
+            This method is frequently called by a batch.
+            In the context of this call, there is no current transaction, so no merchant contract identified.
+            So the ContractConfiguration contained in the request might be null. Or its content might be irrelevant.
+            Still, the signature algorithm will need a clientName and an onboardingId (@see EquensHttpClient#authorizationHeaders).
+            We create here a fake ContractConfiguration, containing specific onboardingId and a clientName from the
+            PartnerConfiguration. This way, there is no need to duplicate ay of the code in the HTTP client.
+             */
+            PartnerConfiguration partnerConfiguration = retrievePluginConfigurationRequest.getPartnerConfiguration();
+            if( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME ) == null ){
+                throw new PluginException("Missing Payline clientName from partner configuration");
+            }
+            if( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.PAYLINE_ONBOARDING_ID ) == null ){
+                throw new PluginException("Missing Payline onboardingId from partner configuration");
+            }
+            Map<String, ContractProperty> contractProperties = new HashMap<>();
+            contractProperties.put(Constants.ContractConfigurationKeys.CLIENT_NAME,
+                    new ContractProperty( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME ) ));
+            contractProperties.put(Constants.ContractConfigurationKeys.ONBOARDING_ID,
+                    new ContractProperty( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.PAYLINE_ONBOARDING_ID ) ));
+            ContractConfiguration contractConfiguration = new ContractConfiguration("fake contract", contractProperties);
+
+            RequestConfiguration requestConfiguration = new RequestConfiguration(
+                    contractConfiguration,
+                    retrievePluginConfigurationRequest.getEnvironment(),
+                    retrievePluginConfigurationRequest.getPartnerConfiguration());
 
             // Init HTTP client
             pisHttpClient.init( requestConfiguration.getPartnerConfiguration() );

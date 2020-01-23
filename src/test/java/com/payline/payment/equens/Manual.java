@@ -1,21 +1,23 @@
 package com.payline.payment.equens;
 
-import com.payline.payment.equens.bean.business.fraud.PsuSessionInformation;
-import com.payline.payment.equens.bean.business.payment.*;
+import com.payline.payment.equens.bean.business.payment.PaymentInitiationRequest;
+import com.payline.payment.equens.bean.business.payment.PaymentInitiationResponse;
+import com.payline.payment.equens.bean.business.payment.PaymentStatusResponse;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
+import com.payline.payment.equens.bean.configuration.RequestConfiguration;
+import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.service.impl.ConfigurationServiceImpl;
+import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.http.PisHttpClient;
+import com.payline.payment.equens.utils.http.PsuHttpClient;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
+import com.payline.pmapi.bean.configuration.request.RetrievePluginConfigurationRequest;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
 import com.payline.pmapi.bean.payment.ContractProperty;
 import com.payline.pmapi.logger.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.payline.payment.equens.bean.configuration.RequestConfiguration;
-import com.payline.payment.equens.exception.PluginException;
-import com.payline.payment.equens.utils.Constants;
-import com.payline.payment.equens.utils.http.PsuHttpClient;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,6 +46,14 @@ public class Manual {
         String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 
         try {
+            // Manual test of ConfigurationServiceImpl#retrievePluginConfiguration
+            RetrievePluginConfigurationRequest request = MockUtils.aRetrievePluginConfigurationRequestBuilder()
+                    .withContractConfiguration( initContractConfiguration() )
+                    .withPartnerConfiguration( initPartnerConfiguration() )
+                    .build();
+            String result = new ConfigurationServiceImpl().retrievePluginConfiguration( request );
+
+            // Manual tests of the HTTP clients
             RequestConfiguration requestConfiguration = new RequestConfiguration(
                     initContractConfiguration(), MockUtils.anEnvironment(), initPartnerConfiguration());
 
@@ -89,7 +99,10 @@ public class Manual {
 
     private static PartnerConfiguration initPartnerConfiguration() throws IOException {
         Map<String, String> partnerConfigurationMap = new HashMap<>();
-        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.API_BASE_URL, "https://xs2a.awltest.de/xs2a/routingservice/services");
+        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.API_BASE_URL, "https://xs2a.awltest.de/xs2a/routingservice/services" );
+        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME, "MarketPay" );
+        //partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYLINE_ONBOARDING_ID, System.getProperty("project.onboardingId") );
+        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT, "Instant" );
 
         Map<String, String> sensitiveConfigurationMap = new HashMap<>();
         sensitiveConfigurationMap.put( Constants.PartnerConfigurationKeys.CLIENT_CERTIFICATE, new String(Files.readAllBytes(Paths.get(System.getProperty("project.certificateChainPath")))) );

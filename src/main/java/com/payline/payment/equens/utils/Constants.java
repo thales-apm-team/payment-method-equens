@@ -32,6 +32,8 @@ public class Constants {
         public static final String API_BASE_URL = "apisUrl";
         public static final String CLIENT_CERTIFICATE = "clientCertificate";
         public static final String CLIENT_PRIVATE_KEY = "clientPrivateKey";
+        public static final String PAYLINE_CLIENT_NAME = "paylineclientName";
+        public static final String PAYLINE_ONBOARDING_ID = "paylineOnboardingId";
         public static final String PAYMENT_PRODUCT = "paymentProduct";
 
         /* Static utility class : no need to instantiate it (Sonar bug fix) */
