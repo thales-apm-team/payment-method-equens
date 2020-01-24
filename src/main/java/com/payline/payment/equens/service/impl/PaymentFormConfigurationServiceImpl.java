@@ -34,8 +34,8 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
             if( paymentFormConfigurationRequest.getPluginConfiguration() == null ){
                 throw new InvalidDataException("Plugin configuration must not be null");
             }
-            // TODO: validate that the filter is performed using the locale (@see PAYLAPMEXT-203). Correct if necessary.
-            List<SelectOption> banks = this.getBanks( paymentFormConfigurationRequest.getPluginConfiguration(), locale.getCountry() );
+            String countryCode = paymentFormConfigurationRequest.getOrder().getCountry(); // @see https://payline.atlassian.net/browse/PAYLAPMEXT-203
+            List<SelectOption> banks = this.getBanks( paymentFormConfigurationRequest.getPluginConfiguration(), countryCode );
 
             // Build the payment form
             CustomForm form = BankTransferForm.builder()
