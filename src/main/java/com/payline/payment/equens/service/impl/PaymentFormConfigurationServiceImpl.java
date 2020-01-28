@@ -30,28 +30,16 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
         try {
             Locale locale = paymentFormConfigurationRequest.getLocale();
 
-            // retrieve the banks list from the plugin configuration
+            // build the banks list from the plugin configuration
             if( paymentFormConfigurationRequest.getPluginConfiguration() == null ){
                 throw new InvalidDataException("Plugin configuration must not be null");
             }
-            final List<SelectOption> aspsps = new ArrayList<>();
-            for( Aspsp aspsp : GetAspspsResponse.fromJson( paymentFormConfigurationRequest.getPluginConfiguration() ).getAspsps() ){
-                List<String> values = new ArrayList<>();
-                if( aspsp.getBic() != null && !aspsp.getBic().isEmpty() ){
-                    values.add( aspsp.getBic() );
-                }
-                if( aspsp.getName() != null && !aspsp.getName().isEmpty() ){
-                    values.add( aspsp.getName().get(0) );
-                }
-                aspsps.add( SelectOption.SelectOptionBuilder.aSelectOption()
-                        .withKey( aspsp.getAspspId() )
-                        .withValue( String.join(" - ", values) )
-                        .build() );
-            }
+            String countryCode = paymentFormConfigurationRequest.getOrder().getCountry(); // @see https://payline.atlassian.net/browse/PAYLAPMEXT-203
+            List<SelectOption> banks = this.getBanks( paymentFormConfigurationRequest.getPluginConfiguration(), countryCode );
 
-            // Build form
+            // Build the payment form
             CustomForm form = BankTransferForm.builder()
-                    .withBanks( aspsps )
+                    .withBanks( banks )
                     .withDescription( i18n.getMessage( "paymentForm.description", locale ) )
                     .withDisplayButton( true )
                     .withButtonText( i18n.getMessage( "paymentForm.buttonText", locale ) )
@@ -76,5 +64,39 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
         }
 
         return pfcResponse;
+    }
+
+    /**
+     * This method parses the PluginConfiguration string to read the list of ASPSPs and convert it to a list of choices
+     * for a select list. The key of each option is the AspspId and the value is "BIC - name".
+     * PAYLAPMEXT-204: if BIC is null, the selection option's value will just be the name of the bank.
+     * PAYLAPMEXT-203: filter the list using the countryCode (if provided) to keep only the banks which country code matches.
+     *
+     * @param pluginConfiguration The PluginConfiguration string
+     * @param countryCode The 2-letters country code
+     * @return The list of banks, as select options.
+     */
+    List<SelectOption> getBanks( String pluginConfiguration, String countryCode ){
+        final List<SelectOption> options = new ArrayList<>();
+        for( Aspsp aspsp : GetAspspsResponse.fromJson( pluginConfiguration ).getAspsps() ){
+            // filter by country code
+            if( aspsp.getCountryCode() != null &&
+                    ( countryCode == null || countryCode.equalsIgnoreCase(  aspsp.getCountryCode()) )){
+                // build the string to display in the select option value
+                List<String> values = new ArrayList<>();
+                if( aspsp.getBic() != null && !aspsp.getBic().isEmpty() ){
+                    values.add( aspsp.getBic() );
+                }
+                if( aspsp.getName() != null && !aspsp.getName().isEmpty() ){
+                    values.add( aspsp.getName().get(0) );
+                }
+                // add the ASPSP to the select choices
+                options.add( SelectOption.SelectOptionBuilder.aSelectOption()
+                        .withKey( aspsp.getAspspId() )
+                        .withValue( String.join(" - ", values) )
+                        .build() );
+            }
+        }
+        return options;
     }
 }
