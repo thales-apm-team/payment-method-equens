@@ -36,13 +36,16 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
             }
             final List<SelectOption> aspsps = new ArrayList<>();
             for( Aspsp aspsp : GetAspspsResponse.fromJson( paymentFormConfigurationRequest.getPluginConfiguration() ).getAspsps() ){
-                String value = aspsp.getBic();
-                if( !aspsp.getName().isEmpty() ){
-                    value += " - " + aspsp.getName().get(0);
+                List<String> values = new ArrayList<>();
+                if( aspsp.getBic() != null && !aspsp.getBic().isEmpty() ){
+                    values.add( aspsp.getBic() );
+                }
+                if( aspsp.getName() != null && !aspsp.getName().isEmpty() ){
+                    values.add( aspsp.getName().get(0) );
                 }
                 aspsps.add( SelectOption.SelectOptionBuilder.aSelectOption()
                         .withKey( aspsp.getAspspId() )
-                        .withValue( value )
+                        .withValue( String.join(" - ", values) )
                         .build() );
             }
 
