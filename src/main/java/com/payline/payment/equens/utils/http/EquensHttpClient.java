@@ -13,11 +13,9 @@ import com.payline.pmapi.bean.payment.ContractConfiguration;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.ssl.SSLContexts;
 import org.tomitribe.auth.signatures.Signature;
 import org.tomitribe.auth.signatures.Signer;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
@@ -39,7 +37,7 @@ abstract class EquensHttpClient extends OAuthHttpClient {
     public static final String HEADER_AUTH_CLIENT = "Client";
     public static final String HEADER_AUTH_DATE = "Date";
     public static final String HEADER_AUTH_ID = "Id";
-    public static final String HEADER_REQUEST_ID = "X-Request-ID";
+    static final String HEADER_REQUEST_ID = "X-Request-ID";
 
     /**
      * Holder containing the keystore data (keys or certificates).
@@ -47,8 +45,6 @@ abstract class EquensHttpClient extends OAuthHttpClient {
     private RSAHolder rsaHolder;
 
     public void init(PartnerConfiguration partnerConfiguration) {
-        // Create security (SSL) elements from the data passed through PartnerConfiguration
-        SSLContext sslContext;
         try {
             // Build RSA holder from PartnerConfiguration
             if( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.CLIENT_CERTIFICATE ) == null ){
@@ -64,10 +60,6 @@ abstract class EquensHttpClient extends OAuthHttpClient {
                     .parsePrivateKey( partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.CLIENT_PRIVATE_KEY) )
                     .build();
 
-            // SSL context
-            sslContext = SSLContexts.custom()
-                    .loadKeyMaterial(this.rsaHolder.getKeyStore(), this.rsaHolder.getPrivateKeyPassword())
-                    .build();
         } catch ( IOException | GeneralSecurityException e ){
             throw new PluginException( "A problem occurred initializing SSL context", FailureCause.INVALID_DATA, e );
         }
@@ -76,7 +68,7 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         String authorizationEndpoint = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.API_BASE_URL) + "/authorize/token";
 
         // Pass these elements to the parent method initializer
-        super.init(authorizationEndpoint, sslContext);
+        super.init(authorizationEndpoint);
     }
 
     protected abstract String appName();

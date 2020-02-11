@@ -18,13 +18,14 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.logging.log4j.Logger;
 
-import javax.net.ssl.SSLContext;
+import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -79,7 +80,7 @@ abstract class OAuthHttpClient {
      *
      * @param tokenEndpointUrl the full URL of the endpoint that delivers access tokens
      */
-    protected void init( String tokenEndpointUrl, SSLContext sslContext ){
+    protected void init( String tokenEndpointUrl){
         if( this.initialized.compareAndSet(false, true) ){
             // Set the token endpoint URL
             this.tokenEndpointUrl = tokenEndpointUrl;
@@ -112,7 +113,7 @@ abstract class OAuthHttpClient {
             this.client = HttpClientBuilder.create()
                     .useSystemProperties()
                     .setDefaultRequestConfig( requestConfig )
-                    .setSSLContext( sslContext )
+                    .setSSLSocketFactory(new SSLConnectionSocketFactory(HttpsURLConnection.getDefaultSSLSocketFactory(), SSLConnectionSocketFactory.getDefaultHostnameVerifier()))
                     .build();
         }
     }
