@@ -78,23 +78,28 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
      */
     List<SelectOption> getBanks( String pluginConfiguration, String countryCode ){
         final List<SelectOption> options = new ArrayList<>();
-        for( Aspsp aspsp : GetAspspsResponse.fromJson( pluginConfiguration ).getAspsps() ){
-            // filter by country code
-            if( aspsp.getCountryCode() != null &&
-                    ( countryCode == null || countryCode.equalsIgnoreCase(  aspsp.getCountryCode()) )){
-                // build the string to display in the select option value
-                List<String> values = new ArrayList<>();
-                if( aspsp.getBic() != null && !aspsp.getBic().isEmpty() ){
-                    values.add( aspsp.getBic() );
+
+        if (pluginConfiguration == null){
+            LOGGER.warn("pluginConfiguration is null");
+        } else {
+            for (Aspsp aspsp : GetAspspsResponse.fromJson(pluginConfiguration).getAspsps()) {
+                // filter by country code
+                if (aspsp.getCountryCode() != null &&
+                        (countryCode == null || countryCode.equalsIgnoreCase(aspsp.getCountryCode()))) {
+                    // build the string to display in the select option value
+                    List<String> values = new ArrayList<>();
+                    if (aspsp.getBic() != null && !aspsp.getBic().isEmpty()) {
+                        values.add(aspsp.getBic());
+                    }
+                    if (aspsp.getName() != null && !aspsp.getName().isEmpty()) {
+                        values.add(aspsp.getName().get(0));
+                    }
+                    // add the ASPSP to the select choices
+                    options.add(SelectOption.SelectOptionBuilder.aSelectOption()
+                            .withKey(aspsp.getAspspId())
+                            .withValue(String.join(" - ", values))
+                            .build());
                 }
-                if( aspsp.getName() != null && !aspsp.getName().isEmpty() ){
-                    values.add( aspsp.getName().get(0) );
-                }
-                // add the ASPSP to the select choices
-                options.add( SelectOption.SelectOptionBuilder.aSelectOption()
-                        .withKey( aspsp.getAspspId() )
-                        .withValue( String.join(" - ", values) )
-                        .build() );
             }
         }
         return options;

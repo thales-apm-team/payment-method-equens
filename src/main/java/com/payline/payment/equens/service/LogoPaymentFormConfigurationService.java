@@ -1,5 +1,6 @@
 package com.payline.payment.equens.service;
 
+import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.utils.i18n.I18nService;
 import com.payline.payment.equens.utils.properties.ConfigProperties;
 import com.payline.pmapi.bean.paymentform.bean.PaymentFormLogo;
@@ -9,7 +10,6 @@ import com.payline.pmapi.bean.paymentform.response.logo.impl.PaymentFormLogoResp
 import com.payline.pmapi.logger.LogManager;
 import com.payline.pmapi.service.PaymentFormConfigurationService;
 import org.apache.logging.log4j.Logger;
-import com.payline.payment.equens.exception.PluginException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -31,16 +31,15 @@ public abstract class LogoPaymentFormConfigurationService implements PaymentForm
         int height;
         int width;
         try {
-            height = Integer.valueOf(config.get("logo.height"));
-            width = Integer.valueOf(config.get("logo.width"));
-        }
-        catch( NumberFormatException e ){
-            throw new PluginException( "Plugin config error: logo height and width must be integers", e );
+            height = Integer.parseInt(config.get("logo.height"));
+            width = Integer.parseInt(config.get("logo.width"));
+        } catch (NumberFormatException e) {
+            throw new PluginException("Plugin config error: logo height and width must be integers", e);
         }
 
         return PaymentFormLogoResponseFile.PaymentFormLogoResponseFileBuilder.aPaymentFormLogoResponseFile()
-                .withHeight( height )
-                .withWidth( width )
+                .withHeight(height)
+                .withWidth(width)
                 .withTitle(i18n.getMessage("paymentMethod.name", locale))
                 .withAlt(i18n.getMessage("paymentMethod.name", locale) + " logo")
                 .build();
@@ -50,12 +49,11 @@ public abstract class LogoPaymentFormConfigurationService implements PaymentForm
     public PaymentFormLogo getLogo(String paymentMethodIdentifier, Locale locale) {
         String filename = config.get("logo.filename");
 
-        InputStream input = this.getClass().getClassLoader().getResourceAsStream( filename );
-        if (input == null) {
-            LOGGER.error("Unable to load file {}", filename);
-            throw new PluginException("Plugin error: unable to load the logo file" );
-        }
-        try {
+        try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(filename)) {
+            if (input == null) {
+                LOGGER.error("Unable to load file {}", filename);
+                throw new PluginException("Plugin error: unable to load the logo file");
+            }
             // Read logo file
             BufferedImage logo = ImageIO.read(input);
 
