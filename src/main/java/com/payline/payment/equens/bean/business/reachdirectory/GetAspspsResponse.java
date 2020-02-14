@@ -8,17 +8,11 @@ import java.util.List;
 
 public class GetAspspsResponse extends EquensApiMessage {
 
-    @SerializedName("Application")
-    private String application;
     @SerializedName("ASPSP")
     private List<Aspsp> aspsps;
 
     GetAspspsResponse(EquensApiMessageBuilder builder) {
         super(builder);
-    }
-
-    public String getApplication() {
-        return application;
     }
 
     public List<Aspsp> getAspsps() {

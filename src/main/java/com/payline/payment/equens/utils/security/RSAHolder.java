@@ -108,11 +108,6 @@ public class RSAHolder {
             return this;
         }
 
-        public RSAHolderBuilder withChain( List<Certificate> chain ){
-            this.chain = chain;
-            return this;
-        }
-
         /**
          * Parse a PEM encoded string containing a private key.
          *
@@ -134,11 +129,6 @@ public class RSAHolder {
             KeyFactory factory = KeyFactory.getInstance("RSA");
             this.privateKey = factory.generatePrivate(spec);
 
-            return this;
-        }
-
-        public RSAHolderBuilder withPrivateKey( PrivateKey privateKey ){
-            this.privateKey = privateKey;
             return this;
         }
 

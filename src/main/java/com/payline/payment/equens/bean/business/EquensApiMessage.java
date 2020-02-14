@@ -19,28 +19,9 @@ public abstract class EquensApiMessage {
         this.messageId = builder.messageId;
     }
 
-    public Date getMessageCreateDateTime() {
-        return messageCreateDateTime;
-    }
-
-    public String getMessageId() {
-        return messageId;
-    }
-
     public static class EquensApiMessageBuilder {
-
         private Date messageCreateDateTime = new Date();
         private String messageId = "PAYLINE" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
-
-        public EquensApiMessageBuilder withMessageCreateDateTime(Date messageCreateDateTime) {
-            this.messageCreateDateTime = messageCreateDateTime;
-            return this;
-        }
-
-        public EquensApiMessageBuilder withMessageId(String messageId) {
-            this.messageId = messageId;
-            return this;
-        }
 
         // no "build" method as EquensApiMessage is abstract
     }

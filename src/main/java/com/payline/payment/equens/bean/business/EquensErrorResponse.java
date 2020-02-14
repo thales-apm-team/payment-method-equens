@@ -7,7 +7,6 @@ public class EquensErrorResponse extends EquensApiMessage {
     private String code;
     private String message;
     private String details;
-    private Link link;
 
     EquensErrorResponse(EquensApiMessageBuilder builder) {
         super(builder);
@@ -25,17 +24,6 @@ public class EquensErrorResponse extends EquensApiMessage {
         return details;
     }
 
-    public Link getLink() {
-        return link;
-    }
-
-    private static class Link {
-        private String href;
-
-        public String getHref() {
-            return href;
-        }
-    }
 
     public static EquensErrorResponse fromJson( String json ){
         return new Gson().fromJson( json, EquensErrorResponse.class );

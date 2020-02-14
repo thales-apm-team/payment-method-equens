@@ -486,7 +486,6 @@ public class MockUtils {
                 .withFirstName("John")
                 .withLastName("Doe")
                 .withEmail("john.doe@mythalesgroup.io")
-                .withPhoneNumber("0442010101")
                 .withStatus("ACTIVE")
                 .build();
     }

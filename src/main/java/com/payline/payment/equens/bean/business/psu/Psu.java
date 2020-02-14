@@ -31,22 +31,6 @@ public class Psu {
         return psuId;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
     public String getStatus() {
         return status;
     }
@@ -78,11 +62,6 @@ public class Psu {
 
         public PsuBuilder withEmail(String email) {
             this.email = email;
-            return this;
-        }
-
-        public PsuBuilder withPhoneNumber(String phoneNumber) {
-            this.phoneNumber = phoneNumber;
             return this;
         }
 

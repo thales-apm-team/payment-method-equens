@@ -29,18 +29,6 @@ public class RFC6749AccessTokenSuccessResponse {
     @SerializedName("expires_in")
     private Integer expiresIn;
 
-    /**
-     * The refresh token, which can be used to obtain new access tokens using the same
-     * authorization grant as described in Section 6.
-     */
-    @SerializedName("refresh_token")
-    private String refreshToken;
-
-    /**
-     * The scope of the access token as described by Section 3.3.
-     */
-    private String scope;
-
     public String getAccessToken() {
         return accessToken;
     }
@@ -51,14 +39,6 @@ public class RFC6749AccessTokenSuccessResponse {
 
     public Integer getExpiresIn() {
         return expiresIn;
-    }
-
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public String getScope() {
-        return scope;
     }
 
     public static RFC6749AccessTokenSuccessResponse fromJson(String json ){

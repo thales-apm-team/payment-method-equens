@@ -29,16 +29,6 @@ public class PsuCreateRequest extends Psu {
         private Date messageCreateDateTime = new Date();
         private String messageId = "PAYLINE" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
 
-        public PsuCreateRequestBuilder withMessageCreateDateTime(Date messageCreateDateTime) {
-            this.messageCreateDateTime = messageCreateDateTime;
-            return this;
-        }
-
-        public PsuCreateRequestBuilder withMessageId(String messageId) {
-            this.messageId = messageId;
-            return this;
-        }
-
         @Override
         public PsuCreateRequest build(){
             return new PsuCreateRequest(this);

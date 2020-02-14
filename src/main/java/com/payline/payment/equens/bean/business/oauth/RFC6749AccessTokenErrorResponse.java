@@ -22,23 +22,12 @@ public class RFC6749AccessTokenErrorResponse {
     @SerializedName("error_description")
     private String errorDescription;
 
-    /**
-     * A URI identifying a human-readable web page with information about the error, used to
-     * provide the client developer with additional information about the error.
-     */
-    @SerializedName("error_uri")
-    private String errorUri;
-
     public String getError() {
         return error;
     }
 
     public String getErrorDescription() {
         return errorDescription;
-    }
-
-    public String getErrorUri() {
-        return errorUri;
     }
 
     public static RFC6749AccessTokenErrorResponse fromJson(String json ){
