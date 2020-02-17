@@ -85,7 +85,7 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
             for (Aspsp aspsp : GetAspspsResponse.fromJson(pluginConfiguration).getAspsps()) {
                 // filter by country code
                 if (aspsp.getCountryCode() != null &&
-                        (countryCode == null || countryCode.equalsIgnoreCase(aspsp.getCountryCode()))) {
+                        (countryCode == null || countryCode.equals("") || countryCode.equalsIgnoreCase(aspsp.getCountryCode()))) {
                     // build the string to display in the select option value
                     List<String> values = new ArrayList<>();
                     if (aspsp.getBic() != null && !aspsp.getBic().isEmpty()) {
