@@ -4,10 +4,12 @@ import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.utils.Constants;
+import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.payment.equens.utils.http.PisHttpClient;
 import com.payline.payment.equens.utils.http.PsuHttpClient;
 import com.payline.payment.equens.utils.i18n.I18nService;
 import com.payline.payment.equens.utils.properties.ReleaseProperties;
+import com.payline.payment.equens.utils.security.RSAUtils;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.configuration.ReleaseInformation;
 import com.payline.pmapi.bean.configuration.parameter.AbstractParameter;
@@ -21,6 +23,7 @@ import com.payline.pmapi.logger.LogManager;
 import com.payline.pmapi.service.ConfigurationService;
 import org.apache.logging.log4j.Logger;
 
+import java.security.KeyPair;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -60,6 +63,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private PisHttpClient pisHttpClient = PisHttpClient.getInstance();
     private PsuHttpClient psuHttpClient = PsuHttpClient.getInstance();
     private ReleaseProperties releaseProperties = ReleaseProperties.getInstance();
+    private RSAUtils rsaUtils = RSAUtils.getInstance();
 
 
     @Override
@@ -163,6 +167,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             We create here a fake ContractConfiguration, containing specific onboardingId and a clientName from the
             PartnerConfiguration. This way, there is no need to duplicate ay of the code in the HTTP client.
              */
+            /*
+            PAYLAPMEXT-199: add a keyPair in pluginConfiguration to encrypt and decrypt wallet.
+            pluginConfigurationIs now formated as: { banks }|privateKey|publicKey
+             */
             PartnerConfiguration partnerConfiguration = retrievePluginConfigurationRequest.getPartnerConfiguration();
             if( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME ) == null ){
                 throw new PluginException("Missing Payline clientName from partner configuration");
@@ -189,7 +197,18 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             GetAspspsResponse apspsps = pisHttpClient.getAspsps( requestConfiguration );
 
             // Serialize the list (as JSON)
-            return apspsps.toString();
+            String banks = apspsps.toString();
+
+            // get oldKey or generate first key
+            String oldKey = PluginUtils.extractKey( retrievePluginConfigurationRequest.getPluginConfiguration() );
+            String key;
+            if (PluginUtils.isEmpty(oldKey)){
+                 key = rsaUtils.generateKey();
+            }else{
+                key = oldKey;
+            }
+
+            return banks + PluginUtils.SEPARATOR + key;
         }
         catch( RuntimeException e ){
             LOGGER.error("Could not retrieve plugin configuration due to a plugin error", e );

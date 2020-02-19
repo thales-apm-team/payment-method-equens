@@ -5,6 +5,7 @@ import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.service.LogoPaymentFormConfigurationService;
+import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.paymentform.bean.field.SelectOption;
 import com.payline.pmapi.bean.paymentform.bean.form.BankTransferForm;
@@ -85,7 +86,7 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
             for (Aspsp aspsp : GetAspspsResponse.fromJson(pluginConfiguration).getAspsps()) {
                 // filter by country code
                 if (aspsp.getCountryCode() != null &&
-                        (countryCode == null || countryCode.equals("") || countryCode.equalsIgnoreCase(aspsp.getCountryCode()))) {
+                        (PluginUtils.isEmpty(countryCode) || countryCode.equalsIgnoreCase(aspsp.getCountryCode()))) {
                     // build the string to display in the select option value
                     List<String> values = new ArrayList<>();
                     if (aspsp.getBic() != null && !aspsp.getBic().isEmpty()) {
