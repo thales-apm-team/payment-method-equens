@@ -1,6 +1,5 @@
 package com.payline.payment.equens.utils;
 
-import org.apache.commons.codec.binary.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpPost;

@@ -47,20 +47,6 @@ public class Payment {
         PaymentResponse paymentResponse;
 
         try {
-            // Init HTTP clients
-            pisHttpClient.init(paymentRequest.getPartnerConfiguration());
-            psuHttpclient.init(paymentRequest.getPartnerConfiguration());
-
-            // Build request configuration
-            RequestConfiguration requestConfiguration = new RequestConfiguration(
-                    paymentRequest.getContractConfiguration()
-                    , paymentRequest.getEnvironment()
-                    , paymentRequest.getPartnerConfiguration()
-            );
-
-            // Create a new PSU
-            Psu newPsu = psuHttpclient.createPsu(new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration);
-
             // Control on the input data (to avoid NullPointerExceptions)
             if (paymentRequest.getAmount() == null
                     || paymentRequest.getAmount().getCurrency() == null
@@ -70,6 +56,20 @@ public class Payment {
             if (paymentRequest.getOrder() == null) {
                 throw new InvalidDataException("paymentRequest.order is required");
             }
+
+            // Build request configuration
+            RequestConfiguration requestConfiguration = new RequestConfiguration(
+                    paymentRequest.getContractConfiguration()
+                    , paymentRequest.getEnvironment()
+                    , paymentRequest.getPartnerConfiguration()
+            );
+
+            // Init HTTP clients
+            pisHttpClient.init(paymentRequest.getPartnerConfiguration());
+            psuHttpclient.init(paymentRequest.getPartnerConfiguration());
+
+            // Create a new PSU
+            Psu newPsu = psuHttpclient.createPsu(new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration);
 
             // Check required contract properties
             List<String> requiredContractProperties = Arrays.asList(

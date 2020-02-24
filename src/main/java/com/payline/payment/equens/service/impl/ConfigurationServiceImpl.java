@@ -169,7 +169,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
              */
             /*
             PAYLAPMEXT-199: add a keyPair in pluginConfiguration to encrypt and decrypt wallet.
-            pluginConfigurationIs now formated as: { banks }|privateKey|publicKey
+            pluginConfigurationIs now formated as: { banks }&&&privateKey
              */
             PartnerConfiguration partnerConfiguration = retrievePluginConfigurationRequest.getPartnerConfiguration();
             if( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME ) == null ){
@@ -200,12 +200,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             String banks = apspsps.toString();
 
             // get oldKey or generate first key
-            String oldKey = PluginUtils.extractKey( retrievePluginConfigurationRequest.getPluginConfiguration() );
             String key;
-            if (PluginUtils.isEmpty(oldKey)){
-                 key = rsaUtils.generateKey();
-            }else{
-                key = oldKey;
+            String oldKey;
+            if (retrievePluginConfigurationRequest.getPluginConfiguration() == null){
+                key = rsaUtils.generateKey();
+            } else {
+                key = PluginUtils.extractKey( retrievePluginConfigurationRequest.getPluginConfiguration() );
             }
 
             return banks + PluginUtils.SEPARATOR + key;
