@@ -201,7 +201,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
             // get oldKey or generate first key
             String key;
-            String oldKey;
             if (retrievePluginConfigurationRequest.getPluginConfiguration() == null){
                 key = rsaUtils.generateKey();
             } else {
