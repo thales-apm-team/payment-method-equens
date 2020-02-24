@@ -93,7 +93,6 @@ public class PaymentWithRedirectionServiceImpl implements PaymentWithRedirection
             pisHttpClient.init( requestConfiguration.getPartnerConfiguration() );
 
             // Retrieve the payment status
-            // TODO: check if auto-confirm is required (and functional)
             PaymentStatusResponse paymentStatusResponse = pisHttpClient.paymentStatus( paymentId, requestConfiguration, true );
             PaymentStatus status = paymentStatusResponse.getPaymentStatus();
             if( status == null ){

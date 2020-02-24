@@ -213,7 +213,6 @@ public class PisHttpClientTest {
         ArgumentCaptor<List<Header>> headersCaptor = ArgumentCaptor.forClass( List.class );
         verify( pisHttpClient, times(1) ).get( urlCaptor.capture(), headersCaptor.capture() );
         assertTrue( urlCaptor.getValue().contains(paymentId) );
-        // TODO: if the use of autoConfirm is confirmed, test the presence of the parameter in the request URL
         this.verifyAuthorizationHeader( headersCaptor.getValue() );
     }
 
