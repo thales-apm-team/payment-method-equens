@@ -1,2 +1,2 @@
 # payment-method-equens
-payment-method-oney
+payment-method-equens
