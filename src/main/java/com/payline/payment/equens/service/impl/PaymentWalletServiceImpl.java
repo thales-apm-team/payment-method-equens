@@ -1,6 +1,7 @@
 package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.bean.GenericPaymentRequest;
+import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.service.Payment;
 import com.payline.payment.equens.utils.PluginUtils;
@@ -24,10 +25,15 @@ public class PaymentWalletServiceImpl implements PaymentWalletService {
         try {
             GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(walletPaymentRequest);
 
-            // get decrypted wallet data
-            String encryptedAspspId = walletPaymentRequest.getWallet().getPluginPaymentData();
+            // get decrypted wallet data (BIC)
+            String encryptedBic = walletPaymentRequest.getWallet().getPluginPaymentData();
             String key = PluginUtils.extractKey(walletPaymentRequest.getPluginConfiguration());
-            String aspspId = rsaUtils.decrypt(encryptedAspspId, key);
+            String bic = rsaUtils.decrypt(encryptedBic, key);
+
+            // get the aspspId from the BIC
+            String aspspId = PluginUtils.getAspspIdFromBIC(
+                    GetAspspsResponse.fromJson(PluginUtils.extractBanks(walletPaymentRequest.getPluginConfiguration())).getAspsps()
+                    , bic);
 
             return payment.paymentRequest(genericPaymentRequest, aspspId);
         } catch (RuntimeException e) {

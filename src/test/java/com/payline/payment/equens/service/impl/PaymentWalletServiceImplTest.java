@@ -66,7 +66,7 @@ class PaymentWalletServiceImplTest {
 
         doReturn(responseRedirect).when(payment).paymentRequest(any(), anyString());
 
-        doReturn("thisIsWalletDecryptedData").when(rsaUtils).decrypt(any(), any());
+        doReturn("PSSTFRPP").when(rsaUtils).decrypt(any(), any());
 
         // when: calling paymentRequest() method
         PaymentResponse paymentResponse = service.walletPaymentRequest( paymentRequest );

@@ -45,11 +45,11 @@ public class WalletServiceImpl implements WalletService {
     public WalletCreateResponse createWallet(WalletCreateRequest walletCreateRequest) {
         try {
             // get wallet data
-            String bank = walletCreateRequest.getPaymentFormContext().getPaymentFormParameter().get(BankTransferForm.BANK_KEY);
+            String bic = walletCreateRequest.getPaymentFormContext().getPaymentFormParameter().get(BankTransferForm.BANK_KEY);
 
             // encrypt it
             String key = PluginUtils.extractKey(walletCreateRequest.getPluginConfiguration()).trim();
-            String paymentData = rsaUtils.encrypt(bank, key);
+            String paymentData = rsaUtils.encrypt(bic, key);
 
             // create wallet
             return WalletCreateResponseSuccess.builder()

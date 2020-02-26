@@ -23,7 +23,6 @@ import com.payline.pmapi.logger.LogManager;
 import com.payline.pmapi.service.ConfigurationService;
 import org.apache.logging.log4j.Logger;
 
-import java.security.KeyPair;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -201,7 +200,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
             // get oldKey or generate first key
             String key;
-            if (retrievePluginConfigurationRequest.getPluginConfiguration() == null){
+            if (PluginUtils.isEmpty( retrievePluginConfigurationRequest.getPluginConfiguration() )){
                 key = rsaUtils.generateKey();
             } else {
                 key = PluginUtils.extractKey( retrievePluginConfigurationRequest.getPluginConfiguration() );
