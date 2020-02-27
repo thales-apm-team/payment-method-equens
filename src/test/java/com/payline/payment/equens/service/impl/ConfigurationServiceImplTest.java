@@ -17,10 +17,7 @@ import com.payline.pmapi.bean.configuration.request.ContractParametersCheckReque
 import com.payline.pmapi.bean.configuration.request.RetrievePluginConfigurationRequest;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
 import com.payline.pmapi.bean.payment.ContractProperty;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
@@ -197,7 +194,7 @@ class ConfigurationServiceImplTest {
         ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration();
         contractConfiguration.getContractProperties().put(Constants.ContractConfigurationKeys.ONBOARDING_ID, new ContractProperty( "000000" ));
         RetrievePluginConfigurationRequest request = MockUtils.aRetrievePluginConfigurationRequestBuilder()
-                .withPluginConfiguration("initial configuration")
+                .withPluginConfiguration("")
                 .build();
 
         // when: calling the method retrievePluginConfiguration

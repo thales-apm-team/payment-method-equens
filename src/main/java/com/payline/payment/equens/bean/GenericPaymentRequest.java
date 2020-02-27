@@ -3,16 +3,13 @@ package com.payline.payment.equens.bean;
 import com.payline.pmapi.bean.Request;
 import com.payline.pmapi.bean.common.Amount;
 import com.payline.pmapi.bean.common.Buyer;
-import com.payline.pmapi.bean.common.Recurring;
 import com.payline.pmapi.bean.common.SubMerchant;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.*;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
 import com.payline.pmapi.bean.payment.request.WalletPaymentRequest;
 
-import java.util.Date;
 import java.util.Locale;
-import java.util.Map;
 
 public class GenericPaymentRequest implements Request {
     private Locale locale;

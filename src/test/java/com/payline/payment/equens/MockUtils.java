@@ -274,7 +274,7 @@ public class MockUtils {
      */
     public static PaymentFormContext aPaymentFormContext(){
         Map<String, String> paymentFormParameter = new HashMap<>();
-        paymentFormParameter.put( BankTransferForm.BANK_KEY, "CMBRFR2BARK" );
+        paymentFormParameter.put( BankTransferForm.BANK_KEY, "PSSTFRPP" );
 
         return PaymentFormContext.PaymentFormContextBuilder.aPaymentFormContext()
                 .withPaymentFormParameter( paymentFormParameter )

@@ -1,8 +1,8 @@
 package com.payline.payment.equens.utils.i18n;
 
+import com.payline.payment.equens.utils.properties.ConfigProperties;
 import com.payline.pmapi.logger.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.payline.payment.equens.utils.properties.ConfigProperties;
 
 import java.util.Locale;
 import java.util.MissingResourceException;
