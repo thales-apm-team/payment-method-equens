@@ -274,7 +274,7 @@ public class MockUtils {
      */
     public static PaymentFormContext aPaymentFormContext(){
         Map<String, String> paymentFormParameter = new HashMap<>();
-        paymentFormParameter.put( BankTransferForm.BANK_KEY, "CMBRFR2BARK" );
+        paymentFormParameter.put( BankTransferForm.BANK_KEY, "PSSTFRPP" );
 
         return PaymentFormContext.PaymentFormContextBuilder.aPaymentFormContext()
                 .withPaymentFormParameter( paymentFormParameter )
@@ -428,7 +428,9 @@ public class MockUtils {
         return "{\"Application\":\"PIS\",\"ASPSP\":[" +
                     "{\"AspspId\":\"1409\",\"Name\":[\"La Banque Postale\"],\"CountryCode\":\"FR\",\"BIC\":\"PSSTFRPP\"}," +
                     "{\"AspspId\":\"1601\",\"Name\":[\"BBVA\"],\"CountryCode\":\"ES\",\"BIC\":\"BBVAESMM\"}" +
-                "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
+                "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}" +
+                "&&&thisIsAPrivateKey" +
+                "&&&thisIsAPublicKey";
     }
 
     /**

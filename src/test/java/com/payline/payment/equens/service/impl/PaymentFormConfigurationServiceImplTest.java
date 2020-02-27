@@ -18,8 +18,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -88,6 +87,7 @@ public class PaymentFormConfigurationServiceImplTest {
     @Test
     void getBanks_aspspWithoutBic(){
         // @see https://payline.atlassian.net/browse/PAYLAPMEXT-204
+        // @see https://payline.atlassian.net/browse/PAYLAPMEXT-219
         // given: in the PluginConfiguration, one ASPSP has no BIC (null)
         String pluginConfiguration = "{\"Application\":\"PIS\"," +
                 "\"ASPSP\":[" +
@@ -97,9 +97,8 @@ public class PaymentFormConfigurationServiceImplTest {
         // when: calling getBanks method
         List<SelectOption> result = service.getBanks( pluginConfiguration, Locale.GERMANY.getCountry() );
 
-        // then: the entry label contains only the bank name (no BIC, ni dash)
-        assertEquals( 1, result.size() );
-        assertEquals("08/15direkt", result.get(0).getValue());
+        // then: the aspsp is ignered because there is no BIC
+        assertTrue( result.isEmpty() );
     }
 
     @Test
