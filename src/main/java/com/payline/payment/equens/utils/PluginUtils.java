@@ -98,6 +98,7 @@ public class PluginUtils {
     public static String getAspspIdFromBIC(List<Aspsp> aspsps, String bic) {
         // found aspsp with the correct Bic
         List<Aspsp> goodAspsps = aspsps.stream()
+                .filter(x -> !PluginUtils.isEmpty(x.getBic()))
                 .filter(x -> x.getBic().equalsIgnoreCase(bic))
                 .collect(Collectors.toList());
 
