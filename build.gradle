@@ -10,6 +10,16 @@ apply plugin: 'maven-publish'
 apply plugin: 'java-library'
 apply plugin: 'jacoco'
 
+description = 'payment-method-equens'
+group = 'com.payline.payment.scti-equens'
+version = '1.6-SNAPSHOT'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+compileJava.options.encoding = 'UTF-8'
+
+
 def externalFileName = "$projectDir/.external"
 if (file(externalFileName).exists()) {
     apply from: "external.gradle"
@@ -17,17 +27,8 @@ if (file(externalFileName).exists()) {
     apply from: "monext.gradle"
 }
 
-description = 'payment-method-equens'
-group = 'com.payline.payment.scti-equens'
-version = '1.5.1-SNAPSHOT'
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-compileJava.options.encoding = 'UTF-8'
-
 ext {
-    paymentMethodApiVersion = '1.8'
+    paymentMethodApiVersion = '1.9'
     paymentMethodIntegrationVersion = '1.4'
 }
 
