@@ -88,3 +88,8 @@ test {
     useJUnitPlatform()
     exclude('**/*IT.class')
 }
+
+dependencyCheck {
+    format 'ALL'
+    skipConfigurations = ['jacocoAgent', 'jacocoAnt', 'annotationProcessor', 'axisGenAntTask', 'jaxws', 'execJar', 'jaxb', 'generateSources']
+}
