@@ -10,7 +10,6 @@ import com.payline.pmapi.bean.wallet.bean.WalletDisplay;
 import com.payline.pmapi.bean.wallet.request.WalletCreateRequest;
 import com.payline.pmapi.bean.wallet.request.WalletDisplayRequest;
 import com.payline.pmapi.bean.wallet.response.WalletCreateResponse;
-import com.payline.pmapi.bean.wallet.response.WalletDisplayResponse;
 import com.payline.pmapi.bean.wallet.response.impl.WalletCreateResponseFailure;
 import com.payline.pmapi.bean.wallet.response.impl.WalletCreateResponseSuccess;
 import com.payline.pmapi.bean.wallet.response.impl.WalletDeleteResponseSuccess;
@@ -25,7 +24,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 
 class WalletServiceImplTest {
@@ -54,12 +52,13 @@ class WalletServiceImplTest {
 
     @Test
     void createWallet() {
-        String pluginPaymentData = "thisIsWalletDataEncrypted";
+        String pluginPaymentData = MockUtils.aWalletPaymentData().toString();
 
         Mockito.doReturn(pluginPaymentData).when(rsaUtils).encrypt(anyString(), anyString());
 
-        Map<String,String> paymentFormDataContext = new HashMap<>();
+        Map<String, String> paymentFormDataContext = new HashMap<>();
         paymentFormDataContext.put(BankTransferForm.BANK_KEY, "thisIsABank");
+        paymentFormDataContext.put(BankTransferForm.IBAN_KEY, "thisIsAnIban");
 
         PaymentFormContext context = PaymentFormContext.PaymentFormContextBuilder
                 .aPaymentFormContext()
@@ -70,6 +69,59 @@ class WalletServiceImplTest {
                 .pluginConfiguration(MockUtils.aPluginConfiguration())
                 .build();
         WalletCreateResponse response = service.createWallet(request);
+        System.out.println(response);
+
+        Assertions.assertEquals(WalletCreateResponseSuccess.class, response.getClass());
+        WalletCreateResponseSuccess responseSuccess = (WalletCreateResponseSuccess) response;
+        Assertions.assertEquals(pluginPaymentData, responseSuccess.getPluginPaymentData());
+    }
+
+    @Test
+    void createWalletBicNull() {
+        String pluginPaymentData = MockUtils.aWalletPaymentDataBicNull().toString();
+
+        Mockito.doReturn(pluginPaymentData).when(rsaUtils).encrypt(anyString(), anyString());
+
+        Map<String, String> paymentFormDataContext = new HashMap<>();
+        paymentFormDataContext.put(BankTransferForm.BANK_KEY, "thisIsABank");
+        paymentFormDataContext.put(BankTransferForm.IBAN_KEY, "thisIsAnIban");
+
+        PaymentFormContext context = PaymentFormContext.PaymentFormContextBuilder
+                .aPaymentFormContext()
+                .withPaymentFormParameter(paymentFormDataContext)
+                .build();
+        WalletCreateRequest request = WalletCreateRequest.builder()
+                .paymentFormContext(context)
+                .pluginConfiguration(MockUtils.aPluginConfiguration())
+                .build();
+        WalletCreateResponse response = service.createWallet(request);
+        System.out.println(response);
+
+        Assertions.assertEquals(WalletCreateResponseSuccess.class, response.getClass());
+        WalletCreateResponseSuccess responseSuccess = (WalletCreateResponseSuccess) response;
+        Assertions.assertEquals(pluginPaymentData, responseSuccess.getPluginPaymentData());
+    }
+
+    @Test
+    void createWalletIbanNull() {
+        String pluginPaymentData = MockUtils.aWalletPaymentDataIbanNull().toString();
+
+        Mockito.doReturn(pluginPaymentData).when(rsaUtils).encrypt(anyString(), anyString());
+
+        Map<String, String> paymentFormDataContext = new HashMap<>();
+        paymentFormDataContext.put(BankTransferForm.BANK_KEY, "thisIsABank");
+        paymentFormDataContext.put(BankTransferForm.IBAN_KEY, "thisIsAnIban");
+
+        PaymentFormContext context = PaymentFormContext.PaymentFormContextBuilder
+                .aPaymentFormContext()
+                .withPaymentFormParameter(paymentFormDataContext)
+                .build();
+        WalletCreateRequest request = WalletCreateRequest.builder()
+                .paymentFormContext(context)
+                .pluginConfiguration(MockUtils.aPluginConfiguration())
+                .build();
+        WalletCreateResponse response = service.createWallet(request);
+        System.out.println(response);
 
         Assertions.assertEquals(WalletCreateResponseSuccess.class, response.getClass());
         WalletCreateResponseSuccess responseSuccess = (WalletCreateResponseSuccess) response;
@@ -81,7 +133,7 @@ class WalletServiceImplTest {
 
         Mockito.doThrow(new PluginException("foo")).when(rsaUtils).encrypt(anyString(), anyString());
 
-        Map<String,String> paymentFormDataContext = new HashMap<>();
+        Map<String, String> paymentFormDataContext = new HashMap<>();
         paymentFormDataContext.put(BankTransferForm.BANK_KEY, "thisIsABank");
 
         PaymentFormContext context = PaymentFormContext.PaymentFormContextBuilder
@@ -102,7 +154,7 @@ class WalletServiceImplTest {
 
         Mockito.doThrow(new PluginException("foo")).when(rsaUtils).encrypt(anyString(), anyString());
 
-        Map<String,String> paymentFormDataContext = new HashMap<>();
+        Map<String, String> paymentFormDataContext = new HashMap<>();
         paymentFormDataContext.put(BankTransferForm.BANK_KEY, "thisIsABank");
 
         PaymentFormContext context = PaymentFormContext.PaymentFormContextBuilder
@@ -120,11 +172,11 @@ class WalletServiceImplTest {
 
     @Test
     void displayWallet() {
-        String pluginPaymentData = "thisIsWalletData";
+        String pluginPaymentData = MockUtils.aWalletPaymentData().toString();
         Mockito.doReturn(pluginPaymentData).when(rsaUtils).decrypt(anyString(), anyString());
 
         Wallet wallet = Wallet.builder()
-                .pluginPaymentData("foo")
+                .pluginPaymentData(pluginPaymentData)
                 .build();
 
         WalletDisplayRequest request = WalletDisplayRequest.builder()
@@ -134,9 +186,8 @@ class WalletServiceImplTest {
 
         WalletDisplay response = (WalletDisplay) service.displayWallet(request);
         Assertions.assertNotNull(response.getWalletFields());
-        Assertions.assertEquals(1, response.getWalletFields().size());
+        Assertions.assertEquals(2, response.getWalletFields().size());
     }
-
 
     @Test
     void displayWalletFailure() {

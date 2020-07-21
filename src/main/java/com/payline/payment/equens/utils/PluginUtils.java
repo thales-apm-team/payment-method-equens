@@ -104,7 +104,7 @@ public class PluginUtils {
      * @see https://payline.atlassian.net/browse/PAYLAPMEXT-221
      */
     public static String getAspspIdFromBIC(List<Aspsp> aspsps, String bic) {
-        if (isEmpty(bic) || bic.length()<8){
+        if (isEmpty(bic) || bic.length() < 8) {
             throw new InvalidDataException("Invalid bic:" + bic);
         }
 
@@ -137,6 +137,32 @@ public class PluginUtils {
 
         // return its aspspId
         return goodAspsps.get(0).getAspspId();
+    }
+
+    /**
+     * put X for every characters in the IBAN except the 4 first, the 4 (or 5) last and " "
+     *
+     * @param iban the String to hide
+     * @return String hided
+     */
+    public static String hideIban(String iban) {
+        String hideIban = iban.substring(0, 4);
+        String endIban = iban.substring(iban.length() - 4);
+        // if there is an " " in the last four characters, whe take the last five
+        // can't have more than one " "
+        if (endIban.contains(" ")) {
+            endIban = iban.substring(iban.length() - 5);
+        }
+
+        // mask all characters between the fourth and the four (or five) before the end of the IBAN
+        for (int i = 4; i < iban.substring(4, iban.length() - endIban.length()).length() + 4; i++) {
+            if (iban.charAt(i) == ' ') {
+                hideIban = hideIban.concat(" ");
+            } else {
+                hideIban = hideIban.concat("X");
+            }
+        }
+        return hideIban.concat(endIban);
     }
 
 }

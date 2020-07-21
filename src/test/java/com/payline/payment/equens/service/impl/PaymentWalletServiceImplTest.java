@@ -43,7 +43,7 @@ class PaymentWalletServiceImplTest {
     void walletPaymentRequest() throws Exception{
         // given: a valid walletPaymentRequest
         Wallet wallet = Wallet.builder()
-                .pluginPaymentData("thisIsWalletEncryptedData")
+                .pluginPaymentData(MockUtils.aWalletPaymentData().toString())
                 .build();
 
         WalletPaymentRequest paymentRequest = WalletPaymentRequest.builder()
@@ -66,10 +66,12 @@ class PaymentWalletServiceImplTest {
 
         doReturn(responseRedirect).when(payment).paymentRequest(any(), anyString());
 
-        doReturn("PSSTFRPP").when(rsaUtils).decrypt(any(), any());
+        doReturn(MockUtils.aWalletPaymentData().toString()).when(rsaUtils).decrypt(any(), any());
 
         // when: calling paymentRequest() method
         PaymentResponse paymentResponse = service.walletPaymentRequest( paymentRequest );
+        System.out.println(paymentRequest);
+        System.out.println(paymentResponse);
 
         // then: the payment response is a success
         assertEquals( PaymentResponseRedirect.class, paymentResponse.getClass() );

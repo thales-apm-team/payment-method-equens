@@ -1,6 +1,9 @@
 package com.payline.payment.equens.service.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.payline.payment.equens.bean.GenericPaymentRequest;
+import com.payline.payment.equens.bean.business.payment.WalletPaymentData;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.service.Payment;
@@ -25,10 +28,16 @@ public class PaymentWalletServiceImpl implements PaymentWalletService {
         try {
             GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(walletPaymentRequest);
 
-            // get decrypted wallet data (BIC)
-            String encryptedBic = walletPaymentRequest.getWallet().getPluginPaymentData();
+            // get decrypted wallet data (BIC + IBAN)
+            String encryptedData = walletPaymentRequest.getWallet().getPluginPaymentData();
             String key = PluginUtils.extractKey(walletPaymentRequest.getPluginConfiguration());
-            String bic = rsaUtils.decrypt(encryptedBic, key);
+            String data = rsaUtils.decrypt(encryptedData, key);
+
+            // create the WalletPaymentData object to recover the BIC
+            Gson gson = new GsonBuilder().create();
+            WalletPaymentData walletPaymentData = gson.fromJson(data, WalletPaymentData.class);
+
+            String bic = walletPaymentData.getBic();
 
             // get the aspspId from the BIC
             String aspspId = PluginUtils.getAspspIdFromBIC(

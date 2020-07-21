@@ -81,4 +81,12 @@ class PluginUtilsTest {
         Assertions.assertThrows(PluginException.class, () -> PluginUtils.getAspspIdFromBIC(aspsps, null));
     }
 
+    @Test
+    void hideIban() {
+        String ibanWithSpaces = "FR51 3265 1245 41AZ 1325 4598 145";
+        String ibanWithoutSpaces = "FR513265124541AZ13254598145";
+
+        Assertions.assertEquals("FR51 XXXX XXXX XXXX XXXX XXX8 145", PluginUtils.hideIban(ibanWithSpaces));
+        Assertions.assertEquals("FR51XXXXXXXXXXXXXXXXXXX8145", PluginUtils.hideIban(ibanWithoutSpaces));
+    }
 }
