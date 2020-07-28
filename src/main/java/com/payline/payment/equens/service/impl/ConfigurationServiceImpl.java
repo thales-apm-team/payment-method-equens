@@ -53,6 +53,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         public static final String TRANSPORT = "Transport";
     }
 
+    public static final class CountryCode {
+        private CountryCode(){} // private constructor to hide the implicit public one (Sonarqube issue)
+        public static final String FR = "FR";
+        public static final String ES = "ES";
+        public static final String ALL = "ALL";
+    }
+
     public static final class ScaMethod {
         private ScaMethod(){} // private constructor to hide the implicit public one (Sonarqube issue)
         public static final String REDIRECT = "Redirect";
@@ -105,6 +112,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         purposeCodes.put(PurposeCode.COMMERCE, PurposeCode.COMMERCE);
         purposeCodes.put(PurposeCode.TRANSPORT, PurposeCode.TRANSPORT);
         parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.PURPOSE_CODE, purposeCodes, PurposeCode.COMMERCE, true, locale ) );
+
+        // Create a listBox who display countries accepted by the API
+        Map<String, String> countryCode = new HashMap<>();
+        countryCode.put(CountryCode.FR, CountryCode.FR);
+        countryCode.put(CountryCode.ES, CountryCode.ES);
+        countryCode.put(CountryCode.ALL, i18n.getMessage("countryCode.all", locale));
+        parameters.add(this.newListBoxParameter(Constants.ContractConfigurationKeys.COUNTRIES, countryCode, CountryCode.ALL, true, locale));
 
         return parameters;
     }

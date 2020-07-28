@@ -64,9 +64,9 @@ class PaymentWalletServiceImplTest {
                 .withRedirectionRequest(redirectionRequest)
                 .build();
 
-        doReturn(responseRedirect).when(payment).paymentRequest(any(), anyString());
+        doReturn(responseRedirect).when(payment).paymentRequest(any(), any());
 
-        doReturn("PSSTFRPP").when(rsaUtils).decrypt(any(), any());
+        doReturn(MockUtils.aWalletPaymentdata().toString()).when(rsaUtils).decrypt(any(), any());
 
         // when: calling paymentRequest() method
         PaymentResponse paymentResponse = service.walletPaymentRequest( paymentRequest );
@@ -100,7 +100,7 @@ class PaymentWalletServiceImplTest {
                 .withRedirectionRequest(redirectionRequest)
                 .build();
 
-        doReturn(responseRedirect).when(payment).paymentRequest(any(), anyString());
+        doReturn(responseRedirect).when(payment).paymentRequest(any(), any());
 
         doThrow(new PluginException("foo")).when(rsaUtils).decrypt(any(), any());
 

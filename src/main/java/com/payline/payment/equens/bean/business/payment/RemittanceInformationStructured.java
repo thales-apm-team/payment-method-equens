@@ -25,5 +25,7 @@ public class RemittanceInformationStructured {
         }
     }
 
-
+    public String getReference() {
+        return reference;
+    }
 }

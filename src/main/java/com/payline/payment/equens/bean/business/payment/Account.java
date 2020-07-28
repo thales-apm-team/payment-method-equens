@@ -25,4 +25,7 @@ public class Account {
         }
     }
 
+    public String getIdentification() {
+        return identification;
+    }
 }

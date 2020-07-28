@@ -51,7 +51,7 @@ public class PaymentServiceImplTest {
                 .withRedirectionRequest(redirectionRequest)
                 .build();
 
-        doReturn(responseRedirect).when(payment).paymentRequest(any(), anyString());
+        doReturn(responseRedirect).when(payment).paymentRequest(any(), any());
 
         // when: calling paymentRequest() method
         PaymentResponse paymentResponse = service.paymentRequest( paymentRequest );

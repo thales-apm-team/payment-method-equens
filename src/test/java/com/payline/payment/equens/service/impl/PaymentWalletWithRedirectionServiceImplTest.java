@@ -77,7 +77,7 @@ class PaymentWalletWithRedirectionServiceImplTest {
                 requestData).build();
         final WalletRedirectionPaymentRequest walletRedirectionPaymentRequest = WalletRedirectionPaymentRequest.builder()
                 .requestContext(requestContext)
-                .contractConfiguration(MockUtils.aContractConfiguration())
+                .contractConfiguration(MockUtils.aContractConfiguration(MockUtils.getExampleCountry()))
                 .environment(MockUtils.anEnvironment())
                 .partnerConfiguration(MockUtils.aPartnerConfiguration())
                 .wallet(Wallet.builder().pluginPaymentData("dataEncoded").build()).build();

@@ -137,7 +137,7 @@ public class PisHttpClientTest {
                 .post( anyString(), anyList(), any(HttpEntity.class) );
 
         // when: initializing a payment
-        PaymentInitiationResponse response = pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(), MockUtils.aRequestConfiguration());
+        PaymentInitiationResponse response = pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()), MockUtils.aRequestConfiguration());
 
         // then: the response contains the redirection URL
         assertNotNull( response );
@@ -157,7 +157,7 @@ public class PisHttpClientTest {
         doReturn( null ).when( config ).get( anyString() );
 
         // when: calling the method, then: an exception is thrown
-        assertThrows( InvalidDataException.class, () -> pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(), MockUtils.aRequestConfiguration()) );
+        assertThrows( InvalidDataException.class, () -> pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()), MockUtils.aRequestConfiguration()) );
     }
 
     @Test
@@ -176,7 +176,7 @@ public class PisHttpClientTest {
 
         // when: initializing a payment, then: an exception is thrown
         PluginException thrown = assertThrows(PluginException.class,
-                () -> pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(), MockUtils.aRequestConfiguration()) );
+                () -> pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()), MockUtils.aRequestConfiguration()) );
         assertNotNull(  thrown.getErrorCode() );
         assertNotNull(  thrown.getFailureCause() );
     }
