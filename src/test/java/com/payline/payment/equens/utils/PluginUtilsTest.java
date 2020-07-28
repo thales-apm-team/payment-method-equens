@@ -1,9 +1,13 @@
 package com.payline.payment.equens.utils;
 
+import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
+import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.service.JsonService;
+import com.payline.payment.equens.service.Payment;
+import com.payline.payment.equens.service.impl.ConfigurationServiceImpl;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -11,10 +15,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PluginUtilsTest {
     private JsonService jsonService = JsonService.getInstance();
@@ -83,6 +87,71 @@ class PluginUtilsTest {
         Assertions.assertThrows(PluginException.class, () -> PluginUtils.getAspspIdFromBIC(aspsps, null));
     }
 
+    @Test
+    void getCountryCodeFromBIC() {
+        String aspspJson = "{\"Application\":\"PIS\",\"ASPSP\":[" +
+                "{\"AspspId\":\"1234\",\"Name\":[\"a Bank\"],\"CountryCode\":\"FR\",\"BIC\":\"FOOBARBAZXX\"}," +
+                "{\"AspspId\":\"1409\",\"Name\":[\"La Banque Postale\"],\"CountryCode\":\"FR\",\"BIC\":\"PSSTFRPP\"}," +
+                "{\"AspspId\":\"1601\",\"Name\":[\"BBVA\"],\"CountryCode\":\"ES\",\"BIC\":\"BBVAESMM\"}" +
+                "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
+
+        List<Aspsp> aspsps = jsonService.fromJson(aspspJson, GetAspspsResponse.class).getAspsps();
+        Assertions.assertEquals("FR", PluginUtils.getCountryCodeFromBIC(aspsps, "PSSTFRPP"));
+        Assertions.assertEquals("ES", PluginUtils.getCountryCodeFromBIC(aspsps, "BBVAESMM"));
+
+        Assertions.assertThrows(InvalidDataException.class,
+                () -> PluginUtils.getCountryCodeFromBIC(aspsps, "ANINVALIDBIC"),
+                "Can't find a country for this BIC ANINVALIDBIC"
+        );
+    }
+
+    @Test
+    void createListCountry_OneCountry() {
+        List<String> expected = new ArrayList<String>() {
+        };
+        expected.add(ConfigurationServiceImpl.CountryCode.FR);
+
+        List<String> listCountry = PluginUtils.createListCountry(ConfigurationServiceImpl.CountryCode.FR);
+
+        Assertions.assertEquals(expected, listCountry);
+
+    }
+
+    @Test
+    void createListCountry_TOUSCountry() {
+        List<String> expected = new ArrayList<>();
+        expected.add(ConfigurationServiceImpl.CountryCode.FR);
+        expected.add(ConfigurationServiceImpl.CountryCode.ES);
+
+        List<String> listCountry = PluginUtils.createListCountry(ConfigurationServiceImpl.CountryCode.ALL);
+
+        Assertions.assertEquals(expected, listCountry);
+    }
+
+    @Test
+    void createListCountry_NullCountry() {
+        Assertions.assertThrows(InvalidDataException.class,
+                () -> PluginUtils.createListCountry(""),
+                "Country in ContractConfiguration should not be empty"
+        );
+    }
+
+    @Test
+    void correctIban() {
+        String iban = "FR1234M6789";
+        List<String> listCountry = new ArrayList<>();
+        listCountry.add(ConfigurationServiceImpl.CountryCode.FR);
+
+        Assertions.assertTrue(PluginUtils.correctIban(listCountry, iban));
+    }
+
+    @Test
+    void correctIban_emptyListCountry() {
+        Assertions.assertThrows(InvalidDataException.class,
+                () -> PluginUtils.correctIban(new ArrayList(), MockUtils.getIbanFR()),
+                "listCountry should not be empty"
+        );
+    }
     @Test
     void hideIban() {
         String ibanWithSpaces = "FR51 3265 1245 41AZ 1325 4598 145";

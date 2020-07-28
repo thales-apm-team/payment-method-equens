@@ -2,6 +2,7 @@ package com.payline.payment.equens.utils;
 
 import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
 import com.payline.payment.equens.exception.InvalidDataException;
+import com.payline.payment.equens.service.impl.ConfigurationServiceImpl;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpPost;
@@ -139,6 +140,56 @@ public class PluginUtils {
         return goodAspsps.get(0).getAspspId();
     }
 
+    // find the country of the bank from his BIC
+    public static String getCountryCodeFromBIC(List<Aspsp> listAspsps, String bic) {
+        if (isEmpty(bic) || bic.length()<8){
+            throw new InvalidDataException("Invalid bic:" + bic);
+        }
+
+        if (listAspsps.isEmpty()) {
+            throw new InvalidDataException("the list of Aspsps is empty");
+        }
+
+        for (Aspsp aspsp : listAspsps) {
+            if (aspsp.getBic().equals(bic)) {
+                return aspsp.getCountryCode();
+            }
+        }
+        throw new InvalidDataException("Can't find a country for this BIC " + bic);
+    }
+
+    // create the list of countries accepted by the merchant
+    public static List<String> createListCountry(String country) {
+        List<String> listCountryCode = new ArrayList<>();
+        if (PluginUtils.isEmpty(country)) {
+            throw new InvalidDataException("Country in ContractConfiguration should not be empty");
+        }
+
+        // all the countries available for Equens
+        if (country.trim().equalsIgnoreCase(ConfigurationServiceImpl.CountryCode.ALL)) {
+            listCountryCode.add(ConfigurationServiceImpl.CountryCode.FR);
+            listCountryCode.add(ConfigurationServiceImpl.CountryCode.ES);
+        } else {
+            listCountryCode.add(country.trim().toUpperCase());
+        }
+        return listCountryCode;
+    }
+
+    // check if the 2 first letter in an IBAN are the iso code of country available by the merchant
+    public static boolean correctIban(List<String> listCountry, String iban) {
+
+        if (listCountry.isEmpty()) {
+            throw new InvalidDataException("listCountry should not be empty");
+        }
+
+        for (String s : listCountry) {
+            String pattern = "(^" + s + "[0-9A-Z]*)";
+            if (iban.trim().toUpperCase().matches(pattern)) {
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * put X for every characters in the IBAN except the 4 first, the 4 (or 5) last and " "
      *

@@ -4,6 +4,7 @@ import com.payline.payment.equens.bean.GenericPaymentRequest;
 import com.payline.payment.equens.bean.business.payment.WalletPaymentData;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.exception.InvalidDataException;
+import com.payline.payment.equens.bean.business.payment.WalletPaymentData;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.service.Payment;
@@ -41,14 +42,7 @@ public class PaymentWalletServiceImpl implements PaymentWalletService {
             // create the WalletPaymentData object to recover the BIC
             WalletPaymentData walletPaymentData = jsonService.fromJson(data, WalletPaymentData.class);
 
-            String bic = walletPaymentData.getBic();
-
-            // get the aspspId from the BIC
-            String aspspId = PluginUtils.getAspspIdFromBIC(
-                    jsonService.fromJson(PluginUtils.extractBanks(walletPaymentRequest.getPluginConfiguration()), GetAspspsResponse.class).getAspsps()
-                    , bic);
-
-            return payment.paymentRequest(genericPaymentRequest, aspspId);
+            return payment.paymentRequest(genericPaymentRequest, walletPaymentData);
         } catch (RuntimeException e) {
             LOGGER.error("Unexpected plugin error", e);
             return PaymentResponseFailure.PaymentResponseFailureBuilder

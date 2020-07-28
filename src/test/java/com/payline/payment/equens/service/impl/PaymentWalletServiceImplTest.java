@@ -66,7 +66,7 @@ class PaymentWalletServiceImplTest {
                 .withRedirectionRequest(redirectionRequest)
                 .build();
 
-        doReturn(responseRedirect).when(payment).paymentRequest(any(), anyString());
+        doReturn(responseRedirect).when(payment).paymentRequest(any(), any());
 
         doReturn(pluginPaymentData).when(rsaUtils).decrypt(any(), any());
 
@@ -102,7 +102,7 @@ class PaymentWalletServiceImplTest {
                 .withRedirectionRequest(redirectionRequest)
                 .build();
 
-        doReturn(responseRedirect).when(payment).paymentRequest(any(), anyString());
+        doReturn(responseRedirect).when(payment).paymentRequest(any(), any());
 
         doThrow(new PluginException("foo")).when(rsaUtils).decrypt(any(), any());
 

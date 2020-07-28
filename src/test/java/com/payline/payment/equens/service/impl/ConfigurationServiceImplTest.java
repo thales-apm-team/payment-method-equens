@@ -29,8 +29,6 @@ import org.mockito.MockitoAnnotations;
 import java.text.SimpleDateFormat;
 import java.time.Month;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -192,7 +190,7 @@ class ConfigurationServiceImplTest {
         String input = PluginUtils.extractBanks( MockUtils.aPluginConfiguration());
         doReturn( JsonService.getInstance().fromJson( input, GetAspspsResponse.class ) ).when( pisHttpClient ).getAspsps( any(RequestConfiguration.class) );
 
-        ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration();
+        ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration(MockUtils.getExampleCountry());
         contractConfiguration.getContractProperties().put(Constants.ContractConfigurationKeys.ONBOARDING_ID, new ContractProperty( "000000" ));
         RetrievePluginConfigurationRequest request = MockUtils.aRetrievePluginConfigurationRequestBuilder()
                 .withPluginConfiguration("")
