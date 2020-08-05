@@ -21,6 +21,7 @@ import com.payline.pmapi.bean.payment.request.PaymentRequest;
 import com.payline.pmapi.bean.payment.response.PaymentResponse;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseFailure;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseRedirect;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -198,5 +199,14 @@ class PaymentTest {
         assertEquals("100", Payment.convertAmount(new Amount(BigInteger.valueOf(100), Currency.getInstance("JPY"))));
         // Bahrain Dinar: 3 decimals
         assertEquals("0.100", Payment.convertAmount(new Amount(BigInteger.valueOf(100), Currency.getInstance("BHD"))));
+    }
+
+    @Test
+    void createInitiatingPartyReferenceId() {
+        Assertions.assertEquals("foobar", service.createInitiatingPartyReferenceId("foo", "bar"));
+        Assertions.assertEquals("thisIsAVeryLongTextAndItNeedToBeCu", service.createInitiatingPartyReferenceId("thisIsAVeryLongTextAndItNeedToBeCut", "bar"));
+        Assertions.assertEquals("foothisIsAVeryLongTextAndItNeedToB", service.createInitiatingPartyReferenceId("foo", "thisIsAVeryLongTextAndItNeedToBeCutbar"));
+        Assertions.assertEquals("thisMessageIsExactly34CharactersLo", service.createInitiatingPartyReferenceId("thisMessageIsExactly3", "4CharactersLo"));
+        Assertions.assertEquals("thisMessageIsExactly35CharactersLo", service.createInitiatingPartyReferenceId("thisMessageIsExactly3", "5CharactersLon"));
     }
 }

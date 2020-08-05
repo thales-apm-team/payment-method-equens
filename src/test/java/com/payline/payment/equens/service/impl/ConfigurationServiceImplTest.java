@@ -209,7 +209,7 @@ class ConfigurationServiceImplTest {
         verify( pisHttpClient, times(1) ).getAspsps( requestConfigurationCaptor.capture() );
         ContractConfiguration ccArg = requestConfigurationCaptor.getValue().getContractConfiguration();
         assertEquals( 2, ccArg.getContractProperties().size() );
-        assertNotEquals( "000000", ccArg.getProperty( Constants.ContractConfigurationKeys.ONBOARDING_ID ) );
+        assertNotEquals( "000000", ccArg.getProperty( Constants.ContractConfigurationKeys.ONBOARDING_ID ).getValue() );
     }
 
     @Test

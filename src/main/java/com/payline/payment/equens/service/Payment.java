@@ -97,7 +97,9 @@ public class Payment {
             PaymentInitiationRequest request = new PaymentInitiationRequest.PaymentInitiationRequestBuilder()
                     .withAspspId(aspspId)
                     .withEndToEndId(paymentRequest.getTransactionId())
-                    .withInitiatingPartyReferenceId(paymentRequest.getOrder().getReference())
+                    .withInitiatingPartyReferenceId(createInitiatingPartyReferenceId(
+                            requestConfiguration.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.ONBOARDING_ID).getValue()
+                            , paymentRequest.getOrder().getReference())) // PAYLAPMEXT-266
                     .withInitiatingPartyReturnUrl(paymentRequest.getEnvironment().getRedirectionReturnURL())
                     .withRemittanceInformation(paymentRequest.getSoftDescriptor())
                     .withRemittanceInformationStructured(
@@ -262,5 +264,22 @@ public class Payment {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * concatenate the merchantId and the orderReference to create the initiatingPartyReferenceId
+     * if the initiatingPartyReferenceId is more than 34 char long, trucate it
+     *
+     * @param merchantId     the merchantId
+     * @param orderReference the order reference
+     * @return
+     * @see <a href="https://payline.atlassian.net/jira/software/c/projects/PAYLAPMEXT/issues/PAYLAPMEXT-266">PAYLAPMEXT-266</a>
+     */
+    public String createInitiatingPartyReferenceId(String merchantId, String orderReference) {
+        String initiatingPartyReferenceID = (merchantId + orderReference);
+        if (initiatingPartyReferenceID.length() > 34) {
+            initiatingPartyReferenceID = initiatingPartyReferenceID.substring(0, 34);
+        }
+        return initiatingPartyReferenceID;
     }
 }
