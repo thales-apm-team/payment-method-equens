@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 abstract class OAuthHttpClient {
 
-    private static final Logger LOGGER = LogManager.getLogger(OAuthHttpClient.class);
+    static final Logger LOGGER = LogManager.getLogger(OAuthHttpClient.class);
 
     protected ConfigProperties config = ConfigProperties.getInstance();
     protected JsonService jsonService = JsonService.getInstance();

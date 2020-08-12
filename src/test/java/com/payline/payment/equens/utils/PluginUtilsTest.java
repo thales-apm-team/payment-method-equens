@@ -6,7 +6,6 @@ import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.service.JsonService;
-import com.payline.payment.equens.service.Payment;
 import com.payline.payment.equens.service.impl.ConfigurationServiceImpl;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -18,7 +17,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class PluginUtilsTest {
     private JsonService jsonService = JsonService.getInstance();
@@ -147,11 +147,14 @@ class PluginUtilsTest {
 
     @Test
     void correctIban_emptyListCountry() {
+        String iban = MockUtils.getIbanFR();
+        List<String> countries = new ArrayList<>();
         Assertions.assertThrows(InvalidDataException.class,
-                () -> PluginUtils.correctIban(new ArrayList(), MockUtils.getIbanFR()),
+                () -> PluginUtils.correctIban(countries, iban),
                 "listCountry should not be empty"
         );
     }
+
     @Test
     void hideIban() {
         String ibanWithSpaces = "FR51 3265 1245 41AZ 1325 4598 145";

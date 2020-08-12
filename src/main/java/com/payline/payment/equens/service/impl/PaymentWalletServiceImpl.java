@@ -2,9 +2,7 @@ package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.bean.GenericPaymentRequest;
 import com.payline.payment.equens.bean.business.payment.WalletPaymentData;
-import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.exception.InvalidDataException;
-import com.payline.payment.equens.bean.business.payment.WalletPaymentData;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.service.Payment;

@@ -125,6 +125,20 @@ class PisHttpClientTest {
         assertThrows(PluginException.class, () -> pisHttpClient.getAspsps(requestConfiguration));
     }
 
+    @Test
+    void getAspsps_notJson() {
+        // given: the partner API returns a valid error response
+        // @see PAYLAPMEXT-265
+        String error = "<html><head><title>HTML Error 502</title></head><body><p><h2>equensWorldline - HTML Error 502</h2></p></body></html>";
+        doReturn(HttpTestUtils.mockStringResponse(200, "", error))
+                .when(pisHttpClient)
+                .get(anyString(), anyList());
+
+        // when: calling the method, then: an exception is thrown
+        PluginException e = assertThrows(PluginException.class, () -> pisHttpClient.getAspsps(requestConfiguration));
+        Assertions.assertEquals(error.substring(0,50), e.getErrorCode());
+    }
+
     // --- Test PisHttpClient#initPayment ---
 
     @Test
@@ -164,7 +178,8 @@ class PisHttpClientTest {
         doReturn(null).when(config).get(anyString());
 
         // when: calling the method, then: an exception is thrown
-        assertThrows( InvalidDataException.class, () -> pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()), MockUtils.aRequestConfiguration()) );
+        PaymentInitiationRequest request = MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR());
+        assertThrows(InvalidDataException.class, () -> pisHttpClient.initPayment( request, requestConfiguration));
     }
 
     @Test
@@ -188,7 +203,6 @@ class PisHttpClientTest {
         Assertions.assertEquals("Property paymentAmount : must not be null", thrown.getErrorCode());
         Assertions.assertNotNull(thrown.getFailureCause());
         Assertions.assertEquals(FailureCause.INVALID_DATA, thrown.getFailureCause());
-
     }
 
     // --- Test PisHttpClient#paymentStatus ---

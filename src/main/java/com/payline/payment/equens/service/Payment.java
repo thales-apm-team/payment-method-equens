@@ -91,12 +91,6 @@ public class Payment {
                 }
             });
 
-            // Extract delivery address
-            Address deliveryAddress = null;
-            if (paymentRequest.getBuyer().getAddresses() != null) {
-                deliveryAddress = buildAddress(paymentRequest.getBuyer().getAddressForType(Buyer.AddressType.DELIVERY));
-            }
-
             // Build PaymentInitiationRequest (Equens) from PaymentRequest (Payline)
             PaymentInitiationRequest request = buildPaymentInitiationRequest(paymentRequest, newPsu, walletPaymentData);
 
