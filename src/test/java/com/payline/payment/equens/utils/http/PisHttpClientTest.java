@@ -13,6 +13,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -29,30 +30,31 @@ public class PisHttpClientTest {
     @InjectMocks
     private PisHttpClient pisHttpClient = new PisHttpClient();
 
-    @Mock private ConfigProperties config;
+    @Mock
+    private ConfigProperties config;
 
     @BeforeEach
-    void setup(){
+    void setup() {
         MockitoAnnotations.initMocks(this);
         // Mock a valid authorization
-        doReturn( MockUtils.anAuthorization() ).when( pisHttpClient ).authorize( any(RequestConfiguration.class) );
+        doReturn(MockUtils.anAuthorization()).when(pisHttpClient).authorize(any(RequestConfiguration.class));
         // Mock the config properties
-        doReturn( "/directory/v1/aspsps" ).when( config ).get( "api.pis.aspsps" );
-        doReturn( "/pis/v1/payments" ).when( config ).get( "api.pis.payments" );
-        doReturn( "/pis/v1/payments/{paymentId}/status" ).when( config ).get( "api.pis.payments.status" );
+        doReturn("/directory/v1/aspsps").when(config).get("api.pis.aspsps");
+        doReturn("/pis/v1/payments").when(config).get("api.pis.payments");
+        doReturn("/pis/v1/payments/{paymentId}/status").when(config).get("api.pis.payments.status");
     }
 
     @AfterEach
-    void verifyMocks(){
+    void verifyMocks() {
         /* verify that execute() method is never called ! it ensures the mocks are working properly and there is no
         false negative that could be related to a failed HTTP request sent to the partner API. */
-        verify( pisHttpClient, never() ).execute( any( HttpRequestBase.class ) );
+        verify(pisHttpClient, never()).execute(any(HttpRequestBase.class));
     }
 
     // --- Test PisHttpClient#getAspsps ---
 
     @Test
-    void getAspsps_nominal(){
+    void getAspsps_nominal() {
         // given: the partner API returns a valid success response
         String responseBody = "{" +
                 "  \"MessageCreateDateTime\":\"2019-11-15T15:52:37.092+0000\"," +
@@ -67,61 +69,75 @@ public class PisHttpClientTest {
                 "      \"BIC\":\"TODO\"}" +
                 "  ]" +
                 "}";
-        doReturn( HttpTestUtils.mockStringResponse(200, "OK", responseBody ) )
-                .when( pisHttpClient )
-                .get( anyString(), anyList() );
+        doReturn(HttpTestUtils.mockStringResponse(200, "OK", responseBody))
+                .when(pisHttpClient)
+                .get(anyString(), anyList());
 
         // when: calling the method
-        GetAspspsResponse response = pisHttpClient.getAspsps( MockUtils.aRequestConfiguration() );
+        GetAspspsResponse response = pisHttpClient.getAspsps(MockUtils.aRequestConfiguration());
 
         // then: the list contains 1 Aspsp
-        assertNotNull( response );
-        assertEquals( 1, response.getAspsps().size() );
+        assertNotNull(response);
+        assertEquals(1, response.getAspsps().size());
     }
 
     @Test
-    void getAspsps_invalidConfig(){
+    void getAspsps_invalidConfig() {
         // given: the config property containing the path is missing
-        doReturn( null ).when( config ).get( "api.pis.aspsps" );
+        doReturn(null).when(config).get("api.pis.aspsps");
 
         // when: calling the method, then: an exception is thrown
-        assertThrows( InvalidDataException.class, () -> pisHttpClient.getAspsps( MockUtils.aRequestConfiguration() ) );
+        assertThrows(InvalidDataException.class, () -> pisHttpClient.getAspsps(MockUtils.aRequestConfiguration()));
     }
 
     @Test
-    void getAspsps_noListInResponse(){
+    void getAspsps_noListInResponse() {
         // given: the partner API returns a invalid success response, without any Aspsp list
         String responseBody = "{" +
                 "  \"MessageCreateDateTime\":\"2019-11-15T15:52:37.092+0000\"," +
                 "  \"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"," +
                 "  \"Application\":\"PIS\"" +
                 "}";
-        doReturn( HttpTestUtils.mockStringResponse(200, "OK", responseBody ) )
-                .when( pisHttpClient )
-                .get( anyString(), anyList() );
+        doReturn(HttpTestUtils.mockStringResponse(200, "OK", responseBody))
+                .when(pisHttpClient)
+                .get(anyString(), anyList());
 
         // when: calling the method
-        GetAspspsResponse response = pisHttpClient.getAspsps( MockUtils.aRequestConfiguration() );
+        GetAspspsResponse response = pisHttpClient.getAspsps(MockUtils.aRequestConfiguration());
 
         // then: resulting list is null
-        assertNull( response.getAspsps() );
+        assertNull(response.getAspsps());
     }
 
     @Test
-    void getAspsps_error(){
+    void getAspsps_error() {
         // given: the partner API returns a valid error response
-        doReturn( HttpTestUtils.mockStringResponse(401, "Unauthorized", "" ) )
-                .when( pisHttpClient )
-                .get( anyString(), anyList() );
+        doReturn(HttpTestUtils.mockStringResponse(401, "Unauthorized", ""))
+                .when(pisHttpClient)
+                .get(anyString(), anyList());
 
         // when: calling the method, then: an exception is thrown
-        assertThrows( PluginException.class, () -> pisHttpClient.getAspsps( MockUtils.aRequestConfiguration() ) );
+        assertThrows(PluginException.class, () -> pisHttpClient.getAspsps(MockUtils.aRequestConfiguration()));
+    }
+
+    @Test
+    void getAspsps_notJson() {
+        // given: the partner API returns a valid error response
+        // @see PAYLAPMEXT-265
+        String error = "<html><head><title>HTML Error 502</title></head><body><p><h2>equensWorldline - HTML Error 502</h2></p></body></html>";
+        doReturn(HttpTestUtils.mockStringResponse(200, "", error))
+                .when(pisHttpClient)
+                .get(anyString(), anyList());
+
+        // when: calling the method, then: an exception is thrown
+        PluginException e = assertThrows(PluginException.class, () -> pisHttpClient.getAspsps(MockUtils.aRequestConfiguration()));
+        Assertions.assertEquals(error.substring(0,50), e.getErrorCode());
     }
 
     // --- Test PisHttpClient#initPayment ---
 
     @Test
-    void initPayment_nominal(){
+    void initPayment_nominal() {
         // given: the partner API returns a valid success response
         String redirectionUrl = "https://xs2a.banking.co.at/xs2a-sandbox/m044/v1/pis/confirmation/btWMz6mTz7I3SOe4lMqXiwciqe6igXBCeebfVWlmZ8N8zVw_qRKMMuhlLLXtPrVcBeH6HIP2qhdTTZ1HINXSkg==_=_psGLvQpt9Q/authorisations/fa8e44a7-3bf7-4543-82d1-5a1163aaaaad";
         String responseContent = "{\n" +
@@ -132,36 +148,36 @@ public class PisHttpClientTest {
                 "    \"PaymentStatus\": \"OPEN\",\n" +
                 "    \"AspspRedirectUrl\": \"" + redirectionUrl + "\"\n" +
                 "}";
-        doReturn( HttpTestUtils.mockStringResponse(201, "Created", responseContent ) )
-                .when( pisHttpClient )
-                .post( anyString(), anyList(), any(HttpEntity.class) );
+        doReturn(HttpTestUtils.mockStringResponse(201, "Created", responseContent))
+                .when(pisHttpClient)
+                .post(anyString(), anyList(), any(HttpEntity.class));
 
         // when: initializing a payment
         PaymentInitiationResponse response = pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()), MockUtils.aRequestConfiguration());
 
         // then: the response contains the redirection URL
-        assertNotNull( response );
-        assertEquals( redirectionUrl, response.getAspspRedirectUrl().toString() );
+        assertNotNull(response);
+        assertEquals(redirectionUrl, response.getAspspRedirectUrl().toString());
 
         // verify the post() method has been called and the content of the arguments passed
-        ArgumentCaptor<List<Header>> headersCaptor = ArgumentCaptor.forClass( List.class );
-        ArgumentCaptor<HttpEntity> bodyCaptor = ArgumentCaptor.forClass( HttpEntity.class );
-        verify( pisHttpClient, times(1) ).post( anyString(), headersCaptor.capture(), bodyCaptor.capture() );
-        this.verifyAuthorizationHeader( headersCaptor.getValue() );
-        assertNotNull( bodyCaptor.getValue() );
+        ArgumentCaptor<List<Header>> headersCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<HttpEntity> bodyCaptor = ArgumentCaptor.forClass(HttpEntity.class);
+        verify(pisHttpClient, times(1)).post(anyString(), headersCaptor.capture(), bodyCaptor.capture());
+        this.verifyAuthorizationHeader(headersCaptor.getValue());
+        assertNotNull(bodyCaptor.getValue());
     }
 
     @Test
-    void initPayment_invalidConfig(){
+    void initPayment_invalidConfig() {
         // given: the config property containing the path is missing
-        doReturn( null ).when( config ).get( anyString() );
+        doReturn(null).when(config).get(anyString());
 
         // when: calling the method, then: an exception is thrown
-        assertThrows( InvalidDataException.class, () -> pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()), MockUtils.aRequestConfiguration()) );
+        assertThrows(InvalidDataException.class, () -> pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()), MockUtils.aRequestConfiguration()));
     }
 
     @Test
-    void initPayment_badRequest(){
+    void initPayment_badRequest() {
         // given: the partner API returns a 400 Bad Request
         String responseContent = "{" +
                 "    \"code\":\"002\"," +
@@ -170,21 +186,21 @@ public class PisHttpClientTest {
                 "    \"MessageCreateDateTime\":\"2019-11-25T15:02:36.555+0100\"," +
                 "    \"MessageId\":\"c2a4ce10086547019b1d50411ea6a99e\"" +
                 "}";
-        doReturn( HttpTestUtils.mockStringResponse(400, "Bad Request", responseContent ) )
-                .when( pisHttpClient )
-                .post( anyString(), anyList(), any(HttpEntity.class) );
+        doReturn(HttpTestUtils.mockStringResponse(400, "Bad Request", responseContent))
+                .when(pisHttpClient)
+                .post(anyString(), anyList(), any(HttpEntity.class));
 
         // when: initializing a payment, then: an exception is thrown
         PluginException thrown = assertThrows(PluginException.class,
-                () -> pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()), MockUtils.aRequestConfiguration()) );
-        assertNotNull(  thrown.getErrorCode() );
-        assertNotNull(  thrown.getFailureCause() );
+                () -> pisHttpClient.initPayment(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()), MockUtils.aRequestConfiguration()));
+        assertNotNull(thrown.getErrorCode());
+        assertNotNull(thrown.getFailureCause());
     }
 
     // --- Test PisHttpClient#paymentStatus ---
 
     @Test
-    void paymentStatus_nominal(){
+    void paymentStatus_nominal() {
         // given: the partner API returns a valid success response
         String paymentId = "130676";
         String responseContent = "{\n" +
@@ -197,36 +213,36 @@ public class PisHttpClientTest {
                 "    \"DebtorAgent\": \"BNPADEFF\",\n" +
                 "    \"DebtorAccount\": \"AT880000000000000001\"\n" +
                 "}";
-        doReturn( HttpTestUtils.mockStringResponse(200, "OK", responseContent ) )
-                .when( pisHttpClient )
-                .get( anyString(), anyList() );
+        doReturn(HttpTestUtils.mockStringResponse(200, "OK", responseContent))
+                .when(pisHttpClient)
+                .get(anyString(), anyList());
 
         // when: retrieving the payment status
-        PaymentStatusResponse response = pisHttpClient.paymentStatus( paymentId, MockUtils.aRequestConfiguration(), false );
+        PaymentStatusResponse response = pisHttpClient.paymentStatus(paymentId, MockUtils.aRequestConfiguration(), false);
 
         // then: the response contains the status
-        assertNotNull( response );
-        assertNotNull( response.getPaymentStatus() );
+        assertNotNull(response);
+        assertNotNull(response.getPaymentStatus());
 
         // verify the get() method has been called and the content of the arguments passed
-        ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass( String.class );
-        ArgumentCaptor<List<Header>> headersCaptor = ArgumentCaptor.forClass( List.class );
-        verify( pisHttpClient, times(1) ).get( urlCaptor.capture(), headersCaptor.capture() );
-        assertTrue( urlCaptor.getValue().contains(paymentId) );
-        this.verifyAuthorizationHeader( headersCaptor.getValue() );
+        ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<List<Header>> headersCaptor = ArgumentCaptor.forClass(List.class);
+        verify(pisHttpClient, times(1)).get(urlCaptor.capture(), headersCaptor.capture());
+        assertTrue(urlCaptor.getValue().contains(paymentId));
+        this.verifyAuthorizationHeader(headersCaptor.getValue());
     }
 
     @Test
-    void paymentStatus_invalidConfig(){
+    void paymentStatus_invalidConfig() {
         // given: the config property containing the path is missing
-        doReturn( null ).when( config ).get( anyString() );
+        doReturn(null).when(config).get(anyString());
 
         // when: calling the method, then: an exception is thrown
-        assertThrows( InvalidDataException.class, () -> pisHttpClient.paymentStatus( MockUtils.aPaymentId(), MockUtils.aRequestConfiguration(), false ) );
+        assertThrows(InvalidDataException.class, () -> pisHttpClient.paymentStatus(MockUtils.aPaymentId(), MockUtils.aRequestConfiguration(), false));
     }
 
     @Test
-    void paymentStatus_notFound(){
+    void paymentStatus_notFound() {
         // given: the partner API returns a 400 Bad Request
         String responseContent = "{" +
                 "    \"code\":\"110\"," +
@@ -235,26 +251,26 @@ public class PisHttpClientTest {
                 "    \"MessageCreateDateTime\":\"22019-12-03T15:27:32.629+0000\"," +
                 "    \"MessageId\":\"3274abb431c8410f886a903b88285ebd\"" +
                 "}";
-        doReturn( HttpTestUtils.mockStringResponse(404, "Not Found", responseContent ) )
-                .when( pisHttpClient )
-                .get( anyString(), anyList() );
+        doReturn(HttpTestUtils.mockStringResponse(404, "Not Found", responseContent))
+                .when(pisHttpClient)
+                .get(anyString(), anyList());
 
         // when: iretrieving the payment status, then: an exception is thrown
         PluginException thrown = assertThrows(PluginException.class,
-                () -> pisHttpClient.paymentStatus( "666", MockUtils.aRequestConfiguration(), false ) );
-        assertNotNull(  thrown.getErrorCode() );
-        assertNotNull(  thrown.getFailureCause() );
+                () -> pisHttpClient.paymentStatus("666", MockUtils.aRequestConfiguration(), false));
+        assertNotNull(thrown.getErrorCode());
+        assertNotNull(thrown.getFailureCause());
     }
 
 
-    private void verifyAuthorizationHeader( List<Header> headers ){
+    private void verifyAuthorizationHeader(List<Header> headers) {
         boolean headerPresent = false;
-        for( Header h : headers ){
-            if( HttpHeaders.AUTHORIZATION.equals( h.getName() ) ){
+        for (Header h : headers) {
+            if (HttpHeaders.AUTHORIZATION.equals(h.getName())) {
                 headerPresent = true;
             }
         }
-        assertTrue( headerPresent );
+        assertTrue(headerPresent);
     }
 
 }
