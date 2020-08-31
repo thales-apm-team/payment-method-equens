@@ -4,6 +4,7 @@ import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.payment.equens.utils.http.PisHttpClient;
@@ -189,7 +190,7 @@ class ConfigurationServiceImplTest {
     void retrievePluginConfiguration_nominal(){
         // given: the HTTP client returns a proper response
         String input = PluginUtils.extractBanks( MockUtils.aPluginConfiguration());
-        doReturn( GetAspspsResponse.fromJson( input ) ).when( pisHttpClient ).getAspsps( any(RequestConfiguration.class) );
+        doReturn( JsonService.getInstance().fromJson( input, GetAspspsResponse.class ) ).when( pisHttpClient ).getAspsps( any(RequestConfiguration.class) );
 
         ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration();
         contractConfiguration.getContractProperties().put(Constants.ContractConfigurationKeys.ONBOARDING_ID, new ContractProperty( "000000" ));

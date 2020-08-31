@@ -22,9 +22,4 @@ class WalletPaymentDataTest {
         Assertions.assertEquals("anIbanWithMoreThan8Charactere", create().getIban());
     }
 
-    @Test
-    void testToString() {
-        Assertions.assertEquals("{\"bic\":\"PSSTFRPP\",\"iban\":\"anIbanWithMoreThan8Charactere\"}",
-                create().toString());
-    }
 }

@@ -1,7 +1,5 @@
 package com.payline.payment.equens.bean.business.payment;
 
-import com.google.gson.Gson;
-
 public class WalletPaymentData {
     /** the BIC for the creation of the wallet */
     private String bic;
@@ -38,11 +36,5 @@ public class WalletPaymentData {
 
     public String getIban() {
         return iban;
-    }
-
-    @Override
-    public String toString() {
-        Gson gson = new Gson();
-        return gson.toJson(this);
     }
 }

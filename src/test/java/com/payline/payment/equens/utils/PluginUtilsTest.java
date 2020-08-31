@@ -3,6 +3,7 @@ package com.payline.payment.equens.utils;
 import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.service.JsonService;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 class PluginUtilsTest {
+    private JsonService jsonService = JsonService.getInstance();
 
     @Test
     void requestToString_get() {
@@ -70,7 +72,7 @@ class PluginUtilsTest {
                 "{\"AspspId\":\"1601\",\"Name\":[\"BBVA\"],\"CountryCode\":\"ES\",\"BIC\":\"BBVAESMM\"}" +
                 "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
 
-        List<Aspsp> aspsps = GetAspspsResponse.fromJson(aspspJson).getAspsps();
+        List<Aspsp> aspsps = jsonService.fromJson(aspspJson, GetAspspsResponse.class).getAspsps();
 
         Assertions.assertEquals("1234", PluginUtils.getAspspIdFromBIC(aspsps, "FOOBARBAZXX"));
         Assertions.assertEquals("1409", PluginUtils.getAspspIdFromBIC(aspsps, "PSSTFRPP"));

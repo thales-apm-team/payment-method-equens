@@ -1,6 +1,5 @@
 package com.payline.payment.equens.bean.business.reachdirectory;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.payline.payment.equens.bean.business.EquensApiMessage;
 
@@ -17,9 +16,5 @@ public class GetAspspsResponse extends EquensApiMessage {
 
     public List<Aspsp> getAspsps() {
         return aspsps;
-    }
-
-    public static GetAspspsResponse fromJson(String json ){
-        return new Gson().fromJson( json, GetAspspsResponse.class );
     }
 }

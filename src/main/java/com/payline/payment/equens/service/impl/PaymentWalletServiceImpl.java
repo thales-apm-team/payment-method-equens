@@ -1,11 +1,11 @@
 package com.payline.payment.equens.service.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.payline.payment.equens.bean.GenericPaymentRequest;
 import com.payline.payment.equens.bean.business.payment.WalletPaymentData;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
+import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.service.Payment;
 import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.payment.equens.utils.security.RSAUtils;
@@ -22,6 +22,7 @@ public class PaymentWalletServiceImpl implements PaymentWalletService {
 
     private RSAUtils rsaUtils = RSAUtils.getInstance();
     private Payment payment = Payment.getInstance();
+    private JsonService jsonService = JsonService.getInstance();
 
     @Override
     public PaymentResponse walletPaymentRequest(WalletPaymentRequest walletPaymentRequest) {
@@ -30,18 +31,21 @@ public class PaymentWalletServiceImpl implements PaymentWalletService {
 
             // get decrypted wallet data (BIC + IBAN)
             String encryptedData = walletPaymentRequest.getWallet().getPluginPaymentData();
+            if (PluginUtils.isEmpty(encryptedData)){
+                throw new InvalidDataException("WalletPaymentRequest shall have a pluginPaymentData");
+            }
+
             String key = PluginUtils.extractKey(walletPaymentRequest.getPluginConfiguration());
             String data = rsaUtils.decrypt(encryptedData, key);
 
             // create the WalletPaymentData object to recover the BIC
-            Gson gson = new GsonBuilder().create();
-            WalletPaymentData walletPaymentData = gson.fromJson(data, WalletPaymentData.class);
+            WalletPaymentData walletPaymentData = jsonService.fromJson(data, WalletPaymentData.class);
 
             String bic = walletPaymentData.getBic();
 
             // get the aspspId from the BIC
             String aspspId = PluginUtils.getAspspIdFromBIC(
-                    GetAspspsResponse.fromJson(PluginUtils.extractBanks(walletPaymentRequest.getPluginConfiguration())).getAspsps()
+                    jsonService.fromJson(PluginUtils.extractBanks(walletPaymentRequest.getPluginConfiguration()), GetAspspsResponse.class).getAspsps()
                     , bic);
 
             return payment.paymentRequest(genericPaymentRequest, aspspId);

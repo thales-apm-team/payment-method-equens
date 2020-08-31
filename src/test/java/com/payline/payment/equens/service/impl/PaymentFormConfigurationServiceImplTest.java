@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
-public class PaymentFormConfigurationServiceImplTest {
+class PaymentFormConfigurationServiceImplTest {
 
     @InjectMocks
     private PaymentFormConfigurationServiceImpl service;

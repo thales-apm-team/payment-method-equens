@@ -146,23 +146,31 @@ public class PluginUtils {
      * @return String hided
      */
     public static String hideIban(String iban) {
-        String hideIban = iban.substring(0, 4);
-        String endIban = iban.substring(iban.length() - 4);
-        // if there is an " " in the last four characters, whe take the last five
-        // can't have more than one " "
-        if (endIban.contains(" ")) {
-            endIban = iban.substring(iban.length() - 5);
+        if (isEmpty(iban)) {
+            throw new InvalidDataException("IBAN must not be null or empty");
+        }
+        if (iban.length() < 5) {
+            throw new InvalidDataException("IBAN is too short");
         }
 
-        // mask all characters between the fourth and the four (or five) before the end of the IBAN
-        for (int i = 4; i < iban.substring(4, iban.length() - endIban.length()).length() + 4; i++) {
-            if (iban.charAt(i) == ' ') {
-                hideIban = hideIban.concat(" ");
-            } else {
-                hideIban = hideIban.concat("X");
-            }
+        int startLength = 4;
+        int endLength = 4;
+
+        // extract begin, middle (what need to be hidden) and, end
+        String beginIban = iban.substring(0, startLength);
+
+        // if there is an " " in the last four characters, whe take the last five
+        if (iban.substring(iban.length() - endLength).contains(" ")) {
+            endLength += 1;
         }
-        return hideIban.concat(endIban);
+        String middleIban = iban.substring(startLength, iban.length() - endLength);
+        String endIban = iban.substring(iban.length() - endLength);
+
+        StringBuilder sb = new StringBuilder(beginIban)
+                .append(middleIban.replaceAll("[^ ]", "X"))
+                .append(endIban);
+
+        return sb.toString();
     }
 
 }

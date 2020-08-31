@@ -5,6 +5,7 @@ import com.payline.payment.equens.bean.business.payment.*;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
+import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.service.impl.ConfigurationServiceImpl;
 import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.TestUtils;
@@ -35,6 +36,7 @@ import java.util.*;
  * Utility class that generates mocks of frequently used objects.
  */
 public class MockUtils {
+    private static JsonService jsonService = JsonService.getInstance();
 
     /**
      * Generate a valid accountInfo, an attribute of a {@link ContractParametersCheckRequest} instance.
@@ -393,14 +395,14 @@ public class MockUtils {
      * Generate a valid {@link PaymentInitiationResponse}.
      */
     public static PaymentInitiationResponse aPaymentInitiationResponse() {
-        return PaymentInitiationResponse.fromJson("{\n" +
+        return jsonService.fromJson("{\n" +
                 "    \"MessageCreateDateTime\": \"" + aMessageCreateDateTime() + "\",\n" +
                 "    \"MessageId\": \"e8683740-38be-4026-b48e-72089b023e\",\n" +
                 "    \"PaymentId\": \"" + MockUtils.aPaymentId() + "\",\n" +
                 "    \"InitiatingPartyReferenceId\": \"REF1574181352\",\n" +
                 "    \"PaymentStatus\": \"OPEN\",\n" +
                 "    \"AspspRedirectUrl\": \"https://xs2a.banking.co.at/xs2a-sandbox/m044/v1/pis/confirmation/btWMz6mTz7I3SOe4lMqXiwciqe6igXBCeebfVWlmZ8N8zVw_qRKMMuhlLLXtPrVcBeH6HIP2qhdTTZ1HINXSkg==_=_psGLvQpt9Q/authorisations/fa8e44a7-3bf7-4543-82d1-5a1163aaaaad\"\n" +
-                "}");
+                "}", PaymentInitiationResponse.class);
     }
 
     /**
@@ -409,7 +411,7 @@ public class MockUtils {
      * @param status The payment status.
      */
     public static PaymentStatusResponse aPaymentStatusResponse(PaymentStatus status) {
-        return PaymentStatusResponse.fromJson("{\n" +
+        return jsonService.fromJson("{\n" +
                 "    \"MessageCreateDateTime\": \"" + aMessageCreateDateTime() + "\",\n" +
                 "    \"MessageId\": \"ca58925c-57cc-44b0-a827-cd439fb87f\",\n" +
                 "    \"PaymentId\": \"" + MockUtils.aPaymentId() + "\",\n" +
@@ -418,7 +420,7 @@ public class MockUtils {
                 "    \"InitiatingPartyReferenceId\": \"REF1574257016\",\n" +
                 "    \"DebtorAgent\": \"BNPADEFF\",\n" +
                 "    \"DebtorAccount\": \"AT880000000000000001\"\n" +
-                "}");
+                "}", PaymentStatusResponse.class);
     }
 
     /**

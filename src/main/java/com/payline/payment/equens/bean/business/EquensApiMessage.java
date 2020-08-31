@@ -1,7 +1,5 @@
 package com.payline.payment.equens.bean.business;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 
 import java.text.SimpleDateFormat;
@@ -24,13 +22,5 @@ public abstract class EquensApiMessage {
         private String messageId = "PAYLINE" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
 
         // no "build" method as EquensApiMessage is abstract
-    }
-
-    @Override
-    public String toString() {
-        Gson gson = new GsonBuilder()
-                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-                .create();
-        return gson.toJson( this );
     }
 }

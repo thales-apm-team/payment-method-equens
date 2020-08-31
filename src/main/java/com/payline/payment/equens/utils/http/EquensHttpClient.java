@@ -266,7 +266,7 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         // Try to parse the error response with the specified format
         EquensErrorResponse errorResponse;
         try {
-            errorResponse = EquensErrorResponse.fromJson( apiResponse.getContent() );
+            errorResponse = jsonService.fromJson( apiResponse.getContent(), EquensErrorResponse.class);
         }
         catch( JsonSyntaxException e ){
             errorResponse = null;

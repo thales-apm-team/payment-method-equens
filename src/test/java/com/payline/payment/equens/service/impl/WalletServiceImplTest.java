@@ -2,11 +2,13 @@ package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.utils.security.RSAUtils;
 import com.payline.pmapi.bean.payment.PaymentFormContext;
 import com.payline.pmapi.bean.payment.Wallet;
 import com.payline.pmapi.bean.paymentform.bean.form.BankTransferForm;
 import com.payline.pmapi.bean.wallet.bean.WalletDisplay;
+import com.payline.pmapi.bean.wallet.bean.field.WalletDisplayFieldText;
 import com.payline.pmapi.bean.wallet.request.WalletCreateRequest;
 import com.payline.pmapi.bean.wallet.request.WalletDisplayRequest;
 import com.payline.pmapi.bean.wallet.response.WalletCreateResponse;
@@ -69,7 +71,6 @@ class WalletServiceImplTest {
                 .pluginConfiguration(MockUtils.aPluginConfiguration())
                 .build();
         WalletCreateResponse response = service.createWallet(request);
-        System.out.println(response);
 
         Assertions.assertEquals(WalletCreateResponseSuccess.class, response.getClass());
         WalletCreateResponseSuccess responseSuccess = (WalletCreateResponseSuccess) response;
@@ -95,7 +96,6 @@ class WalletServiceImplTest {
                 .pluginConfiguration(MockUtils.aPluginConfiguration())
                 .build();
         WalletCreateResponse response = service.createWallet(request);
-        System.out.println(response);
 
         Assertions.assertEquals(WalletCreateResponseSuccess.class, response.getClass());
         WalletCreateResponseSuccess responseSuccess = (WalletCreateResponseSuccess) response;
@@ -121,7 +121,6 @@ class WalletServiceImplTest {
                 .pluginConfiguration(MockUtils.aPluginConfiguration())
                 .build();
         WalletCreateResponse response = service.createWallet(request);
-        System.out.println(response);
 
         Assertions.assertEquals(WalletCreateResponseSuccess.class, response.getClass());
         WalletCreateResponseSuccess responseSuccess = (WalletCreateResponseSuccess) response;
@@ -172,7 +171,7 @@ class WalletServiceImplTest {
 
     @Test
     void displayWallet() {
-        String pluginPaymentData = MockUtils.aWalletPaymentData().toString();
+        String pluginPaymentData = "{\"bic\":\"PSSTFRPP\",\"iban\":\"anIbanWithMoreThan8Charactere\"}";;
         Mockito.doReturn(pluginPaymentData).when(rsaUtils).decrypt(anyString(), anyString());
 
         Wallet wallet = Wallet.builder()
@@ -187,6 +186,48 @@ class WalletServiceImplTest {
         WalletDisplay response = (WalletDisplay) service.displayWallet(request);
         Assertions.assertNotNull(response.getWalletFields());
         Assertions.assertEquals(2, response.getWalletFields().size());
+        Assertions.assertEquals("PSSTFRPP", ((WalletDisplayFieldText) response.getWalletFields().get(0)).getContent());
+        Assertions.assertEquals("anIbXXXXXXXXXXXXXXXXXXXXXtere", ((WalletDisplayFieldText) response.getWalletFields().get(1)).getContent());
+    }
+
+    @Test
+    void displayWalletOnlyBIC(){
+        String pluginPaymentData = "{\"bic\":\"PSSTFRPP\"}";
+        Mockito.doReturn(pluginPaymentData).when(rsaUtils).decrypt(anyString(), anyString());
+
+        Wallet wallet = Wallet.builder()
+                .pluginPaymentData(pluginPaymentData)
+                .build();
+
+        WalletDisplayRequest request = WalletDisplayRequest.builder()
+                .wallet(wallet)
+                .pluginConfiguration(MockUtils.aPluginConfiguration())
+                .build();
+
+        WalletDisplay response = (WalletDisplay) service.displayWallet(request);
+        Assertions.assertNotNull(response.getWalletFields());
+        Assertions.assertEquals(1, response.getWalletFields().size());
+        Assertions.assertEquals("PSSTFRPP", ((WalletDisplayFieldText) response.getWalletFields().get(0)).getContent());
+    }
+
+    @Test
+    void displayWalletOnlyIBAN(){
+        String pluginPaymentData = JsonService.getInstance().toJson( MockUtils.aWalletPaymentDataBicNull());
+        Mockito.doReturn(pluginPaymentData).when(rsaUtils).decrypt(anyString(), anyString());
+
+        Wallet wallet = Wallet.builder()
+                .pluginPaymentData(pluginPaymentData)
+                .build();
+
+        WalletDisplayRequest request = WalletDisplayRequest.builder()
+                .wallet(wallet)
+                .pluginConfiguration(MockUtils.aPluginConfiguration())
+                .build();
+
+        WalletDisplay response = (WalletDisplay) service.displayWallet(request);
+        Assertions.assertNotNull(response.getWalletFields());
+        Assertions.assertEquals(1, response.getWalletFields().size());
+        Assertions.assertEquals("anIbXXXXXXXXXXXXXXXXXXXXXtere", ((WalletDisplayFieldText) response.getWalletFields().get(0)).getContent());
     }
 
     @Test

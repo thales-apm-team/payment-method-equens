@@ -4,6 +4,7 @@ import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.service.LogoPaymentFormConfigurationService;
 import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.pmapi.bean.common.FailureCause;
@@ -24,6 +25,8 @@ import java.util.Locale;
 public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigurationService {
 
     private static final Logger LOGGER = LogManager.getLogger(PaymentFormConfigurationServiceImpl.class);
+
+    JsonService jsonService = JsonService.getInstance();
 
     @Override
     public PaymentFormConfigurationResponse getPaymentFormConfiguration(PaymentFormConfigurationRequest paymentFormConfigurationRequest) {
@@ -81,7 +84,7 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
         if (pluginConfiguration == null) {
             LOGGER.warn("pluginConfiguration is null");
         } else {
-            for (Aspsp aspsp : GetAspspsResponse.fromJson(PluginUtils.extractBanks(pluginConfiguration)).getAspsps()) {
+            for (Aspsp aspsp : jsonService.fromJson(PluginUtils.extractBanks(pluginConfiguration), GetAspspsResponse.class).getAspsps()) {
                 // filter by country code
                 if (aspsp.getCountryCode() != null &&
                         (PluginUtils.isEmpty(countryCode) || countryCode.equalsIgnoreCase(aspsp.getCountryCode()))) {
