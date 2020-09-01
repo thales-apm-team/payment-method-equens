@@ -65,7 +65,7 @@ public class PsuHttpClient extends EquensHttpClient {
             throw this.handleError( response );
         }
 
-        return PsuCreateResponse.fromJson( response.getContent() ).getPsu();
+        return jsonService.fromJson(response.getContent(), PsuCreateResponse.class).getPsu();
     }
 
 }

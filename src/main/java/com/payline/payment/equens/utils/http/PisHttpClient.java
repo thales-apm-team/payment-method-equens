@@ -56,7 +56,7 @@ public class PisHttpClient extends EquensHttpClient {
             throw this.handleError( response );
         }
 
-        return GetAspspsResponse.fromJson( response.getContent() );
+        return jsonService.fromJson(response.getContent(), GetAspspsResponse.class);
     }
 
     /**
@@ -85,7 +85,7 @@ public class PisHttpClient extends EquensHttpClient {
             throw this.handleError( response );
         }
 
-        return PaymentInitiationResponse.fromJson( response.getContent() );
+        return jsonService.fromJson(response.getContent(), PaymentInitiationResponse.class);
     }
 
     /**
@@ -111,7 +111,7 @@ public class PisHttpClient extends EquensHttpClient {
             throw this.handleError( response );
         }
 
-        return PaymentStatusResponse.fromJson( response.getContent() );
+        return jsonService.fromJson( response.getContent(), PaymentStatusResponse.class);
     }
 
 }

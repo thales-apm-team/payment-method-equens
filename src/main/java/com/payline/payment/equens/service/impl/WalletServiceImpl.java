@@ -1,5 +1,8 @@
 package com.payline.payment.equens.service.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.payline.payment.equens.bean.business.payment.WalletPaymentData;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.payment.equens.utils.properties.ConfigProperties;
@@ -43,10 +46,16 @@ public class WalletServiceImpl implements WalletService {
         try {
             // get wallet data
             String bic = walletCreateRequest.getPaymentFormContext().getPaymentFormParameter().get(BankTransferForm.BANK_KEY);
+            String iban = walletCreateRequest.getPaymentFormContext().getPaymentFormParameter().get(BankTransferForm.IBAN_KEY);
 
-            // encrypt it
+            WalletPaymentData walletPaymentData = new WalletPaymentData.WalletPaymentDataBuilder()
+                    .withBic(bic)
+                    .withIban(iban)
+                    .build();
+
+            // encrypt the Json that contains the BIC and the IBAN
             String key = PluginUtils.extractKey(walletCreateRequest.getPluginConfiguration()).trim();
-            String paymentData = rsaUtils.encrypt(bic, key);
+            String paymentData = rsaUtils.encrypt(walletPaymentData.toString(), key);
 
             // create wallet
             return WalletCreateResponseSuccess.builder()
@@ -58,11 +67,11 @@ public class WalletServiceImpl implements WalletService {
                     .errorCode(e.getErrorCode())
                     .failureCause(e.getFailureCause())
                     .build();
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             LOGGER.error("Unexpected plugin error", e);
             return WalletCreateResponseFailure.builder()
-                    .errorCode( PluginException.runtimeErrorCode( e ) )
-                    .failureCause( FailureCause.INTERNAL_ERROR )
+                    .errorCode(PluginException.runtimeErrorCode(e))
+                    .failureCause(FailureCause.INTERNAL_ERROR)
                     .build();
         }
     }
@@ -71,16 +80,24 @@ public class WalletServiceImpl implements WalletService {
     public WalletDisplayResponse displayWallet(WalletDisplayRequest walletDisplayRequest) {
         List<WalletField> walletFields = new ArrayList<>();
         try {
-            // decrypt the encrypted data
+            // decrypt the encrypted data (BIC + IBAN)
             String encryptedData = walletDisplayRequest.getWallet().getPluginPaymentData();
 
             String key = PluginUtils.extractKey(walletDisplayRequest.getPluginConfiguration());
             String data = rsaUtils.decrypt(encryptedData, key);
 
-            //Build wallet display fields
-            walletFields.add(WalletDisplayFieldText.builder().content(data).build());
-
-        } catch (PluginException e){
+            //Build wallet display fields (BIC and the masked IBAN)
+            Gson gson = new GsonBuilder().create();
+            WalletPaymentData walletPaymentData = gson.fromJson(data, WalletPaymentData.class);
+            String bic = walletPaymentData.getBic();
+            String iban = walletPaymentData.getIban();
+            if (bic != null) {
+                walletFields.add(WalletDisplayFieldText.builder().content(walletPaymentData.getBic()).build());
+            }
+            if (iban != null) {
+                walletFields.add(WalletDisplayFieldText.builder().content(PluginUtils.hideIban(walletPaymentData.getIban())).build());
+            }
+        } catch (PluginException e) {
             LOGGER.warn("Unable to display wallet ", e);
         }
         // create and return walletDisplayResponse

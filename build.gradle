@@ -93,3 +93,9 @@ dependencyCheck {
     format 'ALL'
     skipConfigurations = ['jacocoAgent', 'jacocoAnt', 'annotationProcessor', 'axisGenAntTask', 'jaxws', 'execJar', 'jaxb', 'generateSources']
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}

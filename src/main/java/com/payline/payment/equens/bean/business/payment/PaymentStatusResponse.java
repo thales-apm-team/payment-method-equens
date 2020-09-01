@@ -1,6 +1,5 @@
 package com.payline.payment.equens.bean.business.payment;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.payline.payment.equens.bean.business.EquensApiMessage;
 
@@ -28,7 +27,6 @@ public class PaymentStatusResponse extends EquensApiMessage {
     // ScaMethods field is not mapped because it won't be used for now...
     // _links field is not mapped because its structure is complex and it won't be used for now...
 
-    // This constructor won't be used, since it's a response object : it's instantiated by Gson through the fromJson() method
     PaymentStatusResponse( EquensApiMessageBuilder builder ){
         super(builder);
     }
@@ -51,10 +49,6 @@ public class PaymentStatusResponse extends EquensApiMessage {
 
     public String getDebtorAccount() {
         return debtorAccount;
-    }
-
-    public static PaymentStatusResponse fromJson( String json ){
-        return new Gson().fromJson( json, PaymentStatusResponse.class );
     }
 
 }

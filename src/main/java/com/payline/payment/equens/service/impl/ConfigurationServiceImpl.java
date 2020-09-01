@@ -84,12 +84,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // channel type
         Map<String, String> channelTypes = new HashMap<>();
         channelTypes.put(ChannelType.ECOMMERCE, ChannelType.ECOMMERCE);
-        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.CHANNEL_TYPE, channelTypes, channelTypes.get(0), true, locale ) );
+        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.CHANNEL_TYPE, channelTypes, ChannelType.ECOMMERCE, true, locale ) );
 
         // SCA method
         Map<String, String> scaMethods = new HashMap<>();
         scaMethods.put(ScaMethod.REDIRECT, ScaMethod.REDIRECT);
-        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.SCA_METHOD, scaMethods, scaMethods.get(0), true, locale ) );
+        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.SCA_METHOD, scaMethods, ScaMethod.REDIRECT, true, locale ) );
 
         // Charge bearer
         Map<String, String> chargeBearers = new HashMap<>();

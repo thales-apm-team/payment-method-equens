@@ -1,6 +1,5 @@
 package com.payline.payment.equens.bean.business.oauth;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -41,7 +40,4 @@ public class RFC6749AccessTokenSuccessResponse {
         return expiresIn;
     }
 
-    public static RFC6749AccessTokenSuccessResponse fromJson(String json ){
-        return new Gson().fromJson( json, RFC6749AccessTokenSuccessResponse.class );
-    }
 }

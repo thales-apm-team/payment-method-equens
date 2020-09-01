@@ -2,6 +2,7 @@ package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.bean.GenericPaymentRequest;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
+import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.service.Payment;
 import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
@@ -11,6 +12,7 @@ import com.payline.pmapi.service.PaymentService;
 
 public class PaymentServiceImpl implements PaymentService {
     private Payment payment = Payment.getInstance();
+    private JsonService jsonService = JsonService.getInstance();
 
     @Override
     public PaymentResponse paymentRequest(PaymentRequest paymentRequest) {
@@ -21,7 +23,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         // get the aspspId from the BIC
         String aspspId = PluginUtils.getAspspIdFromBIC(
-                    GetAspspsResponse.fromJson(PluginUtils.extractBanks(paymentRequest.getPluginConfiguration())).getAspsps()
+                    jsonService.fromJson(PluginUtils.extractBanks(paymentRequest.getPluginConfiguration()), GetAspspsResponse.class).getAspsps()
                 , bic);
 
         // execute the payment Request

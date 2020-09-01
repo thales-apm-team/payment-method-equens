@@ -1,6 +1,5 @@
 package com.payline.payment.equens.bean.business.psu;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.payline.payment.equens.bean.business.EquensApiMessage;
 
@@ -18,7 +17,4 @@ public class PsuCreateResponse extends EquensApiMessage {
         return psu;
     }
 
-    public static PsuCreateResponse fromJson( String json ){
-        return new Gson().fromJson( json, PsuCreateResponse.class );
-    }
 }

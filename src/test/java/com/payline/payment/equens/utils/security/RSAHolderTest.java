@@ -1,10 +1,12 @@
 package com.payline.payment.equens.utils.security;
 
-import com.payline.pmapi.bean.configuration.PartnerConfiguration;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.MockUtils;
+import com.payline.payment.equens.utils.Constants;
+import com.payline.pmapi.bean.configuration.PartnerConfiguration;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.security.KeyStoreException;
@@ -20,8 +22,11 @@ class RSAHolderTest {
     private static String pemCertificate;
     private static String pemPk;
 
-    @BeforeAll
-    static void setup() {
+    private static RSAHolder.RSAHolderBuilder builder;
+
+    @BeforeEach
+    void setup() {
+        builder = new RSAHolder.RSAHolderBuilder();
         PartnerConfiguration partnerConfiguration = MockUtils.aPartnerConfiguration();
         pemCertificate = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.CLIENT_CERTIFICATE);
         pemPk = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.CLIENT_PRIVATE_KEY);
@@ -34,7 +39,7 @@ class RSAHolderTest {
         String pk = pemPk;
 
         // when: building a RSAHolder
-        RSAHolder rsaHolder = new RSAHolder.RSAHolderBuilder()
+        RSAHolder rsaHolder = builder
                 .parseChain(chain)
                 .parsePrivateKey(pk)
                 .build();
@@ -54,7 +59,7 @@ class RSAHolderTest {
         String pk = pemPk;
 
         // when: building a RSAHolder
-        RSAHolder rsaHolder = new RSAHolder.RSAHolderBuilder()
+        RSAHolder rsaHolder = builder
                 .parseChain(chain)
                 .parsePrivateKey(pk)
                 .build();
@@ -70,9 +75,7 @@ class RSAHolderTest {
         String chain = null;
 
         // when: trying to parse a null chain, then an exception is thrown
-        assertThrows( IllegalStateException.class, () -> new RSAHolder.RSAHolderBuilder()
-                .parseChain( chain )
-                .build() );
+        assertThrows(IllegalStateException.class, () -> builder.parseChain(chain));
     }
 
     @Test
@@ -81,32 +84,28 @@ class RSAHolderTest {
         String pk = null;
 
         // when: trying to parse a null chain, then an exception is thrown
-        assertThrows( IllegalStateException.class, () -> new RSAHolder.RSAHolderBuilder()
-                .parsePrivateKey( pk )
-                .build() );
+        assertThrows(IllegalStateException.class, () -> builder.parsePrivateKey(pk));
     }
 
     @Test
-    void builder_buildWithoutChain() {
+    void builder_buildWithoutChain() throws Exception {
         // given: a valid chain containing only one certificate and private key
         String chain = pemCertificate;
         String pk = pemPk;
 
         // when: building a RSAHolder, omitting the chain, then an exception is thrown
-        assertThrows( IllegalStateException.class, () -> new RSAHolder.RSAHolderBuilder()
-                .parsePrivateKey(pk)
-                .build() );
+        builder = builder.parsePrivateKey(pk);
+        assertThrows(IllegalStateException.class, () -> builder.build());
     }
 
     @Test
-    void builder_buildWithoutPk() {
+    void builder_buildWithoutPk() throws Exception {
         // given: a valid chain containing only one certificate and private key
         String chain = pemCertificate;
         String pk = pemPk;
 
         // when: building a RSAHolder, omitting the chain, then an exception is thrown
-        assertThrows( IllegalStateException.class, () -> new RSAHolder.RSAHolderBuilder()
-                .parseChain(chain)
-                .build() );
+        builder = builder.parseChain(chain);
+        assertThrows(IllegalStateException.class, () -> builder.build());
     }
 }

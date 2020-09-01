@@ -14,11 +14,6 @@ class RSAUtilsTest {
 
     @Test
     void encryptAndDecryptTest() {
-        System.out.println(System.getProperty("java.version"));
-        for (Provider provider : Security.getProviders())
-            System.out.println(provider);
-
-
         String text = "I am a plain text message";
 
         String key = rsaUtils.generateKey();

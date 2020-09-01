@@ -104,7 +104,7 @@ public class PluginUtils {
      * @see https://payline.atlassian.net/browse/PAYLAPMEXT-221
      */
     public static String getAspspIdFromBIC(List<Aspsp> aspsps, String bic) {
-        if (isEmpty(bic) || bic.length()<8){
+        if (isEmpty(bic) || bic.length() < 8) {
             throw new InvalidDataException("Invalid bic:" + bic);
         }
 
@@ -137,6 +137,40 @@ public class PluginUtils {
 
         // return its aspspId
         return goodAspsps.get(0).getAspspId();
+    }
+
+    /**
+     * put X for every characters in the IBAN except the 4 first, the 4 (or 5) last and " "
+     *
+     * @param iban the String to hide
+     * @return String hided
+     */
+    public static String hideIban(String iban) {
+        if (isEmpty(iban)) {
+            throw new InvalidDataException("IBAN must not be null or empty");
+        }
+        if (iban.length() < 5) {
+            throw new InvalidDataException("IBAN is too short");
+        }
+
+        int startLength = 4;
+        int endLength = 4;
+
+        // extract begin, middle (what need to be hidden) and, end
+        String beginIban = iban.substring(0, startLength);
+
+        // if there is an " " in the last four characters, whe take the last five
+        if (iban.substring(iban.length() - endLength).contains(" ")) {
+            endLength += 1;
+        }
+        String middleIban = iban.substring(startLength, iban.length() - endLength);
+        String endIban = iban.substring(iban.length() - endLength);
+
+        StringBuilder sb = new StringBuilder(beginIban)
+                .append(middleIban.replaceAll("[^ ]", "X"))
+                .append(endIban);
+
+        return sb.toString();
     }
 
 }

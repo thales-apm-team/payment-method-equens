@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class EquensHttpClientTest {
+class EquensHttpClientTest {
 
     /**
      * Private class required to test the sbstract class {@link EquensHttpClient}.
