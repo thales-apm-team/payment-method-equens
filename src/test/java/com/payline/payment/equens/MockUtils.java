@@ -39,7 +39,7 @@ public class MockUtils {
     private static JsonService jsonService = JsonService.getInstance();
 
     private static final String exampleCountry = "FR";
-    private static final String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+    private static final String timestamp = "20200901181833";
     private static final String ibanFR = "FR1234567891234567891234";
     private static final String ibanES = "ES1234567891234567891234";
 
@@ -148,9 +148,9 @@ public class MockUtils {
     public static ContractConfiguration aContractConfiguration(String exampleCountry) {
         Map<String, ContractProperty> contractProperties = new HashMap<>();
         contractProperties.put(Constants.ContractConfigurationKeys.CHANNEL_TYPE,
-                new ContractProperty(ConfigurationServiceImpl.ChannelType.ECOMMERCE));
+                new ContractProperty(ConfigurationServiceImpl.ChannelType.ECOMMERCE.getType()));
         contractProperties.put(Constants.ContractConfigurationKeys.CHARGE_BEARER,
-                new ContractProperty(ConfigurationServiceImpl.ChargeBearer.SLEV));
+                new ContractProperty(ConfigurationServiceImpl.ChargeBearer.SLEV.getBearer()));
         contractProperties.put(Constants.ContractConfigurationKeys.CLIENT_NAME, new ContractProperty("MarketPay"));
         contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_IBAN, new ContractProperty("FR1400490001510000000002"));
         contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_NAME, new ContractProperty("John Snow"));
@@ -158,7 +158,7 @@ public class MockUtils {
         contractProperties.put(Constants.ContractConfigurationKeys.SCA_METHOD,
                 new ContractProperty(ConfigurationServiceImpl.ScaMethod.REDIRECT));
         contractProperties.put(Constants.ContractConfigurationKeys.PURPOSE_CODE,
-                new ContractProperty(ConfigurationServiceImpl.PurposeCode.COMMERCE));
+                new ContractProperty(ConfigurationServiceImpl.PurposeCode.COMMERCE.getCode()));
         contractProperties.put(Constants.ContractConfigurationKeys.COUNTRIES,
                 new ContractProperty(exampleCountry));
 
@@ -371,7 +371,7 @@ public class MockUtils {
                 .withCreditorName("John Snow")
                 .withPaymentAmount("10.00")
                 .withPaymentCurrency("EUR")
-                .withPurposeCode(ConfigurationServiceImpl.PurposeCode.COMMERCE)
+                .withPurposeCode(ConfigurationServiceImpl.PurposeCode.COMMERCE.getCode())
                 .withPsuSessionInformation(
                         new PsuSessionInformation.PsuSessionInformationBuilder()
                                 .withIpAddress("192.168.0.1")
@@ -387,11 +387,11 @@ public class MockUtils {
                                                 .withCountry("FR")
                                                 .build()
                                 )
-                                .withChannelType(ConfigurationServiceImpl.ChannelType.ECOMMERCE)
+                                .withChannelType(ConfigurationServiceImpl.ChannelType.ECOMMERCE.getType())
                                 .build()
                 )
                 .addPreferredScaMethod(ConfigurationServiceImpl.ScaMethod.REDIRECT)
-                .withChargeBearer(ConfigurationServiceImpl.ChargeBearer.SLEV)
+                .withChargeBearer(ConfigurationServiceImpl.ChargeBearer.SLEV.getBearer())
                 .withPsuId("1")
                 .withPaymentProduct(MockUtils.aPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT));
     }

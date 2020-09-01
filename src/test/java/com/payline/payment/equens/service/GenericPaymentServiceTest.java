@@ -38,10 +38,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
-class PaymentTest {
+class GenericPaymentServiceTest {
 
     @InjectMocks
-    private Payment service;
+    private GenericPaymentService service;
 
     @Mock
     private PisHttpClient pisHttpClient;
@@ -50,7 +50,7 @@ class PaymentTest {
 
     @BeforeEach
     void setUp() {
-        service = Payment.getInstance();
+        service = GenericPaymentService.getInstance();
         MockitoAnnotations.initMocks(this);
     }
 
@@ -157,7 +157,7 @@ class PaymentTest {
         Buyer.Address input = MockUtils.aPaylineAddress();
 
         // when: feeding it to the method buildAddress()
-        Address output = Payment.buildAddress(input);
+        Address output = GenericPaymentService.buildAddress(input);
 
         // then: output attributes are not null and the address lines are less than 70 chars long
         assertNotNull(output);
@@ -175,7 +175,7 @@ class PaymentTest {
                 .build();
 
         // when: feeding it to the method buildAddress()
-        Address output = Payment.buildAddress(input);
+        Address output = GenericPaymentService.buildAddress(input);
 
         assertEquals("This is an address, but we need to be careful where to split it :", output.getAddressLines().get(0));
         assertEquals("notInTheMiddleOfThis", output.getAddressLines().get(1));
@@ -189,7 +189,7 @@ class PaymentTest {
                 .build();
 
         // when: feeding it to the method buildAddress()
-        Address output = Payment.buildAddress(input);
+        Address output = GenericPaymentService.buildAddress(input);
 
         assertEquals("ThisIsAnAddressWithoutAnySpaceAndWeNeedToSplitItSomewaySoWeTruncateBru", output.getAddressLines().get(0));
         assertEquals("tallyInTheMiddle", output.getAddressLines().get(1));
@@ -197,14 +197,14 @@ class PaymentTest {
 
     @Test
     void convertAmount() {
-        assertNull(Payment.convertAmount(null));
+        assertNull(GenericPaymentService.convertAmount(null));
         // Euro
-        assertEquals("0.01", Payment.convertAmount(new Amount(BigInteger.ONE, Currency.getInstance("EUR"))));
-        assertEquals("1.00", Payment.convertAmount(new Amount(BigInteger.valueOf(100), Currency.getInstance("EUR"))));
+        assertEquals("0.01", GenericPaymentService.convertAmount(new Amount(BigInteger.ONE, Currency.getInstance("EUR"))));
+        assertEquals("1.00", GenericPaymentService.convertAmount(new Amount(BigInteger.valueOf(100), Currency.getInstance("EUR"))));
         // Yen: no decimal
-        assertEquals("100", Payment.convertAmount(new Amount(BigInteger.valueOf(100), Currency.getInstance("JPY"))));
+        assertEquals("100", GenericPaymentService.convertAmount(new Amount(BigInteger.valueOf(100), Currency.getInstance("JPY"))));
         // Bahrain Dinar: 3 decimals
-        assertEquals("0.100", Payment.convertAmount(new Amount(BigInteger.valueOf(100), Currency.getInstance("BHD"))));
+        assertEquals("0.100", GenericPaymentService.convertAmount(new Amount(BigInteger.valueOf(100), Currency.getInstance("BHD"))));
     }
 
     @Test
@@ -213,29 +213,29 @@ class PaymentTest {
         WalletPaymentData walletPaymentData = MockUtils.aWalletPaymentdata();
         GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(MockUtils.aPaylinePaymentRequest());
 
-        PaymentInitiationRequest paymentInitiationRequest = Payment.buildPaymentInitiationRequest(genericPaymentRequest, psu, walletPaymentData);
-
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getAspspId(), paymentInitiationRequest.getAspspId());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getChargeBearer(), paymentInitiationRequest.getChargeBearer());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getCreditorAccount().getIdentification(), paymentInitiationRequest.getCreditorAccount().getIdentification());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getDebtorAccount().getIdentification(), paymentInitiationRequest.getDebtorAccount().getIdentification());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getCreditorName(), paymentInitiationRequest.getCreditorName());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getEndToEndId(), paymentInitiationRequest.getEndToEndId());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getInitiatingPartyReferenceId(), paymentInitiationRequest.getInitiatingPartyReferenceId());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getInitiatingPartyReturnUrl(), paymentInitiationRequest.getInitiatingPartyReturnUrl());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getPaymentAmount(), paymentInitiationRequest.getPaymentAmount());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getPaymentCurrency(), paymentInitiationRequest.getPaymentCurrency());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getPaymentProduct(), paymentInitiationRequest.getPaymentProduct());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getPreferredScaMethod(), paymentInitiationRequest.getPreferredScaMethod());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getPsuId(), paymentInitiationRequest.getPsuId());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getPsuSessionInformation().getHeaderUserAgent(), paymentInitiationRequest.getPsuSessionInformation().getHeaderUserAgent());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getPsuSessionInformation().getIpAddress(), paymentInitiationRequest.getPsuSessionInformation().getIpAddress());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getPurposeCode(), paymentInitiationRequest.getPurposeCode());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getRemittanceInformation(), paymentInitiationRequest.getRemittanceInformation());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getRemittanceInformationStructured().getReference(), paymentInitiationRequest.getRemittanceInformationStructured().getReference());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getRiskInformation().getChannelType(), paymentInitiationRequest.getRiskInformation().getChannelType());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getRiskInformation().getMerchantCategoryCode(), paymentInitiationRequest.getRiskInformation().getMerchantCategoryCode());
-        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(MockUtils.getIbanFR()).getRiskInformation().getMerchantCustomerId(), paymentInitiationRequest.getRiskInformation().getMerchantCustomerId());
+        PaymentInitiationRequest paymentInitiationRequest = GenericPaymentService.buildPaymentInitiationRequest(genericPaymentRequest, psu, walletPaymentData);
+        String ibanFR = MockUtils.getIbanFR();
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getAspspId(), paymentInitiationRequest.getAspspId());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getChargeBearer(), paymentInitiationRequest.getChargeBearer());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getCreditorAccount().getIdentification(), paymentInitiationRequest.getCreditorAccount().getIdentification());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getDebtorAccount().getIdentification(), paymentInitiationRequest.getDebtorAccount().getIdentification());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getCreditorName(), paymentInitiationRequest.getCreditorName());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getEndToEndId(), paymentInitiationRequest.getEndToEndId());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getInitiatingPartyReferenceId(), paymentInitiationRequest.getInitiatingPartyReferenceId());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getInitiatingPartyReturnUrl(), paymentInitiationRequest.getInitiatingPartyReturnUrl());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getPaymentAmount(), paymentInitiationRequest.getPaymentAmount());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getPaymentCurrency(), paymentInitiationRequest.getPaymentCurrency());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getPaymentProduct(), paymentInitiationRequest.getPaymentProduct());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getPreferredScaMethod(), paymentInitiationRequest.getPreferredScaMethod());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getPsuId(), paymentInitiationRequest.getPsuId());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getPsuSessionInformation().getHeaderUserAgent(), paymentInitiationRequest.getPsuSessionInformation().getHeaderUserAgent());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getPsuSessionInformation().getIpAddress(), paymentInitiationRequest.getPsuSessionInformation().getIpAddress());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getPurposeCode(), paymentInitiationRequest.getPurposeCode());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getRemittanceInformation(), paymentInitiationRequest.getRemittanceInformation());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getRemittanceInformationStructured().getReference(), paymentInitiationRequest.getRemittanceInformationStructured().getReference());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getRiskInformation().getChannelType(), paymentInitiationRequest.getRiskInformation().getChannelType());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getRiskInformation().getMerchantCategoryCode(), paymentInitiationRequest.getRiskInformation().getMerchantCategoryCode());
+        Assertions.assertEquals(MockUtils.aPaymentInitiationRequest(ibanFR).getRiskInformation().getMerchantCustomerId(), paymentInitiationRequest.getRiskInformation().getMerchantCustomerId());
     }
 
     @Test
@@ -250,7 +250,7 @@ class PaymentTest {
                         .build());
 
         Assertions.assertThrows(InvalidDataException.class,
-                () -> Payment.buildPaymentInitiationRequest(genericPaymentRequest, psu, walletPaymentData),
+                () -> GenericPaymentService.buildPaymentInitiationRequest(genericPaymentRequest, psu, walletPaymentData),
                 "IBAN is required for Spain"
         );
     }
@@ -269,7 +269,7 @@ class PaymentTest {
                         .build());
 
         Assertions.assertThrows(InvalidDataException.class,
-                () -> Payment.buildPaymentInitiationRequest(genericPaymentRequest, psu, walletPaymentData),
+                () -> GenericPaymentService.buildPaymentInitiationRequest(genericPaymentRequest, psu, walletPaymentData),
                 "IBAN should be from a country available by the merchant "
         );
     }
@@ -286,7 +286,7 @@ class PaymentTest {
                         .build());
 
         Assertions.assertThrows(InvalidDataException.class,
-                () -> Payment.buildPaymentInitiationRequest(genericPaymentRequest, psu, walletPaymentData),
+                () -> GenericPaymentService.buildPaymentInitiationRequest(genericPaymentRequest, psu, walletPaymentData),
                 "IBAN should be from a country available by the merchant "
         );
     }

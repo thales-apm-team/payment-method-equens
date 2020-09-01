@@ -42,11 +42,12 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
                 throw new InvalidDataException("Plugin configuration must not be null");
             }
             // check if the string who contain the list of country is empty
-            if (PluginUtils.isEmpty(paymentFormConfigurationRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.COUNTRIES).getValue())) {
+            String countries = paymentFormConfigurationRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.COUNTRIES).getValue();
+            if (PluginUtils.isEmpty(countries)) {
                 throw new InvalidDataException("country must not be empty");
             }
 
-            listCountryCode = PluginUtils.createListCountry(paymentFormConfigurationRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.COUNTRIES).getValue());
+            listCountryCode = PluginUtils.createListCountry(countries);
 
             List<SelectOption> banks = this.getBanks(paymentFormConfigurationRequest.getPluginConfiguration(), listCountryCode);
 

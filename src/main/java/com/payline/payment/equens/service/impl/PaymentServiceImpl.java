@@ -3,7 +3,7 @@ package com.payline.payment.equens.service.impl;
 import com.payline.payment.equens.bean.GenericPaymentRequest;
 import com.payline.payment.equens.bean.business.payment.WalletPaymentData;
 import com.payline.payment.equens.exception.PluginException;
-import com.payline.payment.equens.service.Payment;
+import com.payline.payment.equens.service.GenericPaymentService;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
 import com.payline.pmapi.bean.payment.response.PaymentResponse;
@@ -14,7 +14,7 @@ import com.payline.pmapi.service.PaymentService;
 import org.apache.logging.log4j.Logger;
 
 public class PaymentServiceImpl implements PaymentService {
-    private Payment payment = Payment.getInstance();
+    private GenericPaymentService genericPaymentService = GenericPaymentService.getInstance();
     private static final Logger LOGGER = LogManager.getLogger(PaymentServiceImpl.class);
 
     @Override
@@ -28,7 +28,7 @@ public class PaymentServiceImpl implements PaymentService {
                     .build();
 
             // execute the payment Request
-            return payment.paymentRequest(genericPaymentRequest, walletPaymentData);
+            return genericPaymentService.paymentRequest(genericPaymentRequest, walletPaymentData);
         } catch (RuntimeException e) {
             LOGGER.error("Unexpected plugin error", e);
             return PaymentResponseFailure.PaymentResponseFailureBuilder

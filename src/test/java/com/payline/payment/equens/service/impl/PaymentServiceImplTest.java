@@ -1,7 +1,7 @@
 package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.MockUtils;
-import com.payline.payment.equens.service.Payment;
+import com.payline.payment.equens.service.GenericPaymentService;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
 import com.payline.pmapi.bean.payment.response.PaymentResponse;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseRedirect;
@@ -11,12 +11,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
 class PaymentServiceImplTest {
@@ -25,7 +23,7 @@ class PaymentServiceImplTest {
     private PaymentServiceImpl service;
 
     @Mock
-    private Payment payment;
+    private GenericPaymentService genericPaymentService;
 
     @BeforeEach
     void setup(){
@@ -51,7 +49,7 @@ class PaymentServiceImplTest {
                 .withRedirectionRequest(redirectionRequest)
                 .build();
 
-        doReturn(responseRedirect).when(payment).paymentRequest(any(), any());
+        doReturn(responseRedirect).when(genericPaymentService).paymentRequest(any(), any());
 
         // when: calling paymentRequest() method
         PaymentResponse paymentResponse = service.paymentRequest( paymentRequest );

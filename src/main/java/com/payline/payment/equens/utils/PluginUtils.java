@@ -142,7 +142,7 @@ public class PluginUtils {
 
     // find the country of the bank from his BIC
     public static String getCountryCodeFromBIC(List<Aspsp> listAspsps, String bic) {
-        if (isEmpty(bic) || bic.length()<8){
+        if (isEmpty(bic) || bic.length() < 8) {
             throw new InvalidDataException("Invalid bic:" + bic);
         }
 
@@ -166,9 +166,9 @@ public class PluginUtils {
         }
 
         // all the countries available for Equens
-        if (country.trim().equalsIgnoreCase(ConfigurationServiceImpl.CountryCode.ALL)) {
-            listCountryCode.add(ConfigurationServiceImpl.CountryCode.FR);
-            listCountryCode.add(ConfigurationServiceImpl.CountryCode.ES);
+        if (country.trim().equalsIgnoreCase(ConfigurationServiceImpl.CountryCode.ALL.name())) {
+            listCountryCode.add(ConfigurationServiceImpl.CountryCode.FR.name());
+            listCountryCode.add(ConfigurationServiceImpl.CountryCode.ES.name());
         } else {
             listCountryCode.add(country.trim().toUpperCase());
         }
@@ -181,15 +181,18 @@ public class PluginUtils {
         if (listCountry.isEmpty()) {
             throw new InvalidDataException("listCountry should not be empty");
         }
+        if (iban.length() < 2) {
+            throw new InvalidDataException("iban should be at least 2char long");
+        }
 
         for (String s : listCountry) {
-            String pattern = "(^" + s + "[0-9A-Z]*)";
-            if (iban.trim().toUpperCase().matches(pattern)) {
+            if (iban.startsWith(s)) {
                 return true;
             }
         }
         return false;
     }
+
     /**
      * put X for every characters in the IBAN except the 4 first, the 4 (or 5) last and " "
      *

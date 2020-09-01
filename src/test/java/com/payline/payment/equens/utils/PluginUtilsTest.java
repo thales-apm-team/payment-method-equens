@@ -109,9 +109,9 @@ class PluginUtilsTest {
     void createListCountry_OneCountry() {
         List<String> expected = new ArrayList<String>() {
         };
-        expected.add(ConfigurationServiceImpl.CountryCode.FR);
+        expected.add(ConfigurationServiceImpl.CountryCode.FR.name());
 
-        List<String> listCountry = PluginUtils.createListCountry(ConfigurationServiceImpl.CountryCode.FR);
+        List<String> listCountry = PluginUtils.createListCountry(ConfigurationServiceImpl.CountryCode.FR.name());
 
         Assertions.assertEquals(expected, listCountry);
 
@@ -120,10 +120,10 @@ class PluginUtilsTest {
     @Test
     void createListCountry_TOUSCountry() {
         List<String> expected = new ArrayList<>();
-        expected.add(ConfigurationServiceImpl.CountryCode.FR);
-        expected.add(ConfigurationServiceImpl.CountryCode.ES);
+        expected.add(ConfigurationServiceImpl.CountryCode.FR.name());
+        expected.add(ConfigurationServiceImpl.CountryCode.ES.name());
 
-        List<String> listCountry = PluginUtils.createListCountry(ConfigurationServiceImpl.CountryCode.ALL);
+        List<String> listCountry = PluginUtils.createListCountry(ConfigurationServiceImpl.CountryCode.ALL.name());
 
         Assertions.assertEquals(expected, listCountry);
     }
@@ -140,7 +140,7 @@ class PluginUtilsTest {
     void correctIban() {
         String iban = "FR1234M6789";
         List<String> listCountry = new ArrayList<>();
-        listCountry.add(ConfigurationServiceImpl.CountryCode.FR);
+        listCountry.add(ConfigurationServiceImpl.CountryCode.FR.name());
 
         Assertions.assertTrue(PluginUtils.correctIban(listCountry, iban));
     }

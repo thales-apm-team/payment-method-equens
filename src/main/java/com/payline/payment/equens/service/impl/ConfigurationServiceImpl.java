@@ -33,35 +33,55 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private static final String I18N_CONTRACT_PREFIX = "contract.";
 
-    public static final class ChannelType {
-        private ChannelType(){} // private constructor to hide the implicit public one (Sonarqube issue)
-        public static final String ECOMMERCE = "Ecommerce";
+    public enum ChannelType {
+        ECOMMERCE("Ecommerce");
+
+
+        private final String type;
+
+        ChannelType(String type) {
+            this.type = type;
+        }
+
+        public String getType() {
+            return type;
+        }
     }
 
-    public static final class ChargeBearer {
-        private ChargeBearer(){} // private constructor to hide the implicit public one (Sonarqube issue)
-        public static final String CRED = "CRED";
-        public static final String DEBT = "DEBT";
-        public static final String SHAR = "SHAR";
-        public static final String SLEV = "SLEV";
+    public enum ChargeBearer {
+        CRED("CRED"), DEBT("DEBT"), SHAR("SHAR"), SLEV("SLEV");
+
+        private final String bearer;
+        ChargeBearer(String bearer) {
+            this.bearer = bearer;
+        }
+
+        public String getBearer() {
+            return bearer;
+        }
     }
 
-    public static final class PurposeCode {
-        private PurposeCode(){} // private constructor to hide the implicit public one (Sonarqube issue)
-        public static final String CARPARK = "Carpark";
-        public static final String COMMERCE = "Commerce";
-        public static final String TRANSPORT = "Transport";
+    public enum PurposeCode {
+        CARPARK("Carpark"), COMMERCE("Commerce"), TRANSPORT("Transport");
+
+        private final String code;
+        PurposeCode(String code) {
+            this.code = code;
+        }
+
+        public String getCode() {
+            return code;
+        }
     }
 
-    public static final class CountryCode {
-        private CountryCode(){} // private constructor to hide the implicit public one (Sonarqube issue)
-        public static final String FR = "FR";
-        public static final String ES = "ES";
-        public static final String ALL = "ALL";
+    public enum CountryCode {
+        FR, ES, ALL
     }
 
     public static final class ScaMethod {
-        private ScaMethod(){} // private constructor to hide the implicit public one (Sonarqube issue)
+        private ScaMethod() {
+        } // private constructor to hide the implicit public one (Sonarqube issue)
+
         public static final String REDIRECT = "Redirect";
     }
 
@@ -77,48 +97,48 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         List<AbstractParameter> parameters = new ArrayList<>();
 
         // Client name
-        parameters.add( this.newInputParameter( Constants.ContractConfigurationKeys.CLIENT_NAME, true, locale ) );
+        parameters.add(this.newInputParameter(Constants.ContractConfigurationKeys.CLIENT_NAME, true, locale));
 
         // Onboarding ID
-        parameters.add( this.newInputParameter( Constants.ContractConfigurationKeys.ONBOARDING_ID, true, locale ) );
+        parameters.add(this.newInputParameter(Constants.ContractConfigurationKeys.ONBOARDING_ID, true, locale));
 
         // merchant iban
-        parameters.add( this.newInputParameter( Constants.ContractConfigurationKeys.MERCHANT_IBAN, true, locale ) );
+        parameters.add(this.newInputParameter(Constants.ContractConfigurationKeys.MERCHANT_IBAN, true, locale));
 
         // merchant name
-        parameters.add( this.newInputParameter( Constants.ContractConfigurationKeys.MERCHANT_NAME, true, locale ) );
+        parameters.add(this.newInputParameter(Constants.ContractConfigurationKeys.MERCHANT_NAME, true, locale));
 
         // channel type
         Map<String, String> channelTypes = new HashMap<>();
-        channelTypes.put(ChannelType.ECOMMERCE, ChannelType.ECOMMERCE);
-        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.CHANNEL_TYPE, channelTypes, ChannelType.ECOMMERCE, true, locale ) );
+        channelTypes.put(ChannelType.ECOMMERCE.getType(), ChannelType.ECOMMERCE.getType());
+        parameters.add(this.newListBoxParameter(Constants.ContractConfigurationKeys.CHANNEL_TYPE, channelTypes, ChannelType.ECOMMERCE.getType(), true, locale));
 
         // SCA method
         Map<String, String> scaMethods = new HashMap<>();
         scaMethods.put(ScaMethod.REDIRECT, ScaMethod.REDIRECT);
-        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.SCA_METHOD, scaMethods, ScaMethod.REDIRECT, true, locale ) );
+        parameters.add(this.newListBoxParameter(Constants.ContractConfigurationKeys.SCA_METHOD, scaMethods, ScaMethod.REDIRECT, true, locale));
 
         // Charge bearer
         Map<String, String> chargeBearers = new HashMap<>();
-        chargeBearers.put(ChargeBearer.CRED, ChargeBearer.CRED);
-        chargeBearers.put(ChargeBearer.DEBT, ChargeBearer.DEBT);
-        chargeBearers.put(ChargeBearer.SHAR, ChargeBearer.SHAR);
-        chargeBearers.put(ChargeBearer.SLEV, ChargeBearer.SLEV);
-        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.CHARGE_BEARER, chargeBearers, ChargeBearer.SLEV, true, locale ) );
+        chargeBearers.put(ChargeBearer.CRED.getBearer(), ChargeBearer.CRED.getBearer());
+        chargeBearers.put(ChargeBearer.DEBT.getBearer(), ChargeBearer.DEBT.getBearer());
+        chargeBearers.put(ChargeBearer.SHAR.getBearer(), ChargeBearer.SHAR.getBearer());
+        chargeBearers.put(ChargeBearer.SLEV.getBearer(), ChargeBearer.SLEV.getBearer());
+        parameters.add(this.newListBoxParameter(Constants.ContractConfigurationKeys.CHARGE_BEARER, chargeBearers, ChargeBearer.SLEV.getBearer(), true, locale));
 
         // purpose code
         Map<String, String> purposeCodes = new HashMap<>();
-        purposeCodes.put(PurposeCode.CARPARK, PurposeCode.CARPARK);
-        purposeCodes.put(PurposeCode.COMMERCE, PurposeCode.COMMERCE);
-        purposeCodes.put(PurposeCode.TRANSPORT, PurposeCode.TRANSPORT);
-        parameters.add( this.newListBoxParameter( Constants.ContractConfigurationKeys.PURPOSE_CODE, purposeCodes, PurposeCode.COMMERCE, true, locale ) );
+        purposeCodes.put(PurposeCode.CARPARK.getCode(), PurposeCode.CARPARK.getCode());
+        purposeCodes.put(PurposeCode.COMMERCE.getCode(), PurposeCode.COMMERCE.getCode());
+        purposeCodes.put(PurposeCode.TRANSPORT.getCode(), PurposeCode.TRANSPORT.getCode());
+        parameters.add(this.newListBoxParameter(Constants.ContractConfigurationKeys.PURPOSE_CODE, purposeCodes, PurposeCode.COMMERCE.getCode(), true, locale));
 
         // Create a listBox who display countries accepted by the API
         Map<String, String> countryCode = new HashMap<>();
-        countryCode.put(CountryCode.FR, CountryCode.FR);
-        countryCode.put(CountryCode.ES, CountryCode.ES);
-        countryCode.put(CountryCode.ALL, i18n.getMessage("countryCode.all", locale));
-        parameters.add(this.newListBoxParameter(Constants.ContractConfigurationKeys.COUNTRIES, countryCode, CountryCode.ALL, true, locale));
+        countryCode.put(CountryCode.FR.name(), i18n.getMessage("countryCode.fr", locale));
+        countryCode.put(CountryCode.ES.name(), i18n.getMessage("countryCode.es", locale));
+        countryCode.put(CountryCode.ALL.name(), i18n.getMessage("countryCode.all", locale));
+        parameters.add(this.newListBoxParameter(Constants.ContractConfigurationKeys.COUNTRIES, countryCode, CountryCode.ALL.name(), true, locale));
 
         return parameters;
     }
@@ -131,10 +151,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         Locale locale = contractParametersCheckRequest.getLocale();
 
         // check required fields
-        for( AbstractParameter param : this.getParameters( locale ) ){
-            if( param.isRequired() && accountInfo.get( param.getKey() ) == null ){
+        for (AbstractParameter param : this.getParameters(locale)) {
+            if (param.isRequired() && accountInfo.get(param.getKey()) == null) {
                 String message = i18n.getMessage(I18N_CONTRACT_PREFIX + param.getKey() + ".requiredError", locale);
-                errors.put( param.getKey(), message );
+                errors.put(param.getKey(), message);
             }
         }
 
@@ -143,27 +163,26 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         String onboardingIdKey = Constants.ContractConfigurationKeys.ONBOARDING_ID;
 
         // If one of them is missing, no need to go further as they are both required to get an access token
-        if( errors.containsKey( clientNameKey ) || errors.containsKey( onboardingIdKey ) ){
+        if (errors.containsKey(clientNameKey) || errors.containsKey(onboardingIdKey)) {
             return errors;
         }
 
         // We first need to replace these 2 values in the ContractConfiguration (to override the former validated values)
-        RequestConfiguration altRequestConfiguration = RequestConfiguration.build( contractParametersCheckRequest );
+        RequestConfiguration altRequestConfiguration = RequestConfiguration.build(contractParametersCheckRequest);
         Map<String, ContractProperty> contractProperties = altRequestConfiguration.getContractConfiguration().getContractProperties();
-        contractProperties.put( clientNameKey, new ContractProperty( accountInfo.get( clientNameKey ) ) );
-        contractProperties.put( onboardingIdKey, new ContractProperty( accountInfo.get( onboardingIdKey ) ) );
+        contractProperties.put(clientNameKey, new ContractProperty(accountInfo.get(clientNameKey)));
+        contractProperties.put(onboardingIdKey, new ContractProperty(accountInfo.get(onboardingIdKey)));
 
         // Validate the merchant account on the 2 APIs (PIS and PSU) because they have separate subscriptions
         try {
             pisHttpClient.init(contractParametersCheckRequest.getPartnerConfiguration());
-            pisHttpClient.authorize( altRequestConfiguration );
+            pisHttpClient.authorize(altRequestConfiguration);
 
             psuHttpClient.init(contractParametersCheckRequest.getPartnerConfiguration());
-            psuHttpClient.authorize( altRequestConfiguration );
-        }
-        catch( PluginException e ){
-            errors.put( clientNameKey, e.getMessage());
-            errors.put( onboardingIdKey, "" );
+            psuHttpClient.authorize(altRequestConfiguration);
+        } catch (PluginException e) {
+            errors.put(clientNameKey, e.getMessage());
+            errors.put(onboardingIdKey, "");
         }
 
         return errors;
@@ -185,17 +204,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             pluginConfigurationIs now formated as: { banks }&&&privateKey
              */
             PartnerConfiguration partnerConfiguration = retrievePluginConfigurationRequest.getPartnerConfiguration();
-            if( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME ) == null ){
+            if (partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME) == null) {
                 throw new PluginException("Missing Payline clientName from partner configuration");
             }
-            if( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.PAYLINE_ONBOARDING_ID ) == null ){
+            if (partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.PAYLINE_ONBOARDING_ID) == null) {
                 throw new PluginException("Missing Payline onboardingId from partner configuration");
             }
             Map<String, ContractProperty> contractProperties = new HashMap<>();
             contractProperties.put(Constants.ContractConfigurationKeys.CLIENT_NAME,
-                    new ContractProperty( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME ) ));
+                    new ContractProperty(partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME)));
             contractProperties.put(Constants.ContractConfigurationKeys.ONBOARDING_ID,
-                    new ContractProperty( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.PAYLINE_ONBOARDING_ID ) ));
+                    new ContractProperty(partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.PAYLINE_ONBOARDING_ID)));
             ContractConfiguration contractConfiguration = new ContractConfiguration("fake contract", contractProperties);
 
             RequestConfiguration requestConfiguration = new RequestConfiguration(
@@ -204,26 +223,25 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                     retrievePluginConfigurationRequest.getPartnerConfiguration());
 
             // Init HTTP client
-            pisHttpClient.init( requestConfiguration.getPartnerConfiguration() );
+            pisHttpClient.init(requestConfiguration.getPartnerConfiguration());
 
             // Retrieve account service providers list
-            GetAspspsResponse apspsps = pisHttpClient.getAspsps( requestConfiguration );
+            GetAspspsResponse apspsps = pisHttpClient.getAspsps(requestConfiguration);
 
             // Serialize the list (as JSON)
             String banks = apspsps.toString();
 
             // get oldKey or generate first key
             String key;
-            if (PluginUtils.isEmpty( retrievePluginConfigurationRequest.getPluginConfiguration() )){
+            if (PluginUtils.isEmpty(retrievePluginConfigurationRequest.getPluginConfiguration())) {
                 key = rsaUtils.generateKey();
             } else {
-                key = PluginUtils.extractKey( retrievePluginConfigurationRequest.getPluginConfiguration() );
+                key = PluginUtils.extractKey(retrievePluginConfigurationRequest.getPluginConfiguration());
             }
 
             return banks + PluginUtils.SEPARATOR + key;
-        }
-        catch( RuntimeException e ){
-            LOGGER.error("Could not retrieve plugin configuration due to a plugin error", e );
+        } catch (RuntimeException e) {
+            LOGGER.error("Could not retrieve plugin configuration due to a plugin error", e);
             return retrievePluginConfigurationRequest.getPluginConfiguration();
         }
     }
@@ -244,38 +262,38 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     /**
      * Build and return a new <code>InputParameter</code> for the contract configuration.
      *
-     * @param key The parameter key
+     * @param key      The parameter key
      * @param required Is this parameter required ?
-     * @param locale The current locale
+     * @param locale   The current locale
      * @return The new input parameter
      */
-    private InputParameter newInputParameter( String key, boolean required, Locale locale ){
+    private InputParameter newInputParameter(String key, boolean required, Locale locale) {
         InputParameter inputParameter = new InputParameter();
-        inputParameter.setKey( key );
-        inputParameter.setLabel( i18n.getMessage(I18N_CONTRACT_PREFIX + key + ".label", locale) );
-        inputParameter.setDescription( i18n.getMessage(I18N_CONTRACT_PREFIX + key + ".description", locale) );
-        inputParameter.setRequired( required );
+        inputParameter.setKey(key);
+        inputParameter.setLabel(i18n.getMessage(I18N_CONTRACT_PREFIX + key + ".label", locale));
+        inputParameter.setDescription(i18n.getMessage(I18N_CONTRACT_PREFIX + key + ".description", locale));
+        inputParameter.setRequired(required);
         return inputParameter;
     }
 
     /**
      * Build and return a new <code>ListBoxParameter</code> for the contract configuration.
      *
-     * @param key The parameter key
-     * @param values All the possible values for the list box
+     * @param key          The parameter key
+     * @param values       All the possible values for the list box
      * @param defaultValue The key of the default value (which will be selected by default)
-     * @param required Is this parameter required ?
-     * @param locale The current locale
+     * @param required     Is this parameter required ?
+     * @param locale       The current locale
      * @return The new list box parameter
      */
-    private ListBoxParameter newListBoxParameter( String key, Map<String, String> values, String defaultValue, boolean required, Locale locale ){
+    private ListBoxParameter newListBoxParameter(String key, Map<String, String> values, String defaultValue, boolean required, Locale locale) {
         ListBoxParameter listBoxParameter = new ListBoxParameter();
-        listBoxParameter.setKey( key );
-        listBoxParameter.setLabel( i18n.getMessage(I18N_CONTRACT_PREFIX + key + ".label", locale) );
-        listBoxParameter.setDescription( i18n.getMessage(I18N_CONTRACT_PREFIX + key + ".description", locale) );
-        listBoxParameter.setList( values );
-        listBoxParameter.setRequired( required );
-        listBoxParameter.setValue( defaultValue );
+        listBoxParameter.setKey(key);
+        listBoxParameter.setLabel(i18n.getMessage(I18N_CONTRACT_PREFIX + key + ".label", locale));
+        listBoxParameter.setDescription(i18n.getMessage(I18N_CONTRACT_PREFIX + key + ".description", locale));
+        listBoxParameter.setList(values);
+        listBoxParameter.setRequired(required);
+        listBoxParameter.setValue(defaultValue);
         return listBoxParameter;
     }
 

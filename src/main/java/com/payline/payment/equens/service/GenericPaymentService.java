@@ -27,21 +27,21 @@ import org.apache.logging.log4j.Logger;
 import java.math.BigInteger;
 import java.util.*;
 
-public class Payment {
-    private static final Logger LOGGER = LogManager.getLogger(Payment.class);
+public class GenericPaymentService {
+    private static final Logger LOGGER = LogManager.getLogger(GenericPaymentService.class);
 
     private PisHttpClient pisHttpClient = PisHttpClient.getInstance();
     private PsuHttpClient psuHttpclient = PsuHttpClient.getInstance();
     private static JsonService jsonService = JsonService.getInstance();
 
-    private Payment() {
+    private GenericPaymentService() {
     }
 
     private static class Holder {
-        private static final Payment instance = new Payment();
+        private static final GenericPaymentService instance = new GenericPaymentService();
     }
 
-    public static Payment getInstance() {
+    public static GenericPaymentService getInstance() {
         return Holder.instance;
     }
 
@@ -177,11 +177,7 @@ public class Payment {
                 .build();
     }
 
-
-    // Build PaymentInitiationRequest (Equens) from PaymentRequest (Payline)
-    static PaymentInitiationRequest buildPaymentInitiationRequest(GenericPaymentRequest paymentRequest, Psu newPsu, WalletPaymentData walletPaymentData) {
-        List<String> listCountryCode;
-
+    static void validateRequest(GenericPaymentRequest paymentRequest) {
         // Control on the input data (to avoid NullPointerExceptions)
         if (paymentRequest.getAmount() == null
                 || paymentRequest.getAmount().getCurrency() == null
@@ -191,10 +187,11 @@ public class Payment {
         if (paymentRequest.getOrder() == null) {
             throw new InvalidDataException("paymentRequest.order is required");
         }
+    }
 
-        // extract BIC and IBAN
-        String bic = walletPaymentData.getBic();
-        String iban = walletPaymentData.getIban();
+    static void validateIban(GenericPaymentRequest paymentRequest, String bic, String iban) {
+        List<String> listCountryCode;
+
 
         // get the list of countryCode available by the merchant
         listCountryCode = PluginUtils.createListCountry(paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.COUNTRIES).getValue());
@@ -205,7 +202,7 @@ public class Payment {
                 , bic);
 
         // if the buyer choose a bank from Spain, IBAN is required
-        if (countryCode.equalsIgnoreCase(ConfigurationServiceImpl.CountryCode.ES) && PluginUtils.isEmpty(iban)) {
+        if (countryCode.equalsIgnoreCase(ConfigurationServiceImpl.CountryCode.ES.name()) && PluginUtils.isEmpty(iban)) {
             throw new InvalidDataException("IBAN is required for Spain");
         }
 
@@ -213,6 +210,18 @@ public class Payment {
         if (!PluginUtils.isEmpty(iban) && !PluginUtils.correctIban(listCountryCode, iban)) {
             throw new InvalidDataException("IBAN should be from a country available by the merchant " + listCountryCode.toString());
         }
+    }
+
+    // Build PaymentInitiationRequest (Equens) from PaymentRequest (Payline)
+    static PaymentInitiationRequest buildPaymentInitiationRequest(GenericPaymentRequest paymentRequest, Psu newPsu, WalletPaymentData walletPaymentData) {
+
+        // extract BIC and IBAN
+        String bic = walletPaymentData.getBic();
+        String iban = walletPaymentData.getIban();
+
+        // Control on the input data (to avoid NullPointerExceptions)
+        validateRequest(paymentRequest);
+        validateIban(paymentRequest, bic, iban);
 
         // get the aspspId from the BIC
         String aspspId = PluginUtils.getAspspIdFromBIC(
