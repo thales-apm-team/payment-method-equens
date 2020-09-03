@@ -38,11 +38,16 @@ import java.util.*;
 public class MockUtils {
     private static JsonService jsonService = JsonService.getInstance();
 
+    private static final String exampleCountry = "FR";
+    private static final String timestamp = "20200901181833";
+    private static final String ibanFR = "FR1234567891234567891234";
+    private static final String ibanES = "ES1234567891234567891234";
+
     /**
      * Generate a valid accountInfo, an attribute of a {@link ContractParametersCheckRequest} instance.
      */
     public static Map<String, String> anAccountInfo() {
-        return anAccountInfo(aContractConfiguration());
+        return anAccountInfo(aContractConfiguration(exampleCountry));
     }
 
     /**
@@ -140,20 +145,22 @@ public class MockUtils {
     /**
      * Generate a valid {@link ContractConfiguration}.
      */
-    public static ContractConfiguration aContractConfiguration() {
+    public static ContractConfiguration aContractConfiguration(String exampleCountry) {
         Map<String, ContractProperty> contractProperties = new HashMap<>();
         contractProperties.put(Constants.ContractConfigurationKeys.CHANNEL_TYPE,
-                new ContractProperty(ConfigurationServiceImpl.ChannelType.ECOMMERCE));
+                new ContractProperty(ConfigurationServiceImpl.ChannelType.ECOMMERCE.getType()));
         contractProperties.put(Constants.ContractConfigurationKeys.CHARGE_BEARER,
-                new ContractProperty(ConfigurationServiceImpl.ChargeBearer.SLEV));
+                new ContractProperty(ConfigurationServiceImpl.ChargeBearer.SLEV.getBearer()));
         contractProperties.put(Constants.ContractConfigurationKeys.CLIENT_NAME, new ContractProperty("MarketPay"));
-        contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_IBAN, new ContractProperty("FR33BBBBBGGGGGCCCCCCCCCCC00"));
+        contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_IBAN, new ContractProperty("FR1400490001510000000002"));
         contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_NAME, new ContractProperty("John Snow"));
         contractProperties.put(Constants.ContractConfigurationKeys.ONBOARDING_ID, new ContractProperty("XXXXXX"));
         contractProperties.put(Constants.ContractConfigurationKeys.SCA_METHOD,
                 new ContractProperty(ConfigurationServiceImpl.ScaMethod.REDIRECT));
         contractProperties.put(Constants.ContractConfigurationKeys.PURPOSE_CODE,
-                new ContractProperty(ConfigurationServiceImpl.PurposeCode.COMMERCE));
+                new ContractProperty(ConfigurationServiceImpl.PurposeCode.COMMERCE.getCode()));
+        contractProperties.put(Constants.ContractConfigurationKeys.COUNTRIES,
+                new ContractProperty(exampleCountry));
 
         return new ContractConfiguration("INST EquensWorldline", contractProperties);
     }
@@ -172,7 +179,7 @@ public class MockUtils {
     public static ContractParametersCheckRequest.CheckRequestBuilder aContractParametersCheckRequestBuilder() {
         return ContractParametersCheckRequest.CheckRequestBuilder.aCheckRequest()
                 .withAccountInfo(anAccountInfo())
-                .withContractConfiguration(aContractConfiguration())
+                .withContractConfiguration(aContractConfiguration(exampleCountry))
                 .withEnvironment(anEnvironment())
                 .withLocale(Locale.getDefault())
                 .withPartnerConfiguration(aPartnerConfiguration());
@@ -199,7 +206,7 @@ public class MockUtils {
         return Order.OrderBuilder.anOrder()
                 .withDate(new Date())
                 .withAmount(aPaylineAmount())
-                .withReference("ORDER-REF-123456")
+                .withReference("REF" + timestamp)
                 .build();
     }
 
@@ -255,28 +262,29 @@ public class MockUtils {
      */
     public static PaymentRequest.Builder aPaylinePaymentRequestBuilder() {
         return PaymentRequest.builder()
-                .withAmount(aPaylineAmount())
-                .withBrowser(aBrowser())
-                .withBuyer(aBuyer())
-                .withCaptureNow(true)
-                .withContractConfiguration(aContractConfiguration())
-                .withDifferedActionDate(TestUtils.addTime(new Date(), Calendar.DATE, 5))
-                .withEnvironment(anEnvironment())
-                .withLocale(Locale.getDefault())
-                .withOrder(anOrder())
-                .withPartnerConfiguration(aPartnerConfiguration())
-                .withPaymentFormContext(aPaymentFormContext())
-                .withPluginConfiguration(aPluginConfiguration())
-                .withSoftDescriptor("softDescriptor")
-                .withTransactionId("123456789012345678901");
+                .withAmount( aPaylineAmount() )
+                .withBrowser( aBrowser() )
+                .withBuyer( aBuyer() )
+                .withCaptureNow( true )
+                .withContractConfiguration( aContractConfiguration(exampleCountry) )
+                .withDifferedActionDate( TestUtils.addTime( new Date(), Calendar.DATE, 5) )
+                .withEnvironment( anEnvironment() )
+                .withLocale( Locale.getDefault() )
+                .withOrder( anOrder() )
+                .withPartnerConfiguration( aPartnerConfiguration() )
+                .withPaymentFormContext( aPaymentFormContext(ibanFR) )
+                .withPluginConfiguration( aPluginConfiguration() )
+                .withSoftDescriptor( "softDescriptor" )
+                .withTransactionId( "PAYLINE" + timestamp );
     }
 
     /**
      * Generate a valid {@link PaymentFormContext}.
      */
-    public static PaymentFormContext aPaymentFormContext() {
+    public static PaymentFormContext aPaymentFormContext(String iban){
         Map<String, String> paymentFormParameter = new HashMap<>();
-        paymentFormParameter.put(BankTransferForm.BANK_KEY, "PSSTFRPP");
+        paymentFormParameter.put( BankTransferForm.BANK_KEY, "PSSTFRPT" );
+        paymentFormParameter.put( BankTransferForm.IBAN_KEY, iban );
 
         return PaymentFormContext.PaymentFormContextBuilder.aPaymentFormContext()
                 .withPaymentFormParameter(paymentFormParameter)
@@ -297,14 +305,14 @@ public class MockUtils {
      */
     public static PaymentFormConfigurationRequest.PaymentFormConfigurationRequestBuilder aPaymentFormConfigurationRequestBuilder() {
         return PaymentFormConfigurationRequest.PaymentFormConfigurationRequestBuilder.aPaymentFormConfigurationRequest()
-                .withAmount(aPaylineAmount())
-                .withBuyer(aBuyer())
-                .withContractConfiguration(aContractConfiguration())
-                .withEnvironment(anEnvironment())
-                .withLocale(Locale.getDefault())
-                .withOrder(anOrder())
-                .withPartnerConfiguration(aPartnerConfiguration())
-                .withPluginConfiguration(aPluginConfiguration());
+                .withAmount( aPaylineAmount() )
+                .withBuyer( aBuyer() )
+                .withContractConfiguration( aContractConfiguration(exampleCountry) )
+                .withEnvironment( anEnvironment() )
+                .withLocale( Locale.getDefault() )
+                .withOrder( anOrder() )
+                .withPartnerConfiguration( aPartnerConfiguration() )
+                .withPluginConfiguration( aPluginConfiguration() );
     }
 
     /**
@@ -312,10 +320,10 @@ public class MockUtils {
      */
     public static PaymentFormLogoRequest aPaymentFormLogoRequest() {
         return PaymentFormLogoRequest.PaymentFormLogoRequestBuilder.aPaymentFormLogoRequest()
-                .withContractConfiguration(aContractConfiguration())
-                .withEnvironment(anEnvironment())
-                .withPartnerConfiguration(aPartnerConfiguration())
-                .withLocale(Locale.getDefault())
+                .withContractConfiguration( aContractConfiguration(exampleCountry) )
+                .withEnvironment( anEnvironment() )
+                .withPartnerConfiguration( aPartnerConfiguration() )
+                .withLocale( Locale.getDefault() )
                 .build();
     }
 
@@ -330,43 +338,40 @@ public class MockUtils {
     /**
      * Generate a valid {@link PaymentInitiationRequest}.
      */
-    public static PaymentInitiationRequest aPaymentInitiationRequest() {
-        return aPaymentInitiationRequestBuilder().build();
+    public static PaymentInitiationRequest aPaymentInitiationRequest(String debtorAccount){
+        return aPaymentInitiationRequestBuilder(debtorAccount).build();
     }
 
     /**
      * Generate a builder for a valid {@link PaymentInitiationRequest}.
      * This way, some attributes may be overridden to match specific test needs.
      */
-    public static PaymentInitiationRequest.PaymentInitiationRequestBuilder aPaymentInitiationRequestBuilder() {
-        String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+    public static PaymentInitiationRequest.PaymentInitiationRequestBuilder aPaymentInitiationRequestBuilder(String debtorAccount){
         return new PaymentInitiationRequest.PaymentInitiationRequestBuilder()
-                .withAspspId("1402")
-                .withEndToEndId("PAYLINE" + timestamp)
-                .withInitiatingPartyReferenceId("REF" + timestamp)
-                .withInitiatingPartyReturnUrl("http://google.fr?result=success")
-                .withRemittanceInformation("softDescriptor")
+                .withAspspId("1410")
+                .withEndToEndId( "PAYLINE" + timestamp )
+                .withInitiatingPartyReferenceId( "REF" + timestamp )
+                .withInitiatingPartyReturnUrl( "http://redirectionURL.com" )
+                .withRemittanceInformation( "softDescriptor" )
                 .withRemittanceInformationStructured(
                         new RemittanceInformationStructured.RemittanceInformationStructuredBuilder()
                                 .withReference("REF" + timestamp)
                                 .build()
                 )
-                /*
                 .withDebtorAccount(
                         new Account.AccountBuilder()
-                                .withIdentification( "AT880000000000000001" )
+                                .withIdentification( debtorAccount )
                                 .build()
                 )
-                */
                 .withCreditorAccount(
                         new Account.AccountBuilder()
-                                .withIdentification("ES1400490001510000000002")
+                                .withIdentification("FR1400490001510000000002")
                                 .build()
                 )
-                .withCreditorName("John Smith")
+                .withCreditorName("John Snow")
                 .withPaymentAmount("10.00")
                 .withPaymentCurrency("EUR")
-                .withPurposeCode(ConfigurationServiceImpl.PurposeCode.COMMERCE)
+                .withPurposeCode(ConfigurationServiceImpl.PurposeCode.COMMERCE.getCode())
                 .withPsuSessionInformation(
                         new PsuSessionInformation.PsuSessionInformationBuilder()
                                 .withIpAddress("192.168.0.1")
@@ -382,11 +387,11 @@ public class MockUtils {
                                                 .withCountry("FR")
                                                 .build()
                                 )
-                                .withChannelType(ConfigurationServiceImpl.ChannelType.ECOMMERCE)
+                                .withChannelType(ConfigurationServiceImpl.ChannelType.ECOMMERCE.getType())
                                 .build()
                 )
                 .addPreferredScaMethod(ConfigurationServiceImpl.ScaMethod.REDIRECT)
-                .withChargeBearer(ConfigurationServiceImpl.ChargeBearer.SLEV)
+                .withChargeBearer(ConfigurationServiceImpl.ChargeBearer.SLEV.getBearer())
                 .withPsuId("1")
                 .withPaymentProduct(MockUtils.aPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT));
     }
@@ -408,6 +413,7 @@ public class MockUtils {
     /**
      * Generate a valid {@link PaymentStatusResponse} with the given status.
      *
+     *
      * @param status The payment status.
      */
     public static PaymentStatusResponse aPaymentStatusResponse(PaymentStatus status) {
@@ -428,8 +434,9 @@ public class MockUtils {
      */
     public static String aPluginConfiguration() {
         return "{\"Application\":\"PIS\",\"ASPSP\":[" +
-                "{\"AspspId\":\"1409\",\"Name\":[\"La Banque Postale\"],\"CountryCode\":\"FR\",\"BIC\":\"PSSTFRPP\"}," +
-                "{\"AspspId\":\"1601\",\"Name\":[\"BBVA\"],\"CountryCode\":\"ES\",\"BIC\":\"BBVAESMM\"}" +
+                    "{\"AspspId\":\"1409\",\"Name\":[\"La Banque Postale\"],\"CountryCode\":\"FR\",\"BIC\":\"PSSTFRPP\"}," +
+                    "{\"AspspId\":\"1410\",\"Name\":[\"La Banque\"],\"CountryCode\":\"ES\",\"BIC\":\"PSSTFRPT\"}," +
+                    "{\"AspspId\":\"1601\",\"Name\":[\"BBVA\"],\"CountryCode\":\"ES\",\"BIC\":\"BBVAESMM\"}" +
                 "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}" +
                 "&&&thisIsAKey";
     }
@@ -520,22 +527,22 @@ public class MockUtils {
      */
     public static RedirectionPaymentRequest aRedirectionPaymentRequest() {
         return RedirectionPaymentRequest.builder()
-                .withAmount(aPaylineAmount())
-                .withBrowser(aBrowser())
-                .withBuyer(aBuyer())
-                .withContractConfiguration(aContractConfiguration())
-                .withEnvironment(anEnvironment())
-                .withOrder(anOrder())
-                .withPartnerConfiguration(aPartnerConfiguration())
-                .withTransactionId(aTransactionId())
+                .withAmount( aPaylineAmount() )
+                .withBrowser( aBrowser() )
+                .withBuyer( aBuyer() )
+                .withContractConfiguration( aContractConfiguration(exampleCountry) )
+                .withEnvironment( anEnvironment() )
+                .withOrder( anOrder() )
+                .withPartnerConfiguration( aPartnerConfiguration() )
+                .withTransactionId( aTransactionId() )
                 .build();
     }
 
     /**
      * Generate a valid {@link RequestConfiguration}.
      */
-    public static RequestConfiguration aRequestConfiguration() {
-        return new RequestConfiguration(aContractConfiguration(), anEnvironment(), aPartnerConfiguration());
+    public static RequestConfiguration aRequestConfiguration(){
+        return new RequestConfiguration( aContractConfiguration(exampleCountry), anEnvironment(), aPartnerConfiguration() );
     }
 
     /**
@@ -551,10 +558,10 @@ public class MockUtils {
      */
     public static RetrievePluginConfigurationRequest.RetrieveConfigurationRequestBuilder aRetrievePluginConfigurationRequestBuilder() {
         return RetrievePluginConfigurationRequest.RetrieveConfigurationRequestBuilder.aRetrieveConfigurationRequest()
-                .withContractConfiguration(aContractConfiguration())
-                .withEnvironment(anEnvironment())
-                .withPartnerConfiguration(aPartnerConfiguration())
-                .withPluginConfiguration(aPluginConfiguration());
+                .withContractConfiguration( aContractConfiguration(exampleCountry) )
+                .withEnvironment( anEnvironment() )
+                .withPartnerConfiguration( aPartnerConfiguration() )
+                .withPluginConfiguration( aPluginConfiguration() );
     }
 
     /**
@@ -585,13 +592,13 @@ public class MockUtils {
      */
     public static TransactionStatusRequest aTransactionStatusRequest() {
         return TransactionStatusRequest.TransactionStatusRequestBuilder.aNotificationRequest()
-                .withAmount(aPaylineAmount())
-                .withBuyer(aBuyer())
-                .withContractConfiguration(aContractConfiguration())
-                .withEnvironment(anEnvironment())
-                .withOrder(anOrder())
-                .withPartnerConfiguration(aPartnerConfiguration())
-                .withTransactionId(aTransactionId())
+                .withAmount( aPaylineAmount() )
+                .withBuyer( aBuyer() )
+                .withContractConfiguration( aContractConfiguration(exampleCountry) )
+                .withEnvironment( anEnvironment() )
+                .withOrder( anOrder() )
+                .withPartnerConfiguration( aPartnerConfiguration() )
+                .withTransactionId( aTransactionId() )
                 .build();
     }
 
@@ -607,6 +614,31 @@ public class MockUtils {
      */
     public static String aUserAgent() {
         return "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:67.0) Gecko/20100101 Firefox/67.0";
+    }
+
+    public static WalletPaymentData aWalletPaymentdata() {
+        return aWalletPaymentDataBuilder().build();
+    }
+
+    /**
+     * @return a WalletPaymentData
+     */
+    public static WalletPaymentData.WalletPaymentDataBuilder aWalletPaymentDataBuilder() {
+        return new WalletPaymentData.WalletPaymentDataBuilder()
+                .withBic("PSSTFRPT")
+                .withIban(ibanFR);
+    }
+
+    public static String getExampleCountry() {
+        return exampleCountry;
+    }
+
+    public static String getIbanFR() {
+        return ibanFR;
+    }
+
+    public static String getIbanES() {
+        return ibanES;
     }
 
     /**

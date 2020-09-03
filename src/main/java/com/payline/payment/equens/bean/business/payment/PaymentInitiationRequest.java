@@ -40,6 +40,9 @@ public class PaymentInitiationRequest extends EquensApiMessage {
     /** ? */
     @SerializedName("RemittanceInformationStructured")
     private RemittanceInformationStructured remittanceInformationStructured;
+    /** Identification of the debtor account. */
+    @SerializedName("DebtorAccount")
+    private Account debtorAccount;
     /** The name of the creditor. */
     @SerializedName("CreditorName")
     private String creditorName;
@@ -83,6 +86,7 @@ public class PaymentInitiationRequest extends EquensApiMessage {
         this.initiatingPartyReturnUrl = builder.initiatingPartyReturnUrl;
         this.remittanceInformation = builder.remittanceInformation;
         this.remittanceInformationStructured = builder.remittanceInformationStructured;
+        this.debtorAccount = builder.debtorAccount;
         this.creditorName = builder.creditorName;
         this.creditorAccount = builder.creditorAccount;
         this.paymentAmount = builder.paymentAmount;
@@ -104,6 +108,7 @@ public class PaymentInitiationRequest extends EquensApiMessage {
         private String initiatingPartyReturnUrl;
         private String remittanceInformation;
         private RemittanceInformationStructured remittanceInformationStructured;
+        private Account debtorAccount;
         private String creditorName;
         private Account creditorAccount;
         private String paymentAmount;
@@ -143,6 +148,11 @@ public class PaymentInitiationRequest extends EquensApiMessage {
 
         public PaymentInitiationRequestBuilder withRemittanceInformationStructured(RemittanceInformationStructured remittanceInformationStructured) {
             this.remittanceInformationStructured = remittanceInformationStructured;
+            return this;
+        }
+
+        public PaymentInitiationRequestBuilder withDebtorAccount(Account debtorAccount) {
+            this.debtorAccount = debtorAccount;
             return this;
         }
 
@@ -208,5 +218,77 @@ public class PaymentInitiationRequest extends EquensApiMessage {
             return new PaymentInitiationRequest( this );
         }
 
+    }
+
+    public String getAspspId() {
+        return aspspId;
+    }
+
+    public String getEndToEndId() {
+        return endToEndId;
+    }
+
+    public String getInitiatingPartyReferenceId() {
+        return initiatingPartyReferenceId;
+    }
+
+    public String getInitiatingPartyReturnUrl() {
+        return initiatingPartyReturnUrl;
+    }
+
+    public String getRemittanceInformation() {
+        return remittanceInformation;
+    }
+
+    public RemittanceInformationStructured getRemittanceInformationStructured() {
+        return remittanceInformationStructured;
+    }
+
+    public Account getDebtorAccount() {
+        return debtorAccount;
+    }
+
+    public String getCreditorName() {
+        return creditorName;
+    }
+
+    public Account getCreditorAccount() {
+        return creditorAccount;
+    }
+
+    public String getPaymentAmount() {
+        return paymentAmount;
+    }
+
+    public String getPaymentCurrency() {
+        return paymentCurrency;
+    }
+
+    public String getPurposeCode() {
+        return purposeCode;
+    }
+
+    public PsuSessionInformation getPsuSessionInformation() {
+        return psuSessionInformation;
+    }
+
+    public RiskInformation getRiskInformation() {
+        return riskInformation;
+    }
+
+    public List<String> getPreferredScaMethod() {
+        return preferredScaMethod;
+    }
+
+    public String getChargeBearer() {
+        return chargeBearer;
+    }
+
+    public String getPsuId() {
+        return psuId;
+    }
+
+    public String getPaymentProduct() {
+        return paymentProduct;
     }
 }

@@ -2,11 +2,10 @@ package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.bean.GenericPaymentRequest;
 import com.payline.payment.equens.bean.business.payment.WalletPaymentData;
-import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.service.JsonService;
-import com.payline.payment.equens.service.Payment;
+import com.payline.payment.equens.service.GenericPaymentService;
 import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.payment.equens.utils.security.RSAUtils;
 import com.payline.pmapi.bean.common.FailureCause;
@@ -21,7 +20,7 @@ public class PaymentWalletServiceImpl implements PaymentWalletService {
     private static final Logger LOGGER = LogManager.getLogger(PaymentWalletServiceImpl.class);
 
     private RSAUtils rsaUtils = RSAUtils.getInstance();
-    private Payment payment = Payment.getInstance();
+    private GenericPaymentService genericPaymentService = GenericPaymentService.getInstance();
     private JsonService jsonService = JsonService.getInstance();
 
     @Override
@@ -41,14 +40,7 @@ public class PaymentWalletServiceImpl implements PaymentWalletService {
             // create the WalletPaymentData object to recover the BIC
             WalletPaymentData walletPaymentData = jsonService.fromJson(data, WalletPaymentData.class);
 
-            String bic = walletPaymentData.getBic();
-
-            // get the aspspId from the BIC
-            String aspspId = PluginUtils.getAspspIdFromBIC(
-                    jsonService.fromJson(PluginUtils.extractBanks(walletPaymentRequest.getPluginConfiguration()), GetAspspsResponse.class).getAspsps()
-                    , bic);
-
-            return payment.paymentRequest(genericPaymentRequest, aspspId);
+            return genericPaymentService.paymentRequest(genericPaymentRequest, walletPaymentData);
         } catch (RuntimeException e) {
             LOGGER.error("Unexpected plugin error", e);
             return PaymentResponseFailure.PaymentResponseFailureBuilder

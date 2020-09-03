@@ -5,10 +5,13 @@ import com.payline.payment.equens.bean.business.fraud.PsuSessionInformation;
 import com.payline.payment.equens.bean.business.payment.*;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
+import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.service.impl.ConfigurationServiceImpl;
 import com.payline.payment.equens.utils.Constants;
+import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.payment.equens.utils.http.PisHttpClient;
 import com.payline.payment.equens.utils.http.PsuHttpClient;
 import com.payline.pmapi.bean.common.Amount;
@@ -24,25 +27,26 @@ import org.apache.logging.log4j.Logger;
 import java.math.BigInteger;
 import java.util.*;
 
-public class Payment {
-    private static final Logger LOGGER = LogManager.getLogger(Payment.class);
+public class GenericPaymentService {
+    private static final Logger LOGGER = LogManager.getLogger(GenericPaymentService.class);
 
     private PisHttpClient pisHttpClient = PisHttpClient.getInstance();
     private PsuHttpClient psuHttpclient = PsuHttpClient.getInstance();
+    private static JsonService jsonService = JsonService.getInstance();
 
-    private Payment() {
+    private GenericPaymentService() {
     }
 
     private static class Holder {
-        private static final Payment instance = new Payment();
+        private static final GenericPaymentService instance = new GenericPaymentService();
     }
 
-    public static Payment getInstance() {
+    public static GenericPaymentService getInstance() {
         return Holder.instance;
     }
 
 
-    public PaymentResponse paymentRequest(GenericPaymentRequest paymentRequest, String aspspId) {
+    public PaymentResponse paymentRequest(GenericPaymentRequest paymentRequest, WalletPaymentData walletPaymentData) {
         PaymentResponse paymentResponse;
 
         try {
@@ -77,7 +81,8 @@ public class Payment {
                     Constants.ContractConfigurationKeys.MERCHANT_IBAN,
                     Constants.ContractConfigurationKeys.MERCHANT_NAME,
                     Constants.ContractConfigurationKeys.PURPOSE_CODE,
-                    Constants.ContractConfigurationKeys.SCA_METHOD
+                    Constants.ContractConfigurationKeys.SCA_METHOD,
+                    Constants.ContractConfigurationKeys.COUNTRIES
             );
             requiredContractProperties.forEach(key -> {
                 if (paymentRequest.getContractConfiguration().getProperty(key) == null
@@ -86,66 +91,8 @@ public class Payment {
                 }
             });
 
-            // Extract delivery address
-            Address deliveryAddress = null;
-            if (paymentRequest.getBuyer().getAddresses() != null) {
-                deliveryAddress = buildAddress(paymentRequest.getBuyer().getAddressForType(Buyer.AddressType.DELIVERY));
-            }
-
             // Build PaymentInitiationRequest (Equens) from PaymentRequest (Payline)
-            PaymentInitiationRequest request = new PaymentInitiationRequest.PaymentInitiationRequestBuilder()
-                    .withAspspId(aspspId)
-                    .withEndToEndId(paymentRequest.getTransactionId())
-                    .withInitiatingPartyReferenceId(paymentRequest.getOrder().getReference())
-                    .withInitiatingPartyReturnUrl(paymentRequest.getEnvironment().getRedirectionReturnURL())
-                    .withRemittanceInformation(paymentRequest.getSoftDescriptor())
-                    .withRemittanceInformationStructured(
-                            new RemittanceInformationStructured.RemittanceInformationStructuredBuilder()
-                                    .withReference(paymentRequest.getOrder().getReference())
-                                    .build()
-                    )
-                    .withCreditorAccount(
-                            new Account.AccountBuilder()
-                                    .withIdentification(
-                                            paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.MERCHANT_IBAN).getValue()
-                                    )
-                                    .build()
-                    )
-                    .withCreditorName(
-                            paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.MERCHANT_NAME).getValue()
-                    )
-                    .withPaymentAmount(convertAmount(paymentRequest.getAmount()))
-                    .withPaymentCurrency(paymentRequest.getAmount().getCurrency().getCurrencyCode())
-                    .withPurposeCode(
-                            paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.PURPOSE_CODE).getValue()
-                    )
-                    .withPsuSessionInformation(
-                            new PsuSessionInformation.PsuSessionInformationBuilder()
-                                    .withIpAddress(paymentRequest.getBrowser() != null ? paymentRequest.getBrowser().getIp() : null)
-                                    .withHeaderUserAgent(paymentRequest.getBrowser() != null ? paymentRequest.getBrowser().getUserAgent() : null)
-                                    .build()
-                    )
-                    .withRiskInformation(
-                            new RiskInformation.RiskInformationBuilder()
-                                    .withMerchantCategoryCode(paymentRequest.getSubMerchant() != null ? paymentRequest.getSubMerchant().getSubMerchantMCC() : null)
-                                    .withMerchantCustomerId(paymentRequest.getBuyer().getCustomerIdentifier())
-                                    .withDeliveryAddress(deliveryAddress)
-                                    .withChannelType(
-                                            paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.CHANNEL_TYPE).getValue()
-                                    )
-                                    .build()
-                    )
-                    .addPreferredScaMethod(
-                            paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.SCA_METHOD).getValue()
-                    )
-                    .withChargeBearer(
-                            paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.CHARGE_BEARER).getValue()
-                    )
-                    .withPsuId(newPsu.getPsuId())
-                    .withPaymentProduct(
-                            paymentRequest.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT)
-                    )
-                    .build();
+            PaymentInitiationRequest request = buildPaymentInitiationRequest(paymentRequest, newPsu, walletPaymentData);
 
             // Send the payment initiation request
             PaymentInitiationResponse paymentInitResponse = pisHttpClient.initPayment(request, requestConfiguration);
@@ -230,13 +177,134 @@ public class Payment {
                 .build();
     }
 
+    void validateRequest(GenericPaymentRequest paymentRequest) {
+        // Control on the input data (to avoid NullPointerExceptions)
+        if (paymentRequest.getAmount() == null
+                || paymentRequest.getAmount().getCurrency() == null
+                || paymentRequest.getAmount().getAmountInSmallestUnit() == null) {
+            throw new InvalidDataException("Missing or invalid paymentRequest.amount");
+        }
+        if (paymentRequest.getOrder() == null) {
+            throw new InvalidDataException("paymentRequest.order is required");
+        }
+    }
+
+    void validateIban(GenericPaymentRequest paymentRequest, String bic, String iban) {
+        List<String> listCountryCode;
+
+
+        // get the list of countryCode available by the merchant
+        listCountryCode = PluginUtils.createListCountry(paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.COUNTRIES).getValue());
+
+        // get the countryCode from the BIC
+        String countryCode = PluginUtils.getCountryCodeFromBIC(
+                jsonService.fromJson(PluginUtils.extractBanks(paymentRequest.getPluginConfiguration()), GetAspspsResponse.class).getAspsps()
+                , bic);
+
+        // if the buyer choose a bank from Spain, IBAN is required
+        if (countryCode.equalsIgnoreCase(ConfigurationServiceImpl.CountryCode.ES.name()) && PluginUtils.isEmpty(iban)) {
+            throw new InvalidDataException("IBAN is required for Spain");
+        }
+
+        // if the buyer want to use his IBAN, it should be an IBAN from a country available by the merchant
+        if (!PluginUtils.isEmpty(iban) && !PluginUtils.correctIban(listCountryCode, iban)) {
+            throw new InvalidDataException("IBAN should be from a country available by the merchant " + listCountryCode.toString());
+        }
+    }
+
+    // Build PaymentInitiationRequest (Equens) from PaymentRequest (Payline)
+    PaymentInitiationRequest buildPaymentInitiationRequest(GenericPaymentRequest paymentRequest, Psu newPsu, WalletPaymentData walletPaymentData) {
+
+        // extract BIC and IBAN
+        String bic = walletPaymentData.getBic();
+        String iban = walletPaymentData.getIban();
+
+        // Control on the input data (to avoid NullPointerExceptions)
+        validateRequest(paymentRequest);
+        validateIban(paymentRequest, bic, iban);
+
+        // get the aspspId from the BIC
+        String aspspId = PluginUtils.getAspspIdFromBIC(
+                jsonService.fromJson(PluginUtils.extractBanks(paymentRequest.getPluginConfiguration()), GetAspspsResponse.class).getAspsps()
+                , bic);
+
+        // Extract delivery address
+        Address deliveryAddress = null;
+        if (paymentRequest.getBuyer().getAddresses() != null) {
+            deliveryAddress = buildAddress(paymentRequest.getBuyer().getAddressForType(Buyer.AddressType.DELIVERY));
+        }
+
+        PaymentInitiationRequest.PaymentInitiationRequestBuilder paymentInitiationRequestBuilder = new PaymentInitiationRequest.PaymentInitiationRequestBuilder()
+                .withAspspId(aspspId)
+                .withEndToEndId(paymentRequest.getTransactionId())
+                .withInitiatingPartyReferenceId(paymentRequest.getOrder().getReference())
+                .withInitiatingPartyReturnUrl(paymentRequest.getEnvironment().getRedirectionReturnURL())
+                .withRemittanceInformation(paymentRequest.getSoftDescriptor())
+                .withRemittanceInformationStructured(
+                        new RemittanceInformationStructured.RemittanceInformationStructuredBuilder()
+                                .withReference(paymentRequest.getOrder().getReference())
+                                .build()
+                )
+                .withCreditorAccount(
+                        new Account.AccountBuilder()
+                                .withIdentification(
+                                        paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.MERCHANT_IBAN).getValue()
+                                )
+                                .build()
+                )
+                .withCreditorName(
+                        paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.MERCHANT_NAME).getValue()
+                )
+                .withPaymentAmount(convertAmount(paymentRequest.getAmount()))
+                .withPaymentCurrency(paymentRequest.getAmount().getCurrency().getCurrencyCode())
+                .withPurposeCode(
+                        paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.PURPOSE_CODE).getValue()
+                )
+                .withPsuSessionInformation(
+                        new PsuSessionInformation.PsuSessionInformationBuilder()
+                                .withIpAddress(paymentRequest.getBrowser() != null ? paymentRequest.getBrowser().getIp() : null)
+                                .withHeaderUserAgent(paymentRequest.getBrowser() != null ? paymentRequest.getBrowser().getUserAgent() : null)
+                                .build()
+                )
+                .withRiskInformation(
+                        new RiskInformation.RiskInformationBuilder()
+                                .withMerchantCategoryCode(paymentRequest.getSubMerchant() != null ? paymentRequest.getSubMerchant().getSubMerchantMCC() : null)
+                                .withMerchantCustomerId(paymentRequest.getBuyer().getCustomerIdentifier())
+                                .withDeliveryAddress(deliveryAddress)
+                                .withChannelType(
+                                        paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.CHANNEL_TYPE).getValue()
+                                )
+                                .build()
+                )
+                .addPreferredScaMethod(
+                        paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.SCA_METHOD).getValue()
+                )
+                .withChargeBearer(
+                        paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.CHARGE_BEARER).getValue()
+                )
+                .withPsuId(newPsu.getPsuId())
+                .withPaymentProduct(
+                        paymentRequest.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT)
+                );
+
+        // add the debtor account only if he gives his IBAN, to avoid an empty object
+        if (!PluginUtils.isEmpty(iban)) {
+            paymentInitiationRequestBuilder.withDebtorAccount(
+                    new Account.AccountBuilder()
+                            .withIdentification(iban)
+                            .build()
+            );
+        }
+        return paymentInitiationRequestBuilder.build();
+    }
+
     /**
      * Convert a Payline <code>Amount</code> into a string with a dot as decimals separator.
      *
      * @param amount the amount to convert
      * @return The amount formatted as a string
      */
-    static String convertAmount(Amount amount) {
+    String convertAmount(Amount amount) {
         if (amount == null || amount.getAmountInSmallestUnit() == null || amount.getCurrency() == null) {
             return null;
         }

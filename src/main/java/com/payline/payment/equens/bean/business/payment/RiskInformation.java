@@ -60,4 +60,20 @@ public class RiskInformation {
             return new RiskInformation( this );
         }
     }
+
+    public String getMerchantCategoryCode() {
+        return merchantCategoryCode;
+    }
+
+    public String getMerchantCustomerId() {
+        return merchantCustomerId;
+    }
+
+    public Address getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public String getChannelType() {
+        return channelType;
+    }
 }
