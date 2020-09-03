@@ -177,7 +177,7 @@ public class GenericPaymentService {
                 .build();
     }
 
-    static void validateRequest(GenericPaymentRequest paymentRequest) {
+    void validateRequest(GenericPaymentRequest paymentRequest) {
         // Control on the input data (to avoid NullPointerExceptions)
         if (paymentRequest.getAmount() == null
                 || paymentRequest.getAmount().getCurrency() == null
@@ -189,7 +189,7 @@ public class GenericPaymentService {
         }
     }
 
-    static void validateIban(GenericPaymentRequest paymentRequest, String bic, String iban) {
+    void validateIban(GenericPaymentRequest paymentRequest, String bic, String iban) {
         List<String> listCountryCode;
 
 
@@ -213,7 +213,7 @@ public class GenericPaymentService {
     }
 
     // Build PaymentInitiationRequest (Equens) from PaymentRequest (Payline)
-    static PaymentInitiationRequest buildPaymentInitiationRequest(GenericPaymentRequest paymentRequest, Psu newPsu, WalletPaymentData walletPaymentData) {
+    PaymentInitiationRequest buildPaymentInitiationRequest(GenericPaymentRequest paymentRequest, Psu newPsu, WalletPaymentData walletPaymentData) {
 
         // extract BIC and IBAN
         String bic = walletPaymentData.getBic();
@@ -304,7 +304,7 @@ public class GenericPaymentService {
      * @param amount the amount to convert
      * @return The amount formatted as a string
      */
-    static String convertAmount(Amount amount) {
+    String convertAmount(Amount amount) {
         if (amount == null || amount.getAmountInSmallestUnit() == null || amount.getCurrency() == null) {
             return null;
         }

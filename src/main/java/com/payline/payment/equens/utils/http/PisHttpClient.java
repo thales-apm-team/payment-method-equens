@@ -7,10 +7,12 @@ import com.payline.payment.equens.bean.business.payment.PaymentStatusResponse;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.InvalidDataException;
+import com.payline.pmapi.logger.LogManager;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.List;
  * HTTP client in charge of requesting the PIS (Payment Initiation Service) API.
  */
 public class PisHttpClient extends EquensHttpClient {
+    private static final Logger LOGGER = LogManager.getLogger(PisHttpClient.class);
 
     private static final String API_PATH_ASPSPS = "api.pis.aspsps";
     private static final String API_PATH_PAYMENTS = "api.pis.payments";

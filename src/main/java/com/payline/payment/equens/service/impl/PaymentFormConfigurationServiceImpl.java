@@ -99,14 +99,14 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
                         (listCountryCode.isEmpty() || listCountryCode.contains(aspsp.getCountryCode()))
                         && !PluginUtils.isEmpty(aspsp.getBic())) {
                     // build the string to display in the select option value
-                    options.add(createOption(aspsp));
+                    options.add(createAspspOption(aspsp));
                 }
             }
         }
         return options;
     }
 
-    private SelectOption createOption(Aspsp aspsp) {
+    private SelectOption createAspspOption(Aspsp aspsp) {
         // add the aspsp name if exists
         StringBuilder valuesBuilder = new StringBuilder(aspsp.getBic());
         if (aspsp.getName() != null && !aspsp.getName().isEmpty()) {
