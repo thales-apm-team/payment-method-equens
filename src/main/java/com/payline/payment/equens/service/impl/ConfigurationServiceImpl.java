@@ -3,6 +3,7 @@ package com.payline.payment.equens.service.impl;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.payment.equens.utils.http.PisHttpClient;
@@ -32,6 +33,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private static final Logger LOGGER = LogManager.getLogger(ConfigurationServiceImpl.class);
 
     private static final String I18N_CONTRACT_PREFIX = "contract.";
+
+    private final JsonService jsonService = JsonService.getInstance();
 
     public enum ChannelType {
         ECOMMERCE("Ecommerce");
@@ -229,7 +232,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             GetAspspsResponse apspsps = pisHttpClient.getAspsps(requestConfiguration);
 
             // Serialize the list (as JSON)
-            String banks = apspsps.toString();
+            String banks = jsonService.toJson(apspsps);
 
             // get oldKey or generate first key
             String key;

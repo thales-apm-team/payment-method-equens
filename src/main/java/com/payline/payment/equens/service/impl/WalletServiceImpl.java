@@ -2,8 +2,9 @@ package com.payline.payment.equens.service.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.payline.payment.equens.bean.business.payment.WalletPaymentData;
+import com.payline.payment.equens.bean.business.payment.PaymentData;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.payment.equens.utils.properties.ConfigProperties;
 import com.payline.payment.equens.utils.security.RSAUtils;
@@ -29,6 +30,7 @@ public class WalletServiceImpl implements WalletService {
     private static final Logger LOGGER = LogManager.getLogger(WalletServiceImpl.class);
     private RSAUtils rsaUtils = RSAUtils.getInstance();
     protected ConfigProperties config = ConfigProperties.getInstance();
+    private JsonService jsonService = JsonService.getInstance();
 
     @Override
     public WalletDeleteResponse deleteWallet(WalletDeleteRequest walletDeleteRequest) {
@@ -48,14 +50,14 @@ public class WalletServiceImpl implements WalletService {
             String bic = walletCreateRequest.getPaymentFormContext().getPaymentFormParameter().get(BankTransferForm.BANK_KEY);
             String iban = walletCreateRequest.getPaymentFormContext().getPaymentFormParameter().get(BankTransferForm.IBAN_KEY);
 
-            WalletPaymentData walletPaymentData = new WalletPaymentData.WalletPaymentDataBuilder()
+            PaymentData walletPaymentData = new PaymentData.PaymentDataBuilder()
                     .withBic(bic)
                     .withIban(iban)
                     .build();
 
             // encrypt the Json that contains the BIC and the IBAN
             String key = PluginUtils.extractKey(walletCreateRequest.getPluginConfiguration()).trim();
-            String paymentData = rsaUtils.encrypt(walletPaymentData.toString(), key);
+            String paymentData = rsaUtils.encrypt(jsonService.toJson( walletPaymentData), key);
 
             // create wallet
             return WalletCreateResponseSuccess.builder()
@@ -88,14 +90,14 @@ public class WalletServiceImpl implements WalletService {
 
             //Build wallet display fields (BIC and the masked IBAN)
             Gson gson = new GsonBuilder().create();
-            WalletPaymentData walletPaymentData = gson.fromJson(data, WalletPaymentData.class);
-            String bic = walletPaymentData.getBic();
-            String iban = walletPaymentData.getIban();
+            PaymentData paymentData = gson.fromJson(data, PaymentData.class);
+            String bic = paymentData.getBic();
+            String iban = paymentData.getIban();
             if (bic != null) {
-                walletFields.add(WalletDisplayFieldText.builder().content(walletPaymentData.getBic()).build());
+                walletFields.add(WalletDisplayFieldText.builder().content(paymentData.getBic()).build());
             }
             if (iban != null) {
-                walletFields.add(WalletDisplayFieldText.builder().content(PluginUtils.hideIban(walletPaymentData.getIban())).build());
+                walletFields.add(WalletDisplayFieldText.builder().content(PluginUtils.hideIban(paymentData.getIban())).build());
             }
         } catch (PluginException e) {
             LOGGER.warn("Unable to display wallet ", e);

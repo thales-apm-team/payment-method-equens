@@ -1,32 +1,32 @@
 package com.payline.payment.equens.bean.business.payment;
 
-public class WalletPaymentData {
+public class PaymentData {
     /** the BIC for the creation of the wallet */
     private String bic;
     /** the IBAN for the creation of the wallet */
     private String iban;
 
-    private WalletPaymentData(WalletPaymentDataBuilder builder) {
+    private PaymentData(PaymentDataBuilder builder) {
         bic = builder.bic;
         iban = builder.iban;
     }
 
-    public static class WalletPaymentDataBuilder {
+    public static class PaymentDataBuilder {
         private String bic;
         private String iban;
 
-        public WalletPaymentDataBuilder withBic(String bic) {
+        public PaymentDataBuilder withBic(String bic) {
             this.bic = bic;
             return this;
         }
 
-        public WalletPaymentDataBuilder withIban(String iban) {
+        public PaymentDataBuilder withIban(String iban) {
             this.iban = iban;
             return this;
         }
 
-        public WalletPaymentData build() {
-            return new WalletPaymentData(this);
+        public PaymentData build() {
+            return new PaymentData(this);
         }
     }
 

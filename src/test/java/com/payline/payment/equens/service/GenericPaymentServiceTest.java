@@ -4,7 +4,7 @@ import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.GenericPaymentRequest;
 import com.payline.payment.equens.bean.business.payment.Address;
 import com.payline.payment.equens.bean.business.payment.PaymentInitiationRequest;
-import com.payline.payment.equens.bean.business.payment.WalletPaymentData;
+import com.payline.payment.equens.bean.business.payment.PaymentData;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
@@ -59,11 +59,11 @@ class GenericPaymentServiceTest {
         doReturn(MockUtils.aPsu()).when(psuHttpclient).createPsu(any(), any());
         doReturn(MockUtils.aPaymentInitiationResponse()).when(pisHttpClient).initPayment(any(), any());
 
-        WalletPaymentData walletPaymentData = MockUtils.aWalletPaymentdata();
+        PaymentData paymentData = MockUtils.aPaymentdata();
         // when: calling paymentRequest() method
         PaymentRequest paymentRequest = MockUtils.aPaylinePaymentRequest();
         GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(paymentRequest);
-        PaymentResponse paymentResponse = service.paymentRequest(genericPaymentRequest, walletPaymentData);
+        PaymentResponse paymentResponse = service.paymentRequest(genericPaymentRequest, paymentData);
 
         // then: the payment response is a success
         assertEquals(PaymentResponseRedirect.class, paymentResponse.getClass());
@@ -77,12 +77,12 @@ class GenericPaymentServiceTest {
                 .when(pisHttpClient)
                 .init(any(PartnerConfiguration.class));
 
-        WalletPaymentData walletPaymentData = MockUtils.aWalletPaymentdata();
+        PaymentData paymentData = MockUtils.aPaymentdata();
         // when: calling paymentRequest() method
 
         PaymentRequest paymentRequest = MockUtils.aPaylinePaymentRequest();
         GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(paymentRequest);
-        PaymentResponse paymentResponse = service.paymentRequest(genericPaymentRequest, walletPaymentData);
+        PaymentResponse paymentResponse = service.paymentRequest(genericPaymentRequest, paymentData);
 
         // then: the exception is properly catch and the payment response is a failure
         assertEquals(PaymentResponseFailure.class, paymentResponse.getClass());
@@ -96,11 +96,11 @@ class GenericPaymentServiceTest {
                 .when(psuHttpclient)
                 .createPsu(any(PsuCreateRequest.class), any(RequestConfiguration.class));
 
-        WalletPaymentData walletPaymentData = MockUtils.aWalletPaymentdata();
+        PaymentData paymentData = MockUtils.aPaymentdata();
         // when: calling paymentRequest() method
         PaymentRequest paymentRequest = MockUtils.aPaylinePaymentRequest();
         GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(paymentRequest);
-        PaymentResponse paymentResponse = service.paymentRequest(genericPaymentRequest, walletPaymentData);
+        PaymentResponse paymentResponse = service.paymentRequest(genericPaymentRequest, paymentData);
 
         // then: the exception is properly catch and the payment response is a failure
         assertEquals(PaymentResponseFailure.class, paymentResponse.getClass());
@@ -109,7 +109,7 @@ class GenericPaymentServiceTest {
 
     @Test
     void paymentRequest_paymentInitError() {
-        WalletPaymentData walletPaymentData = MockUtils.aWalletPaymentdata();
+        PaymentData paymentData = MockUtils.aPaymentdata();
         // given: the payment initiation fails
         doReturn(MockUtils.aPsu())
                 .when(psuHttpclient)
@@ -121,7 +121,7 @@ class GenericPaymentServiceTest {
         // when: calling paymentRequest() method
         PaymentRequest paymentRequest = MockUtils.aPaylinePaymentRequest();
         GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(paymentRequest);
-        PaymentResponse paymentResponse = service.paymentRequest(genericPaymentRequest, walletPaymentData);
+        PaymentResponse paymentResponse = service.paymentRequest(genericPaymentRequest, paymentData);
 
         // then: the exception is properly catch and the payment response is a failure
         assertEquals(PaymentResponseFailure.class, paymentResponse.getClass());
@@ -130,7 +130,7 @@ class GenericPaymentServiceTest {
 
     @Test
     void paymentRequest_missingContractProperty() {
-        WalletPaymentData walletPaymentData = MockUtils.aWalletPaymentdata();
+        PaymentData paymentData = MockUtils.aPaymentdata();
         // given: a property is missing from ContractConfiguration
         ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration(MockUtils.getExampleCountry());
         contractConfiguration.getContractProperties().remove(Constants.ContractConfigurationKeys.MERCHANT_IBAN);
@@ -143,7 +143,7 @@ class GenericPaymentServiceTest {
 
         // when: calling paymentRequest() method
         GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(paymentRequest);
-        PaymentResponse paymentResponse = service.paymentRequest(genericPaymentRequest, walletPaymentData);
+        PaymentResponse paymentResponse = service.paymentRequest(genericPaymentRequest, paymentData);
 
         // then: the exception is properly catch and the payment response is a failure
         assertEquals(PaymentResponseFailure.class, paymentResponse.getClass());
@@ -210,10 +210,10 @@ class GenericPaymentServiceTest {
     @Test
     void buildPaymentInitiationRequest() {
         Psu psu = MockUtils.aPsu();
-        WalletPaymentData walletPaymentData = MockUtils.aWalletPaymentdata();
+        PaymentData paymentData = MockUtils.aPaymentdata();
         GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(MockUtils.aPaylinePaymentRequest());
 
-        PaymentInitiationRequest paymentInitiationRequest = service.buildPaymentInitiationRequest(genericPaymentRequest, psu, walletPaymentData);
+        PaymentInitiationRequest paymentInitiationRequest = service.buildPaymentInitiationRequest(genericPaymentRequest, psu, paymentData);
         String ibanFR = MockUtils.getIbanFR();
         PaymentInitiationRequest request = MockUtils.aPaymentInitiationRequest(ibanFR);
         Assertions.assertEquals(request.getAspspId(), paymentInitiationRequest.getAspspId());
@@ -242,7 +242,7 @@ class GenericPaymentServiceTest {
     @Test
     void buildPaymentInitiationRequest_EmptyIBANForSpain() {
         Psu psu = MockUtils.aPsu();
-        WalletPaymentData walletPaymentData = MockUtils.aWalletPaymentDataBuilder()
+        PaymentData paymentData = MockUtils.aPaymentDataBuilder()
                 .withIban("")
                 .build();
         // create a genericPaymentRequest with an empty IBAN and a BIC from Spain
@@ -251,7 +251,7 @@ class GenericPaymentServiceTest {
                         .build());
 
         Assertions.assertThrows(InvalidDataException.class,
-                () -> service.buildPaymentInitiationRequest(genericPaymentRequest, psu, walletPaymentData),
+                () -> service.buildPaymentInitiationRequest(genericPaymentRequest, psu, paymentData),
                 "IBAN is required for Spain"
         );
     }
@@ -259,7 +259,7 @@ class GenericPaymentServiceTest {
     @Test
     void buildPaymentInitiationRequest_WrongIBAN() {
         Psu psu = MockUtils.aPsu();
-        WalletPaymentData walletPaymentData = MockUtils.aWalletPaymentDataBuilder()
+        PaymentData paymentData = MockUtils.aPaymentDataBuilder()
                 .withIban("IT123456789")
                 .build();
         // create a GenericPaymentRequest with an IBAN from a country not accepted, and the merchant lets all banks open
@@ -270,7 +270,7 @@ class GenericPaymentServiceTest {
                         .build());
 
         Assertions.assertThrows(InvalidDataException.class,
-                () -> service.buildPaymentInitiationRequest(genericPaymentRequest, psu, walletPaymentData),
+                () -> service.buildPaymentInitiationRequest(genericPaymentRequest, psu, paymentData),
                 "IBAN should be from a country available by the merchant "
         );
     }
@@ -278,7 +278,7 @@ class GenericPaymentServiceTest {
     @Test
     void buildPaymentInitiationRequest_WrongCountryIBAN() {
         Psu psu = MockUtils.aPsu();
-        WalletPaymentData walletPaymentData = MockUtils.aWalletPaymentDataBuilder()
+        PaymentData paymentData = MockUtils.aPaymentDataBuilder()
                 .withIban(MockUtils.getIbanES())
                 .build();
         // create a GenericPaymentRequest with and IBAn from Spain, and the merchant only want it from France
@@ -287,7 +287,7 @@ class GenericPaymentServiceTest {
                         .build());
 
         Assertions.assertThrows(InvalidDataException.class,
-                () -> service.buildPaymentInitiationRequest(genericPaymentRequest, psu, walletPaymentData),
+                () -> service.buildPaymentInitiationRequest(genericPaymentRequest, psu, paymentData),
                 "IBAN should be from a country available by the merchant "
         );
     }

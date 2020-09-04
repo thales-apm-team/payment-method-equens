@@ -29,6 +29,7 @@ import java.util.Map;
 import static org.mockito.ArgumentMatchers.anyString;
 
 class WalletServiceImplTest {
+    private JsonService jsonService = JsonService.getInstance();
     @InjectMocks
     WalletServiceImpl service;
 
@@ -54,7 +55,7 @@ class WalletServiceImplTest {
 
     @Test
     void createWallet() {
-        String pluginPaymentData = MockUtils.aWalletPaymentData().toString();
+        String pluginPaymentData = jsonService.toJson( MockUtils.aPaymentData());
 
         Mockito.doReturn(pluginPaymentData).when(rsaUtils).encrypt(anyString(), anyString());
 
@@ -79,7 +80,7 @@ class WalletServiceImplTest {
 
     @Test
     void createWalletBicNull() {
-        String pluginPaymentData = MockUtils.aWalletPaymentDataBicNull().toString();
+        String pluginPaymentData = jsonService.toJson( MockUtils.aPaymentDataBicNull());
 
         Mockito.doReturn(pluginPaymentData).when(rsaUtils).encrypt(anyString(), anyString());
 
@@ -104,7 +105,7 @@ class WalletServiceImplTest {
 
     @Test
     void createWalletIbanNull() {
-        String pluginPaymentData = MockUtils.aWalletPaymentDataIbanNull().toString();
+        String pluginPaymentData = jsonService.toJson( MockUtils.aPaymentDataIbanNull());
 
         Mockito.doReturn(pluginPaymentData).when(rsaUtils).encrypt(anyString(), anyString());
 
@@ -212,7 +213,7 @@ class WalletServiceImplTest {
 
     @Test
     void displayWalletOnlyIBAN(){
-        String pluginPaymentData = JsonService.getInstance().toJson( MockUtils.aWalletPaymentDataBicNull());
+        String pluginPaymentData = JsonService.getInstance().toJson( MockUtils.aPaymentDataBicNull());
         Mockito.doReturn(pluginPaymentData).when(rsaUtils).decrypt(anyString(), anyString());
 
         Wallet wallet = Wallet.builder()
