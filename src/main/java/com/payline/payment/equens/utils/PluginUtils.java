@@ -151,7 +151,8 @@ public class PluginUtils {
         }
 
         for (Aspsp aspsp : listAspsps) {
-            if (aspsp.getBic().equals(bic)) {
+            String aspspBic = aspsp.getBic();
+            if (!PluginUtils.isEmpty(aspspBic) && aspspBic.equals(bic)) {
                 return aspsp.getCountryCode();
             }
         }
