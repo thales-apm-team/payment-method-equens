@@ -1,7 +1,7 @@
 package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.bean.GenericPaymentRequest;
-import com.payline.payment.equens.bean.business.payment.WalletPaymentData;
+import com.payline.payment.equens.bean.business.payment.PaymentData;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.service.GenericPaymentService;
 import com.payline.pmapi.bean.common.FailureCause;
@@ -22,13 +22,13 @@ public class PaymentServiceImpl implements PaymentService {
         try {
             GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(paymentRequest);
 
-            WalletPaymentData walletPaymentData = new WalletPaymentData.WalletPaymentDataBuilder()
+            PaymentData paymentData = new PaymentData.PaymentDataBuilder()
                     .withBic(paymentRequest.getPaymentFormContext().getPaymentFormParameter().get(BankTransferForm.BANK_KEY))
                     .withIban(paymentRequest.getPaymentFormContext().getPaymentFormParameter().get(BankTransferForm.IBAN_KEY))
                     .build();
 
             // execute the payment Request
-            return genericPaymentService.paymentRequest(genericPaymentRequest, walletPaymentData);
+            return genericPaymentService.paymentRequest(genericPaymentRequest, paymentData);
         } catch (RuntimeException e) {
             LOGGER.error("Unexpected plugin error", e);
             return PaymentResponseFailure.PaymentResponseFailureBuilder

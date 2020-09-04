@@ -1,7 +1,7 @@
 package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.bean.GenericPaymentRequest;
-import com.payline.payment.equens.bean.business.payment.WalletPaymentData;
+import com.payline.payment.equens.bean.business.payment.PaymentData;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.service.JsonService;
@@ -38,9 +38,9 @@ public class PaymentWalletServiceImpl implements PaymentWalletService {
             String data = rsaUtils.decrypt(encryptedData, key);
 
             // create the WalletPaymentData object to recover the BIC
-            WalletPaymentData walletPaymentData = jsonService.fromJson(data, WalletPaymentData.class);
+            PaymentData paymentData = jsonService.fromJson(data, PaymentData.class);
 
-            return genericPaymentService.paymentRequest(genericPaymentRequest, walletPaymentData);
+            return genericPaymentService.paymentRequest(genericPaymentRequest, paymentData);
         } catch (RuntimeException e) {
             LOGGER.error("Unexpected plugin error", e);
             return PaymentResponseFailure.PaymentResponseFailureBuilder

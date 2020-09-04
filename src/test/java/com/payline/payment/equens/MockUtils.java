@@ -616,15 +616,15 @@ public class MockUtils {
         return "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:67.0) Gecko/20100101 Firefox/67.0";
     }
 
-    public static WalletPaymentData aWalletPaymentdata() {
-        return aWalletPaymentDataBuilder().build();
+    public static PaymentData aPaymentdata() {
+        return aPaymentDataBuilder().build();
     }
 
     /**
      * @return a WalletPaymentData
      */
-    public static WalletPaymentData.WalletPaymentDataBuilder aWalletPaymentDataBuilder() {
-        return new WalletPaymentData.WalletPaymentDataBuilder()
+    public static PaymentData.PaymentDataBuilder aPaymentDataBuilder() {
+        return new PaymentData.PaymentDataBuilder()
                 .withBic("PSSTFRPT")
                 .withIban(ibanFR);
     }
@@ -642,29 +642,29 @@ public class MockUtils {
     }
 
     /**
-     * @return a bic and an iban for the wallet.
+     * @return a PaymentData object with a bic and an iban.
      */
-    public static WalletPaymentData aWalletPaymentData() {
-        return new WalletPaymentData.WalletPaymentDataBuilder()
+    public static PaymentData aPaymentData() {
+        return new PaymentData.PaymentDataBuilder()
                 .withBic("PSSTFRPP")
                 .withIban("anIbanWithMoreThan8Charactere")
                 .build();
     }
 
     /**
-     * @return a bic null and an iban for the wallet.
+     * @return a PaymentData object with an iban but no bic.
      */
-    public static WalletPaymentData aWalletPaymentDataBicNull() {
-        return new WalletPaymentData.WalletPaymentDataBuilder()
+    public static PaymentData aPaymentDataBicNull() {
+        return new PaymentData.PaymentDataBuilder()
                 .withIban("anIbanWithMoreThan8Charactere")
                 .build();
     }
 
     /**
-     * @return a bic and an iban null for the wallet.
+     * @return a PaymentData object with a bic but no iban.
      */
-    public static WalletPaymentData aWalletPaymentDataIbanNull() {
-        return new WalletPaymentData.WalletPaymentDataBuilder()
+    public static PaymentData aPaymentDataIbanNull() {
+        return new PaymentData.PaymentDataBuilder()
                 .withIban("anIbanWithMoreThan8Charactere")
                 .build();
     }

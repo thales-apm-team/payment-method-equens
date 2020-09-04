@@ -46,7 +46,7 @@ public class GenericPaymentService {
     }
 
 
-    public PaymentResponse paymentRequest(GenericPaymentRequest paymentRequest, WalletPaymentData walletPaymentData) {
+    public PaymentResponse paymentRequest(GenericPaymentRequest paymentRequest, PaymentData paymentData) {
         PaymentResponse paymentResponse;
 
         try {
@@ -92,7 +92,7 @@ public class GenericPaymentService {
             });
 
             // Build PaymentInitiationRequest (Equens) from PaymentRequest (Payline)
-            PaymentInitiationRequest request = buildPaymentInitiationRequest(paymentRequest, newPsu, walletPaymentData);
+            PaymentInitiationRequest request = buildPaymentInitiationRequest(paymentRequest, newPsu, paymentData);
 
             // Send the payment initiation request
             PaymentInitiationResponse paymentInitResponse = pisHttpClient.initPayment(request, requestConfiguration);
@@ -213,11 +213,11 @@ public class GenericPaymentService {
     }
 
     // Build PaymentInitiationRequest (Equens) from PaymentRequest (Payline)
-    PaymentInitiationRequest buildPaymentInitiationRequest(GenericPaymentRequest paymentRequest, Psu newPsu, WalletPaymentData walletPaymentData) {
+    PaymentInitiationRequest buildPaymentInitiationRequest(GenericPaymentRequest paymentRequest, Psu newPsu, PaymentData paymentData) {
 
         // extract BIC and IBAN
-        String bic = walletPaymentData.getBic();
-        String iban = walletPaymentData.getIban();
+        String bic = paymentData.getBic();
+        String iban = paymentData.getIban();
 
         // Control on the input data (to avoid NullPointerExceptions)
         validateRequest(paymentRequest);

@@ -4,12 +4,10 @@ import com.payline.payment.equens.MockUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+class PaymentDataTest {
 
-class WalletPaymentDataTest {
-
-    public WalletPaymentData create() {
-        return MockUtils.aWalletPaymentData();
+    public PaymentData create() {
+        return MockUtils.aPaymentData();
     }
 
     @Test

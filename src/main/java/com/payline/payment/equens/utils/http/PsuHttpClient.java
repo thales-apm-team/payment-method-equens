@@ -54,7 +54,7 @@ public class PsuHttpClient extends EquensHttpClient {
         headers.add( new BasicHeader( HEADER_REQUEST_ID, UUID.randomUUID().toString() ) );
 
         // Body
-        StringEntity body = new StringEntity( psuCreateRequest.toString(), StandardCharsets.UTF_8 );
+        StringEntity body = new StringEntity(jsonService.toJson(psuCreateRequest), StandardCharsets.UTF_8 );
         headers.add( new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json") );
 
         // Send
