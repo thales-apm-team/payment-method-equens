@@ -86,7 +86,7 @@ public class PisHttpClient extends EquensHttpClient {
         List<Header> headers = this.initHeaders(requestConfiguration);
 
         // Body
-        StringEntity body = new StringEntity(paymentInitiationRequest.toString(), StandardCharsets.UTF_8);
+        StringEntity body = new StringEntity(jsonService.toJson( paymentInitiationRequest), StandardCharsets.UTF_8);
         headers.add(new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json"));
 
         // Send request
