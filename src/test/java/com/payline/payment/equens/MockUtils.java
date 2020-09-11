@@ -284,11 +284,13 @@ public class MockUtils {
     public static PaymentFormContext aPaymentFormContext(String iban){
         Map<String, String> paymentFormParameter = new HashMap<>();
         paymentFormParameter.put( BankTransferForm.BANK_KEY, "PSSTFRPT" );
-        paymentFormParameter.put( BankTransferForm.IBAN_KEY, iban );
+
+        Map<String,String> sensitivePaymentFormParameter = new HashMap<>();
+        sensitivePaymentFormParameter.put( BankTransferForm.IBAN_KEY, iban );
 
         return PaymentFormContext.PaymentFormContextBuilder.aPaymentFormContext()
                 .withPaymentFormParameter(paymentFormParameter)
-                .withSensitivePaymentFormParameter(new HashMap<>())
+                .withSensitivePaymentFormParameter(sensitivePaymentFormParameter)
                 .build();
     }
 

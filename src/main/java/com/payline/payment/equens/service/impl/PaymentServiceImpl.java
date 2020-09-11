@@ -24,7 +24,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             PaymentData paymentData = new PaymentData.PaymentDataBuilder()
                     .withBic(paymentRequest.getPaymentFormContext().getPaymentFormParameter().get(BankTransferForm.BANK_KEY))
-                    .withIban(paymentRequest.getPaymentFormContext().getPaymentFormParameter().get(BankTransferForm.IBAN_KEY))
+                    .withIban(paymentRequest.getPaymentFormContext().getSensitivePaymentFormParameter().get(BankTransferForm.IBAN_KEY))
                     .build();
 
             // execute the payment Request
