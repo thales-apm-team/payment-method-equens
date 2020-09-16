@@ -48,7 +48,7 @@ public class WalletServiceImpl implements WalletService {
         try {
             // get wallet data
             String bic = walletCreateRequest.getPaymentFormContext().getPaymentFormParameter().get(BankTransferForm.BANK_KEY);
-            String iban = walletCreateRequest.getPaymentFormContext().getPaymentFormParameter().get(BankTransferForm.IBAN_KEY);
+            String iban = walletCreateRequest.getPaymentFormContext().getSensitivePaymentFormParameter().get(BankTransferForm.IBAN_KEY);
 
             PaymentData walletPaymentData = new PaymentData.PaymentDataBuilder()
                     .withBic(bic)
