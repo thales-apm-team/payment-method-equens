@@ -142,6 +142,7 @@ public class PluginUtils {
 
     // find the country of the bank from his BIC
     public static String getCountryCodeFromBIC(List<Aspsp> listAspsps, String bic) {
+
         if (isEmpty(bic) || bic.length() < 8) {
             throw new InvalidDataException("Invalid bic:" + bic);
         }
@@ -156,7 +157,17 @@ public class PluginUtils {
                 return aspsp.getCountryCode();
             }
         }
+
+        for (Aspsp aspsp : listAspsps) {
+            String aspspBic = aspsp.getBic();
+            if (!PluginUtils.isEmpty(aspspBic) && aspspBic.equals(bic.substring(0, 8))) {
+                return aspsp.getCountryCode();
+            }
+        }
+
+
         throw new InvalidDataException("Can't find a country for this BIC " + bic);
+
     }
 
     // create the list of countries accepted by the merchant
