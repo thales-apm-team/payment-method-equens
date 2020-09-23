@@ -38,8 +38,8 @@ class WalletServiceImplTest {
     @Mock
     RSAUtils rsaUtils;
 
-    private static final String bank = "thisIsABank";
-    private static final String iban = "thisIsAnIban";
+    private static final String BANK = "thisIsABank";
+    private static final String IBAN = "thisIsAnIban";
 
     @BeforeEach
     void setUp() {
@@ -64,9 +64,9 @@ class WalletServiceImplTest {
         Mockito.doReturn(pluginPaymentData).when(rsaUtils).encrypt(anyString(), anyString());
 
         Map<String, String> paymentFormDataContext = new HashMap<>();
-        paymentFormDataContext.put(BankTransferForm.BANK_KEY, bank);
+        paymentFormDataContext.put(BankTransferForm.BANK_KEY, BANK);
         Map<String, String> sensitivePaymentFormDataContext = new HashMap<>();
-        sensitivePaymentFormDataContext.put(BankTransferForm.IBAN_KEY, iban);
+        sensitivePaymentFormDataContext.put(BankTransferForm.IBAN_KEY, IBAN);
 
         PaymentFormContext context = PaymentFormContext.PaymentFormContextBuilder
                 .aPaymentFormContext()
@@ -92,7 +92,7 @@ class WalletServiceImplTest {
 
         Map<String, String> paymentFormDataContext = new HashMap<>();
         Map<String, String> sensitivePaymentFormDataContext = new HashMap<>();
-        sensitivePaymentFormDataContext.put(BankTransferForm.IBAN_KEY, iban);
+        sensitivePaymentFormDataContext.put(BankTransferForm.IBAN_KEY, IBAN);
 
         PaymentFormContext context = PaymentFormContext.PaymentFormContextBuilder
                 .aPaymentFormContext()
@@ -117,7 +117,7 @@ class WalletServiceImplTest {
         Mockito.doReturn(pluginPaymentData).when(rsaUtils).encrypt(anyString(), anyString());
 
         Map<String, String> paymentFormDataContext = new HashMap<>();
-        paymentFormDataContext.put(BankTransferForm.BANK_KEY, bank);
+        paymentFormDataContext.put(BankTransferForm.BANK_KEY, BANK);
         Map<String, String> sensitivePaymentFormDataContext = new HashMap<>();
 
         PaymentFormContext context = PaymentFormContext.PaymentFormContextBuilder
