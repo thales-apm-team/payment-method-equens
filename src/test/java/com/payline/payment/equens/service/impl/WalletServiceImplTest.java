@@ -38,8 +38,8 @@ class WalletServiceImplTest {
     @Mock
     RSAUtils rsaUtils;
 
-    private String bank = "thisIsABank";
-    private String iban = "thisIsAnIban";
+    private static final String bank = "thisIsABank";
+    private static final String iban = "thisIsAnIban";
 
     @BeforeEach
     void setUp() {
