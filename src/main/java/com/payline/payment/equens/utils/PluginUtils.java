@@ -151,6 +151,22 @@ public class PluginUtils {
             throw new InvalidDataException("the list of Aspsps is empty");
         }
 
+        String countryCode = checkBICFromListAspsps(listAspsps,bic);
+
+        if(countryCode.isEmpty()){
+            countryCode = checkBICFromListAspsps(listAspsps,bic.substring(0, 8));
+        }
+
+        if(!countryCode.isEmpty()){
+            return countryCode;
+        }
+
+        throw new InvalidDataException("Can't find a country for this BIC " + bic);
+
+    }
+
+    public static String checkBICFromListAspsps(List<Aspsp> listAspsps, String bic){
+
         for (Aspsp aspsp : listAspsps) {
             String aspspBic = aspsp.getBic();
             if (!PluginUtils.isEmpty(aspspBic) && aspspBic.equals(bic)) {
@@ -158,16 +174,7 @@ public class PluginUtils {
             }
         }
 
-        for (Aspsp aspsp : listAspsps) {
-            String aspspBic = aspsp.getBic();
-            if (!PluginUtils.isEmpty(aspspBic) && aspspBic.equals(bic.substring(0, 8))) {
-                return aspsp.getCountryCode();
-            }
-        }
-
-
-        throw new InvalidDataException("Can't find a country for this BIC " + bic);
-
+        return "";
     }
 
     // create the list of countries accepted by the merchant
