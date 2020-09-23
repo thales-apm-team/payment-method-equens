@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 
 class WalletServiceImplTest {
     private JsonService jsonService = JsonService.getInstance();
@@ -35,6 +37,9 @@ class WalletServiceImplTest {
 
     @Mock
     RSAUtils rsaUtils;
+
+    private static final String BANK = "thisIsABank";
+    private static final String IBAN = "thisIsAnIban";
 
     @BeforeEach
     void setUp() {
@@ -56,16 +61,17 @@ class WalletServiceImplTest {
     @Test
     void createWallet() {
         String pluginPaymentData = jsonService.toJson( MockUtils.aPaymentData());
-
         Mockito.doReturn(pluginPaymentData).when(rsaUtils).encrypt(anyString(), anyString());
 
         Map<String, String> paymentFormDataContext = new HashMap<>();
-        paymentFormDataContext.put(BankTransferForm.BANK_KEY, "thisIsABank");
-        paymentFormDataContext.put(BankTransferForm.IBAN_KEY, "thisIsAnIban");
+        paymentFormDataContext.put(BankTransferForm.BANK_KEY, BANK);
+        Map<String, String> sensitivePaymentFormDataContext = new HashMap<>();
+        sensitivePaymentFormDataContext.put(BankTransferForm.IBAN_KEY, IBAN);
 
         PaymentFormContext context = PaymentFormContext.PaymentFormContextBuilder
                 .aPaymentFormContext()
                 .withPaymentFormParameter(paymentFormDataContext)
+                .withSensitivePaymentFormParameter(sensitivePaymentFormDataContext)
                 .build();
         WalletCreateRequest request = WalletCreateRequest.builder()
                 .paymentFormContext(context)
@@ -76,21 +82,22 @@ class WalletServiceImplTest {
         Assertions.assertEquals(WalletCreateResponseSuccess.class, response.getClass());
         WalletCreateResponseSuccess responseSuccess = (WalletCreateResponseSuccess) response;
         Assertions.assertEquals(pluginPaymentData, responseSuccess.getPluginPaymentData());
+        verify(rsaUtils, atLeastOnce()).encrypt("{\"bic\":\"thisIsABank\",\"iban\":\"thisIsAnIban\"}", "thisIsAKey");
     }
 
     @Test
     void createWalletBicNull() {
         String pluginPaymentData = jsonService.toJson( MockUtils.aPaymentDataBicNull());
-
         Mockito.doReturn(pluginPaymentData).when(rsaUtils).encrypt(anyString(), anyString());
 
         Map<String, String> paymentFormDataContext = new HashMap<>();
-        paymentFormDataContext.put(BankTransferForm.BANK_KEY, "thisIsABank");
-        paymentFormDataContext.put(BankTransferForm.IBAN_KEY, "thisIsAnIban");
+        Map<String, String> sensitivePaymentFormDataContext = new HashMap<>();
+        sensitivePaymentFormDataContext.put(BankTransferForm.IBAN_KEY, IBAN);
 
         PaymentFormContext context = PaymentFormContext.PaymentFormContextBuilder
                 .aPaymentFormContext()
                 .withPaymentFormParameter(paymentFormDataContext)
+                .withSensitivePaymentFormParameter(sensitivePaymentFormDataContext)
                 .build();
         WalletCreateRequest request = WalletCreateRequest.builder()
                 .paymentFormContext(context)
@@ -101,21 +108,22 @@ class WalletServiceImplTest {
         Assertions.assertEquals(WalletCreateResponseSuccess.class, response.getClass());
         WalletCreateResponseSuccess responseSuccess = (WalletCreateResponseSuccess) response;
         Assertions.assertEquals(pluginPaymentData, responseSuccess.getPluginPaymentData());
+        verify(rsaUtils, atLeastOnce()).encrypt("{\"iban\":\"thisIsAnIban\"}", "thisIsAKey");
     }
 
     @Test
     void createWalletIbanNull() {
         String pluginPaymentData = jsonService.toJson( MockUtils.aPaymentDataIbanNull());
-
         Mockito.doReturn(pluginPaymentData).when(rsaUtils).encrypt(anyString(), anyString());
 
         Map<String, String> paymentFormDataContext = new HashMap<>();
-        paymentFormDataContext.put(BankTransferForm.BANK_KEY, "thisIsABank");
-        paymentFormDataContext.put(BankTransferForm.IBAN_KEY, "thisIsAnIban");
+        paymentFormDataContext.put(BankTransferForm.BANK_KEY, BANK);
+        Map<String, String> sensitivePaymentFormDataContext = new HashMap<>();
 
         PaymentFormContext context = PaymentFormContext.PaymentFormContextBuilder
                 .aPaymentFormContext()
                 .withPaymentFormParameter(paymentFormDataContext)
+                .withSensitivePaymentFormParameter(sensitivePaymentFormDataContext)
                 .build();
         WalletCreateRequest request = WalletCreateRequest.builder()
                 .paymentFormContext(context)
@@ -126,6 +134,8 @@ class WalletServiceImplTest {
         Assertions.assertEquals(WalletCreateResponseSuccess.class, response.getClass());
         WalletCreateResponseSuccess responseSuccess = (WalletCreateResponseSuccess) response;
         Assertions.assertEquals(pluginPaymentData, responseSuccess.getPluginPaymentData());
+        verify(rsaUtils, atLeastOnce()).encrypt("{\"bic\":\"thisIsABank\"}", "thisIsAKey");
+
     }
 
     @Test
