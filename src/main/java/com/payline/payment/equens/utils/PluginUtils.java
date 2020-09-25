@@ -169,23 +169,21 @@ public class PluginUtils {
      * Check if a BIC is present in the Aspsps list. The CheckOnlyEightFirstsCharacters allow you to choose how the BIC check will be done.
      * - FALSE: The raw values will be checked.
      * - TRUE : The 8 first characters will be checked.
-     * @param listAspsps
-     * @param bic
-     * @param checkOnlyEightFirstsCharacters
+     * @param listAspsps The list of aspsp
+     * @param bic The BIC to find
+     * @param checkOnlyEightFirstsCharacters The check to do
      * @return
      */
     public static String checkBICFromListAspsps(List<Aspsp> listAspsps, String bic, boolean checkOnlyEightFirstsCharacters) {
+        final String bicToCompare = checkOnlyEightFirstsCharacters ? bic.substring(0,8) : bic;
         String countryCode = null;
 
         for (Aspsp aspsp : listAspsps) {
-            String aspspBic = aspsp.getBic();
-            if (!checkOnlyEightFirstsCharacters) {
-                if (!PluginUtils.isEmpty(aspspBic) && aspspBic.equals(bic)) {
+            if (!PluginUtils.isEmpty(aspsp.getBic()) && aspsp.getBic().length() >= 8) {
+                final String aspspBic = checkOnlyEightFirstsCharacters ? aspsp.getBic().substring(0, 8) : aspsp.getBic();
+                if (aspspBic.equals(bicToCompare)) {
                     countryCode = aspsp.getCountryCode();
-                }
-            } else {
-                if (!PluginUtils.isEmpty(aspspBic) && aspspBic.substring(0, 8).equals(bic.substring(0, 8))) {
-                    countryCode = aspsp.getCountryCode();
+                    break;
                 }
             }
         }
