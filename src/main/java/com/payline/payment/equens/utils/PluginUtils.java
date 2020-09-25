@@ -142,6 +142,7 @@ public class PluginUtils {
 
     // find the country of the bank from his BIC
     public static String getCountryCodeFromBIC(List<Aspsp> listAspsps, String bic) {
+
         if (isEmpty(bic) || bic.length() < 8) {
             throw new InvalidDataException("Invalid bic:" + bic);
         }
@@ -150,13 +151,44 @@ public class PluginUtils {
             throw new InvalidDataException("the list of Aspsps is empty");
         }
 
+        String countryCode = checkBICFromListAspsps(listAspsps,bic,false);
+
+        if(countryCode == null){
+            countryCode = checkBICFromListAspsps(listAspsps,bic, true);
+        }
+
+        if(countryCode != null){
+            return countryCode;
+        }
+
+        throw new InvalidDataException("Can't find a country for this BIC " + bic);
+
+    }
+
+    /**
+     * Check if a BIC is present in the Aspsps list. The CheckOnlyEightFirstsCharacters allow you to choose how the BIC check will be done.
+     * - FALSE: The raw values will be checked.
+     * - TRUE : The 8 first characters will be checked.
+     * @param listAspsps The list of aspsp
+     * @param bic The BIC to find
+     * @param checkOnlyEightFirstsCharacters The check to do
+     * @return
+     */
+    public static String checkBICFromListAspsps(List<Aspsp> listAspsps, String bic, boolean checkOnlyEightFirstsCharacters) {
+        final String bicToCompare = checkOnlyEightFirstsCharacters ? bic.substring(0,8) : bic;
+        String countryCode = null;
+
         for (Aspsp aspsp : listAspsps) {
-            String aspspBic = aspsp.getBic();
-            if (!PluginUtils.isEmpty(aspspBic) && aspspBic.equals(bic)) {
-                return aspsp.getCountryCode();
+            if (!PluginUtils.isEmpty(aspsp.getBic()) && aspsp.getBic().length() >= 8) {
+                final String aspspBic = checkOnlyEightFirstsCharacters ? aspsp.getBic().substring(0, 8) : aspsp.getBic();
+                if (aspspBic.equals(bicToCompare)) {
+                    countryCode = aspsp.getCountryCode();
+                    break;
+                }
             }
         }
-        throw new InvalidDataException("Can't find a country for this BIC " + bic);
+
+        return countryCode;
     }
 
     // create the list of countries accepted by the merchant

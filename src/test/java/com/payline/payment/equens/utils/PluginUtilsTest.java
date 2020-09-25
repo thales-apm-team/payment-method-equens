@@ -90,14 +90,25 @@ class PluginUtilsTest {
     @Test
     void getCountryCodeFromBIC() {
         String aspspJson = "{\"Application\":\"PIS\",\"ASPSP\":[" +
-                "{\"AspspId\":\"1234\",\"Name\":[\"a Bank\"],\"CountryCode\":\"FR\",\"BIC\":\"FOOBARBAZXX\"}," +
+                "{\"AspspId\":\"1234\",\"Name\":[\"a Bank\"],\"CountryCode\":\"UK\",\"BIC\":\"MOOBARBAZXX\"}," +
+                "{\"AspspId\":\"1234\",\"Name\":[\"a Bank\"],\"CountryCode\":\"FR\",\"BIC\":\"FOOBARBA\"}," +
                 "{\"AspspId\":\"1409\",\"Name\":[\"La Banque Postale\"],\"CountryCode\":\"FR\",\"BIC\":\"PSSTFRPP\"}," +
-                "{\"AspspId\":\"1601\",\"Name\":[\"BBVA\"],\"CountryCode\":\"ES\",\"BIC\":\"BBVAESMM\"}" +
+                "{\"AspspId\":\"1601\",\"Name\":[\"BBVA\"],\"CountryCode\":\"ES\",\"BIC\":\"BBVAESMM\"}," +
+                "{\"AspspId\":\"1602\",\"Name\":[\"Santander\"],\"CountryCode\":\"ES\",\"BIC\":\"ES140049\"}," +
+                "{\"AspspId\":\"1602\",\"Name\":[\"Santander\"],\"CountryCode\":\"IT\",\"BIC\":\"IT14004\"}" +
                 "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
 
         List<Aspsp> aspsps = jsonService.fromJson(aspspJson, GetAspspsResponse.class).getAspsps();
         Assertions.assertEquals("FR", PluginUtils.getCountryCodeFromBIC(aspsps, "PSSTFRPP"));
         Assertions.assertEquals("ES", PluginUtils.getCountryCodeFromBIC(aspsps, "BBVAESMM"));
+        Assertions.assertEquals("FR", PluginUtils.getCountryCodeFromBIC(aspsps, "FOOBARBAAAA"));
+        Assertions.assertEquals("UK", PluginUtils.getCountryCodeFromBIC(aspsps, "MOOBARBAZYY"));
+        Assertions.assertEquals("ES", PluginUtils.getCountryCodeFromBIC(aspsps, "ES140049000"));
+
+        Assertions.assertThrows(InvalidDataException.class,
+                () -> PluginUtils.getCountryCodeFromBIC(aspsps, "IT14004"),
+                "Can't find a country for this BIC IT14004"
+        );
 
         Assertions.assertThrows(InvalidDataException.class,
                 () -> PluginUtils.getCountryCodeFromBIC(aspsps, "ANINVALIDBIC"),
@@ -108,12 +119,12 @@ class PluginUtilsTest {
     @Test
     void getCountryCodeFromBICWithSomeNullBIC() {
         String aspspJson = "{\"Application\":\"PIS\",\"ASPSP\":[" +
-                "{\"AspspId\":\"1234\",\"Name\":[\"a Bank\"],\"CountryCode\":\"FR\",\"BIC\":\"FOOBARBAZXX\"}," +
-                "{\"AspspId\":\"1409\",\"Name\":[\"La Banque Postale\"],\"CountryCode\":\"FR\"}," +
+                "{\"AspspId\":\"1234\",\"Name\":[\"a Bank\"],\"CountryCode\":\"FR\",\"BIC\":\"FOOBARBA\"}," +
+                "{\"AspspId\":\"1409\",\"Name\":[\"La Banque Postale\"],\"CountryCode\":\"FR\"}" +
                 "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
 
         List<Aspsp> aspsps = jsonService.fromJson(aspspJson, GetAspspsResponse.class).getAspsps();
-        Assertions.assertEquals("FR", PluginUtils.getCountryCodeFromBIC(aspsps, "FOOBARBAZXX"));
+        Assertions.assertEquals("FR", PluginUtils.getCountryCodeFromBIC(aspsps, "FOOBARBAZ"));
     }
 
     @Test
