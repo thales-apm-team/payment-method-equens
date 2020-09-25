@@ -151,13 +151,13 @@ public class PluginUtils {
             throw new InvalidDataException("the list of Aspsps is empty");
         }
 
-        String countryCode = checkBICFromListAspsps(listAspsps,bic);
+        String countryCode = checkBICFromListAspsps(listAspsps,bic,false);
 
-        if(countryCode.isEmpty()){
-            countryCode = checkBICFromListAspsps(listAspsps,bic.substring(0, 8));
+        if(countryCode == null){
+            countryCode = checkBICFromListAspsps(listAspsps,bic, true);
         }
 
-        if(!countryCode.isEmpty()){
+        if(countryCode != null){
             return countryCode;
         }
 
@@ -165,16 +165,32 @@ public class PluginUtils {
 
     }
 
-    public static String checkBICFromListAspsps(List<Aspsp> listAspsps, String bic){
+    /**
+     * Check if a BIC is present in the Aspsps list. The CheckOnlyEightFirstsCharacters allow you to choose how the BIC check will be done.
+     * - FALSE: The raw values will be checked.
+     * - TRUE : The 8 first characters will be checked.
+     * @param listAspsps
+     * @param bic
+     * @param checkOnlyEightFirstsCharacters
+     * @return
+     */
+    public static String checkBICFromListAspsps(List<Aspsp> listAspsps, String bic, boolean checkOnlyEightFirstsCharacters) {
+        String countryCode = null;
 
         for (Aspsp aspsp : listAspsps) {
             String aspspBic = aspsp.getBic();
-            if (!PluginUtils.isEmpty(aspspBic) && aspspBic.equals(bic)) {
-                return aspsp.getCountryCode();
+            if (!checkOnlyEightFirstsCharacters) {
+                if (!PluginUtils.isEmpty(aspspBic) && aspspBic.equals(bic)) {
+                    countryCode = aspsp.getCountryCode();
+                }
+            } else {
+                if (!PluginUtils.isEmpty(aspspBic) && aspspBic.substring(0, 8).equals(bic.substring(0, 8))) {
+                    countryCode = aspsp.getCountryCode();
+                }
             }
         }
 
-        return "";
+        return countryCode;
     }
 
     // create the list of countries accepted by the merchant
