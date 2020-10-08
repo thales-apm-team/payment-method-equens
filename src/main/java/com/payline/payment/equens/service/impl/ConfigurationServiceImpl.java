@@ -143,6 +143,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         countryCode.put(CountryCode.ALL.name(), i18n.getMessage("countryCode.all", locale));
         parameters.add(this.newListBoxParameter(Constants.ContractConfigurationKeys.COUNTRIES, countryCode, CountryCode.ALL.name(), true, locale));
 
+        // PISP contract
+        parameters.add(this.newInputParameter(Constants.ContractConfigurationKeys.PISP_CONTRACT, true, locale));
+
         return parameters;
     }
 
@@ -159,6 +162,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 String message = i18n.getMessage(I18N_CONTRACT_PREFIX + param.getKey() + ".requiredError", locale);
                 errors.put(param.getKey(), message);
             }
+        }
+
+        // check PISP format (N12)
+        String pispContract = accountInfo.get(Constants.ContractConfigurationKeys.PISP_CONTRACT);
+        if (PluginUtils.isEmpty(pispContract)
+                || pispContract.length() != 12
+                || !PluginUtils.isNumeric(pispContract)) {
+            String message = i18n.getMessage(I18N_CONTRACT_PREFIX + Constants.ContractConfigurationKeys.PISP_CONTRACT + ".badFormat", locale);
+            errors.put(Constants.ContractConfigurationKeys.PISP_CONTRACT, message);
         }
 
         // Check the clientName and onboarding ID

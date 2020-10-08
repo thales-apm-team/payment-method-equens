@@ -234,12 +234,15 @@ public class GenericPaymentService {
             deliveryAddress = buildAddress(paymentRequest.getBuyer().getAddressForType(Buyer.AddressType.DELIVERY));
         }
 
+        String softDescriptor = paymentRequest.getSoftDescriptor();
+        String pispContract = paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.PISP_CONTRACT).getValue();
+
         PaymentInitiationRequest.PaymentInitiationRequestBuilder paymentInitiationRequestBuilder = new PaymentInitiationRequest.PaymentInitiationRequestBuilder()
                 .withAspspId(aspspId)
                 .withEndToEndId(paymentRequest.getTransactionId())
                 .withInitiatingPartyReferenceId(paymentRequest.getOrder().getReference())
                 .withInitiatingPartyReturnUrl(paymentRequest.getEnvironment().getRedirectionReturnURL())
-                .withRemittanceInformation(paymentRequest.getSoftDescriptor())
+                .withRemittanceInformation(softDescriptor + pispContract)
                 .withRemittanceInformationStructured(
                         new RemittanceInformationStructured.RemittanceInformationStructuredBuilder()
                                 .withReference(paymentRequest.getOrder().getReference())

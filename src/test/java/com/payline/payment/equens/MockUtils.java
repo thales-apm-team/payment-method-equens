@@ -161,6 +161,8 @@ public class MockUtils {
                 new ContractProperty(ConfigurationServiceImpl.PurposeCode.COMMERCE.getCode()));
         contractProperties.put(Constants.ContractConfigurationKeys.COUNTRIES,
                 new ContractProperty(exampleCountry));
+        contractProperties.put(Constants.ContractConfigurationKeys.PISP_CONTRACT,
+                new ContractProperty("123456789012"));
 
         return new ContractConfiguration("INST EquensWorldline", contractProperties);
     }
@@ -354,7 +356,7 @@ public class MockUtils {
                 .withEndToEndId( "PAYLINE" + timestamp )
                 .withInitiatingPartyReferenceId( "REF" + timestamp )
                 .withInitiatingPartyReturnUrl( "http://redirectionURL.com" )
-                .withRemittanceInformation( "softDescriptor" )
+                .withRemittanceInformation( "softDescriptor123456789012" )
                 .withRemittanceInformationStructured(
                         new RemittanceInformationStructured.RemittanceInformationStructuredBuilder()
                                 .withReference("REF" + timestamp)

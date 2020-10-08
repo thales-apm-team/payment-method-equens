@@ -67,6 +67,14 @@ class PluginUtilsTest {
         assertNull(PluginUtils.truncate(null, 30));
     }
 
+    @Test
+    void isNumeric(){
+        Assertions.assertFalse(PluginUtils.isNumeric(null));
+        Assertions.assertFalse(PluginUtils.isNumeric(""));
+        Assertions.assertTrue(PluginUtils.isNumeric("1"));
+        Assertions.assertTrue(PluginUtils.isNumeric("123456789012"));
+    }
+
 
     @Test
     void getAspspIdFromBIC() {

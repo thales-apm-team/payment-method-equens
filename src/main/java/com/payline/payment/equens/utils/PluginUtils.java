@@ -95,6 +95,21 @@ public class PluginUtils {
         return (s == null || s.length() == 0);
     }
 
+    public static boolean isNumeric(String s) {
+        boolean b = true;
+        if (isEmpty(s)) {
+            b = false;
+        } else {
+            try {
+                Double.parseDouble(s);
+            } catch (NumberFormatException e) {
+                b = false;
+            }
+        }
+        return b;
+    }
+
+
     /**
      * Try to find in aspsps list an aspsp with the given BIC11
      * if no aspsp found, try again by truncating the BIC11 into a BIC8
@@ -151,13 +166,13 @@ public class PluginUtils {
             throw new InvalidDataException("the list of Aspsps is empty");
         }
 
-        String countryCode = checkBICFromListAspsps(listAspsps,bic,false);
+        String countryCode = checkBICFromListAspsps(listAspsps, bic, false);
 
-        if(countryCode == null){
-            countryCode = checkBICFromListAspsps(listAspsps,bic, true);
+        if (countryCode == null) {
+            countryCode = checkBICFromListAspsps(listAspsps, bic, true);
         }
 
-        if(countryCode != null){
+        if (countryCode != null) {
             return countryCode;
         }
 
@@ -169,13 +184,14 @@ public class PluginUtils {
      * Check if a BIC is present in the Aspsps list. The CheckOnlyEightFirstsCharacters allow you to choose how the BIC check will be done.
      * - FALSE: The raw values will be checked.
      * - TRUE : The 8 first characters will be checked.
-     * @param listAspsps The list of aspsp
-     * @param bic The BIC to find
+     *
+     * @param listAspsps                     The list of aspsp
+     * @param bic                            The BIC to find
      * @param checkOnlyEightFirstsCharacters The check to do
      * @return
      */
     public static String checkBICFromListAspsps(List<Aspsp> listAspsps, String bic, boolean checkOnlyEightFirstsCharacters) {
-        final String bicToCompare = checkOnlyEightFirstsCharacters ? bic.substring(0,8) : bic;
+        final String bicToCompare = checkOnlyEightFirstsCharacters ? bic.substring(0, 8) : bic;
         String countryCode = null;
 
         for (Aspsp aspsp : listAspsps) {
