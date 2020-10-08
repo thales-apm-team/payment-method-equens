@@ -1,6 +1,7 @@
 package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
+import com.payline.payment.equens.bean.business.reachdirectory.Detail;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
@@ -22,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigurationService {
 
@@ -93,17 +95,34 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
         if (pluginConfiguration == null) {
             LOGGER.warn("pluginConfiguration is null");
         } else {
-            for (Aspsp aspsp : jsonService.fromJson(PluginUtils.extractBanks(pluginConfiguration), GetAspspsResponse.class).getAspsps()) {
-                // filter by country code
-                if (aspsp.getCountryCode() != null &&
-                        (listCountryCode.isEmpty() || listCountryCode.contains(aspsp.getCountryCode()))
-                        && !PluginUtils.isEmpty(aspsp.getBic())) {
-                    // build the string to display in the select option value
-                    options.add(createAspspOption(aspsp));
-                }
+            List<Aspsp> aspsps = jsonService.fromJson(PluginUtils.extractBanks(pluginConfiguration), GetAspspsResponse.class).getAspsps();
+            List<Aspsp> validAspsps = filter(aspsps, listCountryCode);
+
+            for (Aspsp aspsp : validAspsps) {
+                options.add(createAspspOption(aspsp));
             }
         }
         return options;
+    }
+
+    private List<Aspsp> filter(List<Aspsp> aspsps, List<String> listCountryCode) {
+        return aspsps.stream()
+                .filter(e -> e.getCountryCode() != null)
+                .filter(e -> listCountryCode.isEmpty() || listCountryCode.contains(e.getCountryCode()))
+                .filter(e -> !PluginUtils.isEmpty(e.getBic()))
+                .filter(e -> {
+                    if (e.getDetails() != null) {
+                        for (Detail e2 : e.getDetails()) {
+                            if ("POST /payments".equals(e2.getApi())
+                                    && (e2.getValue() == null || e2.getValue().contains("Instant"))) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                    return true;
+                })
+                .collect(Collectors.toList());
     }
 
     private SelectOption createAspspOption(Aspsp aspsp) {
