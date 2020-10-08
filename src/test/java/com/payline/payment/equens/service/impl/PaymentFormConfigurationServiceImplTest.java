@@ -33,6 +33,16 @@ class PaymentFormConfigurationServiceImplTest {
     @Mock
     private I18nService i18n;
 
+    private String aspspsJson = "{\"Application\":\"PIS\",\"ASPSP\":[" +
+            "{\"AspspId\":\"1234\",\"Name\":[\"a Bank\"],\"CountryCode\":\"FR\",\"Details\":[{\"Api\":\"POST /payments\",\"FieldName\":\"PaymentProduct\",\"Value\":\"Normal|Instant\",\"ProtocolVersion\":\"STET_V_1_4_0_47\"}],\"BIC\":\"MOOBARBAZXX\"}," +
+            "{\"AspspId\":\"4321\",\"Name\":[\"another Bank\"],\"CountryCode\":\"FR\",\"Details\":[{\"Api\":\"POST /payments\",\"FieldName\":\"PaymentProduct\",\"ProtocolVersion\":\"STET_V_1_4_0_47\"}],\"BIC\":\"FOOBARBA\"}," +
+            "{\"AspspId\":\"1409\",\"Name\":[\"La Banque Postale\"],\"CountryCode\":\"FR\",\"Details\":[{\"Api\":\"POST /payments\",\"FieldName\":\"PaymentProduct\",\"Value\":\"Normal\",\"ProtocolVersion\":\"STET_V_1_4_0_47\"}],\"BIC\":\"PSSTFRPP\"}," +
+            "{\"AspspId\":\"1601\",\"Name\":[\"BBVA\"],\"CountryCode\":\"ES\",\"Details\":[{\"Api\":\"POST /payments\",\"FieldName\":\"PaymentProduct\",\"Value\":\"Instant\",\"ProtocolVersion\":\"STET_V_1_4_0_47\"}],\"BIC\":\"BBVAESMM\"}," +
+            "{\"AspspId\":\"1602\",\"Name\":[\"Santander\"],\"CountryCode\":\"ES\",\"Details\":[{\"Api\":\"POST /payments\",\"FieldName\":\"PaymentProduct\",\"Value\":\"Instant\",\"ProtocolVersion\":\"STET_V_1_4_0_47\"}],\"BIC\":\"ES140049\"}," +
+            "{\"AspspId\":\"1603\",\"Name\":[\"Santander\"],\"CountryCode\":\"IT\",\"Details\":[{\"Api\":\"POST /payments\",\"FieldName\":\"PaymentProduct\",\"Value\":\"Instant\",\"ProtocolVersion\":\"STET_V_1_4_0_47\"}],\"BIC\":\"IT14004\"}," +
+            "{\"AspspId\":\"224\",\"CountryCode\":\"DE\",\"Name\":[\"08/15direkt\"],\"Details\":[{\"Api\":\"POST /payments\",\"FieldName\":\"PaymentProduct\",\"Value\":\"Instant\",\"ProtocolVersion\":\"STET_V_1_4_0_47\"}]}" +
+            "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
+
     @BeforeEach
     void setup() {
         service = new PaymentFormConfigurationServiceImpl();
@@ -49,12 +59,7 @@ class PaymentFormConfigurationServiceImplTest {
         // given: the plugin configuration contains 2 french banks and the locale is FRANCE
         PaymentFormConfigurationRequest request = MockUtils.aPaymentFormConfigurationRequestBuilder()
                 .withLocale(Locale.FRANCE)
-                .withPluginConfiguration("{\"Application\":\"PIS\"," +
-                        "\"ASPSP\":[" +
-                        "{\"AspspId\": \"1402\", \"Name\": [\"Banque Fédérative du Crédit Mutuel\"], \"CountryCode\": \"FR\", \"BIC\": \"CMCIFRPA\"}," +
-                        "{\"AspspId\": \"1409\", \"Name\": [\"La Banque Postale\"], \"CountryCode\": \"FR\", \"BIC\": \"PSSTFRPP\"}" +
-                        "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}"
-                )
+                .withPluginConfiguration(aspspsJson)
                 .build();
 
         // when: calling getPaymentFormConfiguration method
@@ -108,16 +113,11 @@ class PaymentFormConfigurationServiceImplTest {
     void getBanks_aspspWithoutBic() {
         // @see https://payline.atlassian.net/browse/PAYLAPMEXT-204
         // @see https://payline.atlassian.net/browse/PAYLAPMEXT-219
-        // given: in the PluginConfiguration, one ASPSP has no BIC (null)
-        String pluginConfiguration = "{\"Application\":\"PIS\"," +
-                "\"ASPSP\":[" +
-                "{\"AspspId\":\"224\",\"CountryCode\":\"DE\",\"Name\":[\"08/15direkt\"]}" +
-                "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
 
         // when: calling getBanks method
         List<String> listCountry = new ArrayList<>();
         listCountry.add(Locale.GERMANY.getCountry());
-        List<SelectOption> result = service.getBanks(pluginConfiguration, listCountry);
+        List<SelectOption> result = service.getBanks(aspspsJson, listCountry);
 
         // then: the aspsp is ignered because there is no BIC
         assertTrue(result.isEmpty());
@@ -126,42 +126,27 @@ class PaymentFormConfigurationServiceImplTest {
     @Test
     void getBanks_filterAspspByCountryCode() {
         // @see: https://payline.atlassian.net/browse/PAYLAPMEXT-203
-        // given: the PluginConfiguration contains 3 banks (1 FR, 1 ES, 1 without CountryCode) and the given country code if "FR"
-        String pluginConfiguration = "{\"Application\":\"PIS\"," +
-                "\"ASPSP\":[" +
-                "{\"AspspId\": \"1402\", \"Name\": [\"Banque Fédérative du Crédit Mutuel\"], \"CountryCode\": \"FR\", \"BIC\": \"CMCIFRPA\"}," +
-                "{\"AspspId\": \"1601\", \"Name\": [\"BBVA\"], \"CountryCode\": \"ES\", \"BIC\": \"BBVAESMM\"}," +
-                "{\"AspspId\": \"1409\", \"Name\": [\"La Banque Postale\"], \"BIC\": \"PSSTFRPP\"}" +
-                "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
 
         // when: calling getBanks method
         List<String> listCountry = new ArrayList<>();
         listCountry.add(Locale.FRANCE.getCountry());
-        List<SelectOption> result = service.getBanks(pluginConfiguration, listCountry);
+        List<SelectOption> result = service.getBanks(aspspsJson, listCountry);
 
         // then: there is only 1 bank choice at the end
-        assertEquals(1, result.size());
+        assertEquals(2, result.size());
     }
 
     @Test
     void getBanks_filterAspspByMultipleCountryCode() {
         // @see: https://payline.atlassian.net/browse/PAYLAPMEXT-203
-        // given: the PluginConfiguration contains 3 banks (1 FR, 1 ES, 1 without CountryCode) and the given country code if "FR"
-        String pluginConfiguration = "{\"Application\":\"PIS\"," +
-                "\"ASPSP\":[" +
-                "{\"AspspId\": \"1402\", \"Name\": [\"Banque Fédérative du Crédit Mutuel\"], \"CountryCode\": \"FR\", \"BIC\": \"CMCIFRPA\"}," +
-                "{\"AspspId\": \"1601\", \"Name\": [\"BBVA\"], \"CountryCode\": \"ES\", \"BIC\": \"BBVAESMM\"}," +
-                "{\"AspspId\": \"1409\", \"Name\": [\"La Banque Postale\"], \"BIC\": \"PSSTFRPP\"}," +
-                "{\"AspspId\": \"1111\", \"Name\": [\"AZER\"], \"CountryCode\": \"DE\", \"BIC\": \"AZERTYUI\"}" +
-                "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
 
         // when: calling getBanks method
         List<String> listCountry = new ArrayList<>();
         listCountry.add(Locale.FRANCE.getCountry());
         listCountry.add("ES");
-        List<SelectOption> result = service.getBanks(pluginConfiguration, listCountry);
+        List<SelectOption> result = service.getBanks(aspspsJson, listCountry);
 
         // then: there is 2 banks choice at the end
-        assertEquals(2, result.size());
+        assertEquals(4, result.size());
     }
 }
