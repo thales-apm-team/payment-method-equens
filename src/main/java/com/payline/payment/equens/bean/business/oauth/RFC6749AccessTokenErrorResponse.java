@@ -1,6 +1,5 @@
 package com.payline.payment.equens.bean.business.oauth;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -30,8 +29,5 @@ public class RFC6749AccessTokenErrorResponse {
         return errorDescription;
     }
 
-    public static RFC6749AccessTokenErrorResponse fromJson(String json ){
-        return new Gson().fromJson( json, RFC6749AccessTokenErrorResponse.class );
-    }
 
 }

@@ -1,6 +1,10 @@
 package com.payline.payment.equens.service.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.payline.payment.equens.bean.business.payment.PaymentData;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.payment.equens.utils.properties.ConfigProperties;
 import com.payline.payment.equens.utils.security.RSAUtils;
@@ -26,6 +30,7 @@ public class WalletServiceImpl implements WalletService {
     private static final Logger LOGGER = LogManager.getLogger(WalletServiceImpl.class);
     private RSAUtils rsaUtils = RSAUtils.getInstance();
     protected ConfigProperties config = ConfigProperties.getInstance();
+    private JsonService jsonService = JsonService.getInstance();
 
     @Override
     public WalletDeleteResponse deleteWallet(WalletDeleteRequest walletDeleteRequest) {
@@ -43,10 +48,16 @@ public class WalletServiceImpl implements WalletService {
         try {
             // get wallet data
             String bic = walletCreateRequest.getPaymentFormContext().getPaymentFormParameter().get(BankTransferForm.BANK_KEY);
+            String iban = walletCreateRequest.getPaymentFormContext().getSensitivePaymentFormParameter().get(BankTransferForm.IBAN_KEY);
 
-            // encrypt it
+            PaymentData walletPaymentData = new PaymentData.PaymentDataBuilder()
+                    .withBic(bic)
+                    .withIban(iban)
+                    .build();
+
+            // encrypt the Json that contains the BIC and the IBAN
             String key = PluginUtils.extractKey(walletCreateRequest.getPluginConfiguration()).trim();
-            String paymentData = rsaUtils.encrypt(bic, key);
+            String paymentData = rsaUtils.encrypt(jsonService.toJson( walletPaymentData), key);
 
             // create wallet
             return WalletCreateResponseSuccess.builder()
@@ -58,11 +69,11 @@ public class WalletServiceImpl implements WalletService {
                     .errorCode(e.getErrorCode())
                     .failureCause(e.getFailureCause())
                     .build();
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             LOGGER.error("Unexpected plugin error", e);
             return WalletCreateResponseFailure.builder()
-                    .errorCode( PluginException.runtimeErrorCode( e ) )
-                    .failureCause( FailureCause.INTERNAL_ERROR )
+                    .errorCode(PluginException.runtimeErrorCode(e))
+                    .failureCause(FailureCause.INTERNAL_ERROR)
                     .build();
         }
     }
@@ -71,16 +82,24 @@ public class WalletServiceImpl implements WalletService {
     public WalletDisplayResponse displayWallet(WalletDisplayRequest walletDisplayRequest) {
         List<WalletField> walletFields = new ArrayList<>();
         try {
-            // decrypt the encrypted data
+            // decrypt the encrypted data (BIC + IBAN)
             String encryptedData = walletDisplayRequest.getWallet().getPluginPaymentData();
 
             String key = PluginUtils.extractKey(walletDisplayRequest.getPluginConfiguration());
             String data = rsaUtils.decrypt(encryptedData, key);
 
-            //Build wallet display fields
-            walletFields.add(WalletDisplayFieldText.builder().content(data).build());
-
-        } catch (PluginException e){
+            //Build wallet display fields (BIC and the masked IBAN)
+            Gson gson = new GsonBuilder().create();
+            PaymentData paymentData = gson.fromJson(data, PaymentData.class);
+            String bic = paymentData.getBic();
+            String iban = paymentData.getIban();
+            if (bic != null) {
+                walletFields.add(WalletDisplayFieldText.builder().content(paymentData.getBic()).build());
+            }
+            if (iban != null) {
+                walletFields.add(WalletDisplayFieldText.builder().content(PluginUtils.hideIban(paymentData.getIban())).build());
+            }
+        } catch (PluginException e) {
             LOGGER.warn("Unable to display wallet ", e);
         }
         // create and return walletDisplayResponse

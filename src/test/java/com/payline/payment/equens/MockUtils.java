@@ -5,6 +5,7 @@ import com.payline.payment.equens.bean.business.payment.*;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
+import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.service.impl.ConfigurationServiceImpl;
 import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.TestUtils;
@@ -35,12 +36,18 @@ import java.util.*;
  * Utility class that generates mocks of frequently used objects.
  */
 public class MockUtils {
+    private static JsonService jsonService = JsonService.getInstance();
+
+    private static final String exampleCountry = "FR";
+    private static final String timestamp = "20200901181833";
+    private static final String ibanFR = "FR1234567891234567891234";
+    private static final String ibanES = "ES1234567891234567891234";
 
     /**
      * Generate a valid accountInfo, an attribute of a {@link ContractParametersCheckRequest} instance.
      */
-    public static Map<String, String> anAccountInfo(){
-        return anAccountInfo( aContractConfiguration() );
+    public static Map<String, String> anAccountInfo() {
+        return anAccountInfo(aContractConfiguration(exampleCountry));
     }
 
     /**
@@ -49,9 +56,9 @@ public class MockUtils {
      *
      * @param contractConfiguration The model object from which the properties will be copied
      */
-    public static Map<String, String> anAccountInfo( ContractConfiguration contractConfiguration ){
+    public static Map<String, String> anAccountInfo(ContractConfiguration contractConfiguration) {
         Map<String, String> accountInfo = new HashMap<>();
-        for( Map.Entry<String, ContractProperty> entry : contractConfiguration.getContractProperties().entrySet() ){
+        for (Map.Entry<String, ContractProperty> entry : contractConfiguration.getContractProperties().entrySet()) {
             accountInfo.put(entry.getKey(), entry.getValue().getValue());
         }
         return accountInfo;
@@ -60,7 +67,7 @@ public class MockUtils {
     /**
      * Generate a valid {@link Authorization}.
      */
-    public static Authorization anAuthorization(){
+    public static Authorization anAuthorization() {
         return anAuthorizationBuilder().build();
     }
 
@@ -68,37 +75,37 @@ public class MockUtils {
      * Generate a builder for a valid {@link Authorization}.
      * This way, some attributes may be overridden to match specific test needs.
      */
-    public static Authorization.AuthorizationBuilder anAuthorizationBuilder(){
+    public static Authorization.AuthorizationBuilder anAuthorizationBuilder() {
         return new Authorization.AuthorizationBuilder()
                 .withAccessToken("ABCD1234567890")
                 .withTokenType("Bearer")
-                .withExpiresAt( TestUtils.addTime(new Date(), Calendar.HOUR, 1) );
+                .withExpiresAt(TestUtils.addTime(new Date(), Calendar.HOUR, 1));
     }
 
     /**
      * Generate a valid {@link Browser}.
      */
-    public static Browser aBrowser(){
+    public static Browser aBrowser() {
         return Browser.BrowserBuilder.aBrowser()
-                .withLocale( Locale.getDefault() )
-                .withIp( "192.168.0.1" )
-                .withUserAgent( aUserAgent() )
+                .withLocale(Locale.getDefault())
+                .withIp("192.168.0.1")
+                .withUserAgent(aUserAgent())
                 .build();
     }
 
     /**
      * Generate a valid {@link Buyer}.
      */
-    public static Buyer aBuyer(){
+    public static Buyer aBuyer() {
         return Buyer.BuyerBuilder.aBuyer()
-                .withFullName( new Buyer.FullName( "Marie", "Durand", "1" ) )
+                .withFullName(new Buyer.FullName("Marie", "Durand", "1"))
                 .build();
     }
 
     /**
      * @return A fake but valid client certiicate.
      */
-    public static Certificate aClientCertificate(){
+    public static Certificate aClientCertificate() {
         try {
             return anRsaHolder().getClientCertificate();
         } catch (Exception e) {
@@ -110,7 +117,7 @@ public class MockUtils {
     /**
      * @return A fake client certificate in PEM format.
      */
-    public static String aClientCertificatePem(){
+    public static String aClientCertificatePem() {
         return "-----BEGIN CERTIFICATE-----\n" +
                 "MIIDsTCCApmgAwIBAgIEK96RSTANBgkqhkiG9w0BAQsFADCBiDELMAkGA1UEBhMC\n" +
                 "RlIxDzANBgNVBAgTBkZyYW5jZTEYMBYGA1UEBxMPQWl4LWVuLVByb3ZlbmNlMRgw\n" +
@@ -138,20 +145,24 @@ public class MockUtils {
     /**
      * Generate a valid {@link ContractConfiguration}.
      */
-    public static ContractConfiguration aContractConfiguration(){
+    public static ContractConfiguration aContractConfiguration(String exampleCountry) {
         Map<String, ContractProperty> contractProperties = new HashMap<>();
         contractProperties.put(Constants.ContractConfigurationKeys.CHANNEL_TYPE,
-                new ContractProperty( ConfigurationServiceImpl.ChannelType.ECOMMERCE ));
+                new ContractProperty(ConfigurationServiceImpl.ChannelType.ECOMMERCE.getType()));
         contractProperties.put(Constants.ContractConfigurationKeys.CHARGE_BEARER,
-                new ContractProperty( ConfigurationServiceImpl.ChargeBearer.SLEV ));
-        contractProperties.put(Constants.ContractConfigurationKeys.CLIENT_NAME, new ContractProperty( "MarketPay" ));
-        contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_IBAN, new ContractProperty( "FR33BBBBBGGGGGCCCCCCCCCCC00" ));
-        contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_NAME, new ContractProperty( "John Snow" ));
-        contractProperties.put(Constants.ContractConfigurationKeys.ONBOARDING_ID, new ContractProperty( "XXXXXX" ));
+                new ContractProperty(ConfigurationServiceImpl.ChargeBearer.SLEV.getBearer()));
+        contractProperties.put(Constants.ContractConfigurationKeys.CLIENT_NAME, new ContractProperty("MarketPay"));
+        contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_IBAN, new ContractProperty("FR1400490001510000000002"));
+        contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_NAME, new ContractProperty("John Snow"));
+        contractProperties.put(Constants.ContractConfigurationKeys.ONBOARDING_ID, new ContractProperty("XXXXXX"));
         contractProperties.put(Constants.ContractConfigurationKeys.SCA_METHOD,
-                new ContractProperty( ConfigurationServiceImpl.ScaMethod.REDIRECT ));
+                new ContractProperty(ConfigurationServiceImpl.ScaMethod.REDIRECT));
         contractProperties.put(Constants.ContractConfigurationKeys.PURPOSE_CODE,
-                new ContractProperty( ConfigurationServiceImpl.PurposeCode.COMMERCE ));
+                new ContractProperty(ConfigurationServiceImpl.PurposeCode.COMMERCE.getCode()));
+        contractProperties.put(Constants.ContractConfigurationKeys.COUNTRIES,
+                new ContractProperty(exampleCountry));
+        contractProperties.put(Constants.ContractConfigurationKeys.PISP_CONTRACT,
+                new ContractProperty("123456789012"));
 
         return new ContractConfiguration("INST EquensWorldline", contractProperties);
     }
@@ -159,7 +170,7 @@ public class MockUtils {
     /**
      * Generate a valid {@link ContractParametersCheckRequest}.
      */
-    public static ContractParametersCheckRequest aContractParametersCheckRequest(){
+    public static ContractParametersCheckRequest aContractParametersCheckRequest() {
         return aContractParametersCheckRequestBuilder().build();
     }
 
@@ -167,23 +178,23 @@ public class MockUtils {
      * Generate a builder for a valid {@link ContractParametersCheckRequest}.
      * This way, some attributes may be overridden to match specific test needs.
      */
-    public static ContractParametersCheckRequest.CheckRequestBuilder aContractParametersCheckRequestBuilder(){
+    public static ContractParametersCheckRequest.CheckRequestBuilder aContractParametersCheckRequestBuilder() {
         return ContractParametersCheckRequest.CheckRequestBuilder.aCheckRequest()
-                .withAccountInfo( anAccountInfo() )
-                .withContractConfiguration( aContractConfiguration() )
-                .withEnvironment( anEnvironment() )
-                .withLocale( Locale.getDefault() )
-                .withPartnerConfiguration( aPartnerConfiguration() );
+                .withAccountInfo(anAccountInfo())
+                .withContractConfiguration(aContractConfiguration(exampleCountry))
+                .withEnvironment(anEnvironment())
+                .withLocale(Locale.getDefault())
+                .withPartnerConfiguration(aPartnerConfiguration());
     }
 
-    public static String aMessageCreateDateTime(){
+    public static String aMessageCreateDateTime() {
         return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date());
     }
 
     /**
      * Generate a valid {@link Environment}.
      */
-    public static Environment anEnvironment(){
+    public static Environment anEnvironment() {
         return new Environment("http://notificationURL.com",
                 "http://redirectionURL.com",
                 "http://redirectionCancelURL.com",
@@ -193,40 +204,40 @@ public class MockUtils {
     /**
      * Generate a valid, but not complete, {@link Order}
      */
-    public static Order anOrder(){
+    public static Order anOrder() {
         return Order.OrderBuilder.anOrder()
-                .withDate( new Date() )
-                .withAmount( aPaylineAmount() )
-                .withReference( "ORDER-REF-123456" )
+                .withDate(new Date())
+                .withAmount(aPaylineAmount())
+                .withReference("REF" + timestamp)
                 .build();
     }
 
     /**
      * Generate a valid {@link PartnerConfiguration}.
      */
-    public static PartnerConfiguration aPartnerConfiguration(){
+    public static PartnerConfiguration aPartnerConfiguration() {
         Map<String, String> partnerConfigurationMap = new HashMap<>();
-        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.API_BASE_URL, "https://xs2a.awltest.de/xs2a/routingservice/services" );
-        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME, "MarketPay" );
-        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYLINE_ONBOARDING_ID, "XXXXXX" );
-        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT, "Instant" );
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.API_BASE_URL, "https://xs2a.awltest.de/xs2a/routingservice/services");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME, "MarketPay");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.PAYLINE_ONBOARDING_ID, "XXXXXX");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT, "Instant");
 
         Map<String, String> sensitiveConfigurationMap = new HashMap<>();
-        sensitiveConfigurationMap.put( Constants.PartnerConfigurationKeys.CLIENT_CERTIFICATE, aClientCertificatePem() );
-        sensitiveConfigurationMap.put( Constants.PartnerConfigurationKeys.CLIENT_PRIVATE_KEY, aPrivateKeyPem() );
+        sensitiveConfigurationMap.put(Constants.PartnerConfigurationKeys.CLIENT_CERTIFICATE, aClientCertificatePem());
+        sensitiveConfigurationMap.put(Constants.PartnerConfigurationKeys.CLIENT_PRIVATE_KEY, aPrivateKeyPem());
 
-        return new PartnerConfiguration( partnerConfigurationMap, sensitiveConfigurationMap );
+        return new PartnerConfiguration(partnerConfigurationMap, sensitiveConfigurationMap);
     }
 
     /**
      * Generate a valid Payline <code>Address</code>.
      */
-    public static Buyer.Address aPaylineAddress(){
+    public static Buyer.Address aPaylineAddress() {
         return Buyer.Address.AddressBuilder.anAddress()
                 .withCity("Aix-en-Provence")
                 .withCountry("FR")
                 .withEmail("john.doe@mythalesgroup.io")
-                .withFullName( new Buyer.FullName("Thales", "Services", "M.") )
+                .withFullName(new Buyer.FullName("Thales", "Services", "M."))
                 .withStreet1("150 rue dont le nom est le plus long que j'ai jamais vu. Y'a pas idée d'habiter un endroit pareil !")
                 .withStreet2("Le grand bâtiment orange, avec les fenêtres un peu hautes mais un peu larges aussi, et un toit bleu")
                 .withZipCode("13100")
@@ -236,14 +247,14 @@ public class MockUtils {
     /**
      * Generate a valid Payline Amount.
      */
-    public static com.payline.pmapi.bean.common.Amount aPaylineAmount(){
+    public static com.payline.pmapi.bean.common.Amount aPaylineAmount() {
         return new com.payline.pmapi.bean.common.Amount(BigInteger.valueOf(1000), Currency.getInstance("EUR"));
     }
 
     /**
      * Generate a valid {@link PaymentRequest}.
      */
-    public static PaymentRequest aPaylinePaymentRequest(){
+    public static PaymentRequest aPaylinePaymentRequest() {
         return aPaylinePaymentRequestBuilder().build();
     }
 
@@ -251,41 +262,44 @@ public class MockUtils {
      * Generate a builder for a valid {@link PaymentRequest}.
      * This way, some attributes may be overridden to match specific test needs.
      */
-    public static PaymentRequest.Builder aPaylinePaymentRequestBuilder(){
+    public static PaymentRequest.Builder aPaylinePaymentRequestBuilder() {
         return PaymentRequest.builder()
                 .withAmount( aPaylineAmount() )
                 .withBrowser( aBrowser() )
                 .withBuyer( aBuyer() )
                 .withCaptureNow( true )
-                .withContractConfiguration( aContractConfiguration() )
+                .withContractConfiguration( aContractConfiguration(exampleCountry) )
                 .withDifferedActionDate( TestUtils.addTime( new Date(), Calendar.DATE, 5) )
                 .withEnvironment( anEnvironment() )
                 .withLocale( Locale.getDefault() )
                 .withOrder( anOrder() )
                 .withPartnerConfiguration( aPartnerConfiguration() )
-                .withPaymentFormContext( aPaymentFormContext() )
+                .withPaymentFormContext( aPaymentFormContext(ibanFR) )
                 .withPluginConfiguration( aPluginConfiguration() )
                 .withSoftDescriptor( "softDescriptor" )
-                .withTransactionId( "123456789012345678901" );
+                .withTransactionId( "PAYLINE" + timestamp );
     }
 
     /**
      * Generate a valid {@link PaymentFormContext}.
      */
-    public static PaymentFormContext aPaymentFormContext(){
+    public static PaymentFormContext aPaymentFormContext(String iban){
         Map<String, String> paymentFormParameter = new HashMap<>();
-        paymentFormParameter.put( BankTransferForm.BANK_KEY, "PSSTFRPP" );
+        paymentFormParameter.put( BankTransferForm.BANK_KEY, "PSSTFRPT" );
+
+        Map<String,String> sensitivePaymentFormParameter = new HashMap<>();
+        sensitivePaymentFormParameter.put( BankTransferForm.IBAN_KEY, iban );
 
         return PaymentFormContext.PaymentFormContextBuilder.aPaymentFormContext()
-                .withPaymentFormParameter( paymentFormParameter )
-                .withSensitivePaymentFormParameter( new HashMap<>() )
+                .withPaymentFormParameter(paymentFormParameter)
+                .withSensitivePaymentFormParameter(sensitivePaymentFormParameter)
                 .build();
     }
 
     /**
      * Generate a valid {@link PaymentFormConfigurationRequest}.
      */
-    public static PaymentFormConfigurationRequest aPaymentFormConfigurationRequest(){
+    public static PaymentFormConfigurationRequest aPaymentFormConfigurationRequest() {
         return aPaymentFormConfigurationRequestBuilder().build();
     }
 
@@ -293,11 +307,11 @@ public class MockUtils {
      * Generate a builder for a valid {@link PaymentFormConfigurationRequest}.
      * This way, some attributes may be overridden to match specific test needs.
      */
-    public static PaymentFormConfigurationRequest.PaymentFormConfigurationRequestBuilder aPaymentFormConfigurationRequestBuilder(){
+    public static PaymentFormConfigurationRequest.PaymentFormConfigurationRequestBuilder aPaymentFormConfigurationRequestBuilder() {
         return PaymentFormConfigurationRequest.PaymentFormConfigurationRequestBuilder.aPaymentFormConfigurationRequest()
                 .withAmount( aPaylineAmount() )
                 .withBuyer( aBuyer() )
-                .withContractConfiguration( aContractConfiguration() )
+                .withContractConfiguration( aContractConfiguration(exampleCountry) )
                 .withEnvironment( anEnvironment() )
                 .withLocale( Locale.getDefault() )
                 .withOrder( anOrder() )
@@ -308,9 +322,9 @@ public class MockUtils {
     /**
      * Generate a valid {@link PaymentFormLogoRequest}.
      */
-    public static PaymentFormLogoRequest aPaymentFormLogoRequest(){
+    public static PaymentFormLogoRequest aPaymentFormLogoRequest() {
         return PaymentFormLogoRequest.PaymentFormLogoRequestBuilder.aPaymentFormLogoRequest()
-                .withContractConfiguration( aContractConfiguration() )
+                .withContractConfiguration( aContractConfiguration(exampleCountry) )
                 .withEnvironment( anEnvironment() )
                 .withPartnerConfiguration( aPartnerConfiguration() )
                 .withLocale( Locale.getDefault() )
@@ -320,96 +334,94 @@ public class MockUtils {
     /**
      * Generate a valid payment ID, similar to the ones the partner API would return.
      */
-    public static String aPaymentId(){
+    public static String aPaymentId() {
         return "123456";
     }
-
 
 
     /**
      * Generate a valid {@link PaymentInitiationRequest}.
      */
-    public static PaymentInitiationRequest aPaymentInitiationRequest(){
-        return aPaymentInitiationRequestBuilder().build();
+    public static PaymentInitiationRequest aPaymentInitiationRequest(String debtorAccount){
+        return aPaymentInitiationRequestBuilder(debtorAccount).build();
     }
 
     /**
      * Generate a builder for a valid {@link PaymentInitiationRequest}.
      * This way, some attributes may be overridden to match specific test needs.
      */
-    public static PaymentInitiationRequest.PaymentInitiationRequestBuilder aPaymentInitiationRequestBuilder(){
-        String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+    public static PaymentInitiationRequest.PaymentInitiationRequestBuilder aPaymentInitiationRequestBuilder(String debtorAccount){
         return new PaymentInitiationRequest.PaymentInitiationRequestBuilder()
-                .withAspspId("1402")
+                .withAspspId("1410")
                 .withEndToEndId( "PAYLINE" + timestamp )
                 .withInitiatingPartyReferenceId( "REF" + timestamp )
-                .withInitiatingPartyReturnUrl( "http://google.fr?result=success" )
-                .withRemittanceInformation( "softDescriptor" )
+                .withInitiatingPartyReturnUrl( "http://redirectionURL.com" )
+                .withRemittanceInformation( "softDescriptor123456789012" )
                 .withRemittanceInformationStructured(
                         new RemittanceInformationStructured.RemittanceInformationStructuredBuilder()
-                                .withReference( "REF" + timestamp )
+                                .withReference("REF" + timestamp)
                                 .build()
                 )
-                /*
                 .withDebtorAccount(
                         new Account.AccountBuilder()
-                                .withIdentification( "AT880000000000000001" )
+                                .withIdentification( debtorAccount )
                                 .build()
                 )
-                */
                 .withCreditorAccount(
                         new Account.AccountBuilder()
-                                .withIdentification("ES1400490001510000000002")
+                                .withIdentification("FR1400490001510000000002")
                                 .build()
                 )
-                .withCreditorName("John Smith")
+                .withCreditorName("John Snow")
                 .withPaymentAmount("10.00")
                 .withPaymentCurrency("EUR")
-                .withPurposeCode( ConfigurationServiceImpl.PurposeCode.COMMERCE )
+                .withPurposeCode(ConfigurationServiceImpl.PurposeCode.COMMERCE.getCode())
                 .withPsuSessionInformation(
                         new PsuSessionInformation.PsuSessionInformationBuilder()
-                                .withIpAddress( "192.168.0.1" )
-                                .withHeaderUserAgent( MockUtils.aUserAgent() )
+                                .withIpAddress("192.168.0.1")
+                                .withHeaderUserAgent(MockUtils.aUserAgent())
                                 .build()
                 )
                 .withRiskInformation(
                         new RiskInformation.RiskInformationBuilder()
                                 .withDeliveryAddress(
                                         new Address.AddressBuilder()
-                                                .withPostCode( "13100" )
-                                                .withTownName( "Aix-en-Provence" )
-                                                .withCountry( "FR" )
+                                                .withPostCode("13100")
+                                                .withTownName("Aix-en-Provence")
+                                                .withCountry("FR")
                                                 .build()
                                 )
-                                .withChannelType( ConfigurationServiceImpl.ChannelType.ECOMMERCE )
+                                .withChannelType(ConfigurationServiceImpl.ChannelType.ECOMMERCE.getType())
                                 .build()
                 )
-                .addPreferredScaMethod( ConfigurationServiceImpl.ScaMethod.REDIRECT )
-                .withChargeBearer( ConfigurationServiceImpl.ChargeBearer.SLEV )
-                .withPsuId( "1" )
-                .withPaymentProduct( MockUtils.aPartnerConfiguration().getProperty( Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT ) );
+                .addPreferredScaMethod(ConfigurationServiceImpl.ScaMethod.REDIRECT)
+                .withChargeBearer(ConfigurationServiceImpl.ChargeBearer.SLEV.getBearer())
+                .withPsuId("1")
+                .withPaymentProduct(MockUtils.aPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT));
     }
 
     /**
      * Generate a valid {@link PaymentInitiationResponse}.
      */
-    public static PaymentInitiationResponse aPaymentInitiationResponse(){
-        return PaymentInitiationResponse.fromJson("{\n" +
+    public static PaymentInitiationResponse aPaymentInitiationResponse() {
+        return jsonService.fromJson("{\n" +
                 "    \"MessageCreateDateTime\": \"" + aMessageCreateDateTime() + "\",\n" +
                 "    \"MessageId\": \"e8683740-38be-4026-b48e-72089b023e\",\n" +
                 "    \"PaymentId\": \"" + MockUtils.aPaymentId() + "\",\n" +
                 "    \"InitiatingPartyReferenceId\": \"REF1574181352\",\n" +
                 "    \"PaymentStatus\": \"OPEN\",\n" +
                 "    \"AspspRedirectUrl\": \"https://xs2a.banking.co.at/xs2a-sandbox/m044/v1/pis/confirmation/btWMz6mTz7I3SOe4lMqXiwciqe6igXBCeebfVWlmZ8N8zVw_qRKMMuhlLLXtPrVcBeH6HIP2qhdTTZ1HINXSkg==_=_psGLvQpt9Q/authorisations/fa8e44a7-3bf7-4543-82d1-5a1163aaaaad\"\n" +
-                "}");
+                "}", PaymentInitiationResponse.class);
     }
 
     /**
      * Generate a valid {@link PaymentStatusResponse} with the given status.
+     *
+     *
      * @param status The payment status.
      */
-    public static PaymentStatusResponse aPaymentStatusResponse( PaymentStatus status ){
-        return PaymentStatusResponse.fromJson("{\n" +
+    public static PaymentStatusResponse aPaymentStatusResponse(PaymentStatus status) {
+        return jsonService.fromJson("{\n" +
                 "    \"MessageCreateDateTime\": \"" + aMessageCreateDateTime() + "\",\n" +
                 "    \"MessageId\": \"ca58925c-57cc-44b0-a827-cd439fb87f\",\n" +
                 "    \"PaymentId\": \"" + MockUtils.aPaymentId() + "\",\n" +
@@ -418,15 +430,16 @@ public class MockUtils {
                 "    \"InitiatingPartyReferenceId\": \"REF1574257016\",\n" +
                 "    \"DebtorAgent\": \"BNPADEFF\",\n" +
                 "    \"DebtorAccount\": \"AT880000000000000001\"\n" +
-                "}");
+                "}", PaymentStatusResponse.class);
     }
 
     /**
      * Generate a valid plugin configuration, as a <code>String</code>.
      */
-    public static String aPluginConfiguration(){
+    public static String aPluginConfiguration() {
         return "{\"Application\":\"PIS\",\"ASPSP\":[" +
                     "{\"AspspId\":\"1409\",\"Name\":[\"La Banque Postale\"],\"CountryCode\":\"FR\",\"BIC\":\"PSSTFRPP\"}," +
+                    "{\"AspspId\":\"1410\",\"Name\":[\"La Banque\"],\"CountryCode\":\"ES\",\"BIC\":\"PSSTFRPT\"}," +
                     "{\"AspspId\":\"1601\",\"Name\":[\"BBVA\"],\"CountryCode\":\"ES\",\"BIC\":\"BBVAESMM\"}" +
                 "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}" +
                 "&&&thisIsAKey";
@@ -435,7 +448,7 @@ public class MockUtils {
     /**
      * @return A fake private key, for test purpose.
      */
-    public static PrivateKey aPrivateKey(){
+    public static PrivateKey aPrivateKey() {
         try {
             return (PrivateKey) anRsaHolder().getPrivateKey();
         } catch (Exception e) {
@@ -447,7 +460,7 @@ public class MockUtils {
     /**
      * @return A fake private key in PEM format.
      */
-    public static String aPrivateKeyPem(){
+    public static String aPrivateKeyPem() {
         return "-----BEGIN PRIVATE KEY-----\n" +
                 "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC5V6x4LjhrriUE\n" +
                 "j171bPjAd38F/WC/Qdw9FvpiqpoJ1p85qncqFmDd5nYaWW1rnGjoLu0apzD0PLvA\n" +
@@ -481,7 +494,7 @@ public class MockUtils {
     /**
      * Generate a valid {@link Psu}.
      */
-    public static Psu aPsu(){
+    public static Psu aPsu() {
         return new Psu.PsuBuilder()
                 .withPsuId("1")
                 .withFirstName("John")
@@ -494,18 +507,18 @@ public class MockUtils {
     /**
      * Generate a valid {@link PsuCreateRequest}.
      */
-    public static PsuCreateRequest aPsuCreateRequest(){
+    public static PsuCreateRequest aPsuCreateRequest() {
         return new PsuCreateRequest.PsuCreateRequestBuilder().build();
     }
 
     /**
      * Generate an {@link RSAHolder} instance, containing fake elements, for test purpose.
      */
-    public static RSAHolder anRsaHolder(){
+    public static RSAHolder anRsaHolder() {
         try {
             return new RSAHolder.RSAHolderBuilder()
-                    .parseChain( aClientCertificatePem() )
-                    .parsePrivateKey( aPrivateKeyPem() )
+                    .parseChain(aClientCertificatePem())
+                    .parsePrivateKey(aPrivateKeyPem())
                     .build();
         } catch (Exception e) {
             // this is testing context: ignore the exception. The test case using this will probably fail anyway.
@@ -516,12 +529,12 @@ public class MockUtils {
     /**
      * Generate a valid {@link RedirectionPaymentRequest}.
      */
-    public static RedirectionPaymentRequest aRedirectionPaymentRequest(){
+    public static RedirectionPaymentRequest aRedirectionPaymentRequest() {
         return RedirectionPaymentRequest.builder()
                 .withAmount( aPaylineAmount() )
                 .withBrowser( aBrowser() )
                 .withBuyer( aBuyer() )
-                .withContractConfiguration( aContractConfiguration() )
+                .withContractConfiguration( aContractConfiguration(exampleCountry) )
                 .withEnvironment( anEnvironment() )
                 .withOrder( anOrder() )
                 .withPartnerConfiguration( aPartnerConfiguration() )
@@ -533,13 +546,13 @@ public class MockUtils {
      * Generate a valid {@link RequestConfiguration}.
      */
     public static RequestConfiguration aRequestConfiguration(){
-        return new RequestConfiguration( aContractConfiguration(), anEnvironment(), aPartnerConfiguration() );
+        return new RequestConfiguration( aContractConfiguration(exampleCountry), anEnvironment(), aPartnerConfiguration() );
     }
 
     /**
      * Generate a valid {@link RetrievePluginConfigurationRequest}.
      */
-    public static RetrievePluginConfigurationRequest aRetrievePluginConfigurationRequest(){
+    public static RetrievePluginConfigurationRequest aRetrievePluginConfigurationRequest() {
         return aRetrievePluginConfigurationRequestBuilder().build();
     }
 
@@ -547,9 +560,9 @@ public class MockUtils {
      * Generate a builder for a valid {@link RetrievePluginConfigurationRequest}.
      * This way, some attributes may be overridden to match specific test needs.
      */
-    public static RetrievePluginConfigurationRequest.RetrieveConfigurationRequestBuilder aRetrievePluginConfigurationRequestBuilder(){
+    public static RetrievePluginConfigurationRequest.RetrieveConfigurationRequestBuilder aRetrievePluginConfigurationRequestBuilder() {
         return RetrievePluginConfigurationRequest.RetrieveConfigurationRequestBuilder.aRetrieveConfigurationRequest()
-                .withContractConfiguration( aContractConfiguration() )
+                .withContractConfiguration( aContractConfiguration(exampleCountry) )
                 .withEnvironment( anEnvironment() )
                 .withPartnerConfiguration( aPartnerConfiguration() )
                 .withPluginConfiguration( aPluginConfiguration() );
@@ -558,11 +571,11 @@ public class MockUtils {
     /**
      * Generate a sample {@link Signature}.
      */
-    public static Signature aSignature(){
-        Signature signature = new Signature("a-key-id", Algorithm.RSA_SHA256, null, "(request-target)" );
-        Signer signer = new Signer( aPrivateKey(), signature );
+    public static Signature aSignature() {
+        Signature signature = new Signature("a-key-id", Algorithm.RSA_SHA256, null, "(request-target)");
+        Signer signer = new Signer(aPrivateKey(), signature);
         try {
-            signature = signer.sign( "POST", "/some/path", new HashMap<>() );
+            signature = signer.sign("POST", "/some/path", new HashMap<>());
         } catch (Exception e) {
             // This would happen in a testing context: spare the exception throwing, the test case will probably fail anyway.
             return null;
@@ -574,18 +587,18 @@ public class MockUtils {
     /**
      * @return a valid transaction ID.
      */
-    public static String aTransactionId(){
+    public static String aTransactionId() {
         return "123456789012345678901";
     }
 
     /**
      * Generate a valid {@link TransactionStatusRequest}.
      */
-    public static TransactionStatusRequest aTransactionStatusRequest(){
+    public static TransactionStatusRequest aTransactionStatusRequest() {
         return TransactionStatusRequest.TransactionStatusRequestBuilder.aNotificationRequest()
                 .withAmount( aPaylineAmount() )
                 .withBuyer( aBuyer() )
-                .withContractConfiguration( aContractConfiguration() )
+                .withContractConfiguration( aContractConfiguration(exampleCountry) )
                 .withEnvironment( anEnvironment() )
                 .withOrder( anOrder() )
                 .withPartnerConfiguration( aPartnerConfiguration() )
@@ -596,14 +609,67 @@ public class MockUtils {
     /**
      * Generate a unique identifier that matches the API expectations.
      */
-    public static String aUniqueIdentifier(){
-        return "MONEXT" +  new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+    public static String aUniqueIdentifier() {
+        return "MONEXT" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
     }
 
     /**
      * @return a valid user agent.
      */
-    public static String aUserAgent(){
+    public static String aUserAgent() {
         return "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:67.0) Gecko/20100101 Firefox/67.0";
+    }
+
+    public static PaymentData aPaymentdata() {
+        return aPaymentDataBuilder().build();
+    }
+
+    /**
+     * @return a WalletPaymentData
+     */
+    public static PaymentData.PaymentDataBuilder aPaymentDataBuilder() {
+        return new PaymentData.PaymentDataBuilder()
+                .withBic("PSSTFRPT")
+                .withIban(ibanFR);
+    }
+
+    public static String getExampleCountry() {
+        return exampleCountry;
+    }
+
+    public static String getIbanFR() {
+        return ibanFR;
+    }
+
+    public static String getIbanES() {
+        return ibanES;
+    }
+
+    /**
+     * @return a PaymentData object with a bic and an iban.
+     */
+    public static PaymentData aPaymentData() {
+        return new PaymentData.PaymentDataBuilder()
+                .withBic("PSSTFRPP")
+                .withIban("anIbanWithMoreThan8Charactere")
+                .build();
+    }
+
+    /**
+     * @return a PaymentData object with an iban but no bic.
+     */
+    public static PaymentData aPaymentDataBicNull() {
+        return new PaymentData.PaymentDataBuilder()
+                .withIban("anIbanWithMoreThan8Charactere")
+                .build();
+    }
+
+    /**
+     * @return a PaymentData object with a bic but no iban.
+     */
+    public static PaymentData aPaymentDataIbanNull() {
+        return new PaymentData.PaymentDataBuilder()
+                .withIban("anIbanWithMoreThan8Charactere")
+                .build();
     }
 }

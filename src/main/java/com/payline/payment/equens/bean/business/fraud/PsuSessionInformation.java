@@ -41,4 +41,12 @@ public class PsuSessionInformation {
             return new PsuSessionInformation( this );
         }
     }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public String getHeaderUserAgent() {
+        return headerUserAgent;
+    }
 }

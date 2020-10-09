@@ -18,7 +18,8 @@ public class Constants {
         public static final String ONBOARDING_ID = "onboardingId";
         public static final String PURPOSE_CODE = "purposeCode";
         public static final String SCA_METHOD = "scaMethod";
-
+        public static final String COUNTRIES = "countries";
+        public static final String PISP_CONTRACT = "pisp";
 
         /* Static utility class : no need to instantiate it (Sonar bug fix) */
         private ContractConfigurationKeys(){}

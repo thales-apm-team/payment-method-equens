@@ -15,6 +15,8 @@ public class Aspsp {
     // Do not map Details because it would require another bean that we would not use anyway...
     @SerializedName("Name")
     private List<String> name;
+    @SerializedName("Details")
+    private List<Detail> details;
 
     public String getAspspId() {
         return aspspId;
@@ -30,5 +32,9 @@ public class Aspsp {
 
     public List<String> getName() {
         return name;
+    }
+
+    public List<Detail> getDetails() {
+        return details;
     }
 }

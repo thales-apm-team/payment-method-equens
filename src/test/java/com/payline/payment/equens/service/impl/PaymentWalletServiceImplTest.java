@@ -2,7 +2,7 @@ package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.exception.PluginException;
-import com.payline.payment.equens.service.Payment;
+import com.payline.payment.equens.service.GenericPaymentService;
 import com.payline.payment.equens.utils.security.RSAUtils;
 import com.payline.pmapi.bean.payment.Wallet;
 import com.payline.pmapi.bean.payment.request.WalletPaymentRequest;
@@ -19,7 +19,6 @@ import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
@@ -28,7 +27,7 @@ class PaymentWalletServiceImplTest {
     PaymentWalletServiceImpl service;
 
     @Mock
-    Payment payment;
+    GenericPaymentService genericPaymentService;
 
     @Mock
     RSAUtils rsaUtils;
@@ -42,8 +41,9 @@ class PaymentWalletServiceImplTest {
     @Test
     void walletPaymentRequest() throws Exception{
         // given: a valid walletPaymentRequest
+        String pluginPaymentData = "{\"bic\":\"PSSTFRPP\",\"iban\":\"anIbanWithMoreThan8Charactere\"}";
         Wallet wallet = Wallet.builder()
-                .pluginPaymentData("thisIsWalletEncryptedData")
+                .pluginPaymentData(pluginPaymentData)
                 .build();
 
         WalletPaymentRequest paymentRequest = WalletPaymentRequest.builder()
@@ -64,9 +64,9 @@ class PaymentWalletServiceImplTest {
                 .withRedirectionRequest(redirectionRequest)
                 .build();
 
-        doReturn(responseRedirect).when(payment).paymentRequest(any(), anyString());
+        doReturn(responseRedirect).when(genericPaymentService).paymentRequest(any(), any());
 
-        doReturn("PSSTFRPP").when(rsaUtils).decrypt(any(), any());
+        doReturn(pluginPaymentData).when(rsaUtils).decrypt(any(), any());
 
         // when: calling paymentRequest() method
         PaymentResponse paymentResponse = service.walletPaymentRequest( paymentRequest );
@@ -100,7 +100,7 @@ class PaymentWalletServiceImplTest {
                 .withRedirectionRequest(redirectionRequest)
                 .build();
 
-        doReturn(responseRedirect).when(payment).paymentRequest(any(), anyString());
+        doReturn(responseRedirect).when(genericPaymentService).paymentRequest(any(), any());
 
         doThrow(new PluginException("foo")).when(rsaUtils).decrypt(any(), any());
 

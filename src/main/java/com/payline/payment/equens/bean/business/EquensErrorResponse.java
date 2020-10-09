@@ -1,7 +1,5 @@
 package com.payline.payment.equens.bean.business;
 
-import com.google.gson.Gson;
-
 public class EquensErrorResponse extends EquensApiMessage {
 
     private String code;
@@ -22,11 +20,6 @@ public class EquensErrorResponse extends EquensApiMessage {
 
     public String getDetails() {
         return details;
-    }
-
-
-    public static EquensErrorResponse fromJson( String json ){
-        return new Gson().fromJson( json, EquensErrorResponse.class );
     }
 
 }

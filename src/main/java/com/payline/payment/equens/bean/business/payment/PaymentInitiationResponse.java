@@ -1,6 +1,5 @@
 package com.payline.payment.equens.bean.business.payment;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.payline.payment.equens.bean.business.EquensApiMessage;
 
@@ -23,8 +22,7 @@ public class PaymentInitiationResponse extends EquensApiMessage {
     @SerializedName("AspspRedirectUrl")
     private URL aspspRedirectUrl;
 
-    // This constructor won't be used, since it's a response object : it's instantiated by Gson through the fromJson() method
-    PaymentInitiationResponse( EquensApiMessageBuilder builder ){
+   PaymentInitiationResponse( EquensApiMessageBuilder builder ){
         super( builder );
     }
 
@@ -38,9 +36,5 @@ public class PaymentInitiationResponse extends EquensApiMessage {
 
     public URL getAspspRedirectUrl() {
         return aspspRedirectUrl;
-    }
-
-    public static PaymentInitiationResponse fromJson( String json ){
-        return new Gson().fromJson( json, PaymentInitiationResponse.class );
     }
 }

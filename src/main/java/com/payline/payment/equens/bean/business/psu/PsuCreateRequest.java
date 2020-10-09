@@ -1,7 +1,5 @@
 package com.payline.payment.equens.bean.business.psu;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 
 import java.text.SimpleDateFormat;
@@ -33,14 +31,6 @@ public class PsuCreateRequest extends Psu {
         public PsuCreateRequest build(){
             return new PsuCreateRequest(this);
         }
-    }
-
-    @Override
-    public String toString() {
-        Gson gson = new GsonBuilder()
-                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-                .create();
-        return gson.toJson( this );
     }
 
 }

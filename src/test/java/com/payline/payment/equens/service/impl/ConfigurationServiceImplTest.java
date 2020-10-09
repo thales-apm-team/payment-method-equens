@@ -4,6 +4,7 @@ import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.payment.equens.utils.http.PisHttpClient;
@@ -28,8 +29,6 @@ import org.mockito.MockitoAnnotations;
 import java.text.SimpleDateFormat;
 import java.time.Month;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -189,9 +188,9 @@ class ConfigurationServiceImplTest {
     void retrievePluginConfiguration_nominal(){
         // given: the HTTP client returns a proper response
         String input = PluginUtils.extractBanks( MockUtils.aPluginConfiguration());
-        doReturn( GetAspspsResponse.fromJson( input ) ).when( pisHttpClient ).getAspsps( any(RequestConfiguration.class) );
+        doReturn( JsonService.getInstance().fromJson( input, GetAspspsResponse.class ) ).when( pisHttpClient ).getAspsps( any(RequestConfiguration.class) );
 
-        ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration();
+        ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration(MockUtils.getExampleCountry());
         contractConfiguration.getContractProperties().put(Constants.ContractConfigurationKeys.ONBOARDING_ID, new ContractProperty( "000000" ));
         RetrievePluginConfigurationRequest request = MockUtils.aRetrievePluginConfigurationRequestBuilder()
                 .withPluginConfiguration("")
@@ -209,7 +208,7 @@ class ConfigurationServiceImplTest {
         verify( pisHttpClient, times(1) ).getAspsps( requestConfigurationCaptor.capture() );
         ContractConfiguration ccArg = requestConfigurationCaptor.getValue().getContractConfiguration();
         assertEquals( 2, ccArg.getContractProperties().size() );
-        assertNotEquals( "000000", ccArg.getProperty( Constants.ContractConfigurationKeys.ONBOARDING_ID ) );
+        assertNotEquals( "000000", ccArg.getProperty( Constants.ContractConfigurationKeys.ONBOARDING_ID ).getValue() );
     }
 
     @Test

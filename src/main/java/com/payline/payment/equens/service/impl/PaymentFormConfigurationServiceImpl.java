@@ -1,10 +1,13 @@
 package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.bean.business.reachdirectory.Aspsp;
+import com.payline.payment.equens.bean.business.reachdirectory.Detail;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.service.LogoPaymentFormConfigurationService;
+import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.PluginUtils;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.paymentform.bean.field.SelectOption;
@@ -20,14 +23,19 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigurationService {
 
     private static final Logger LOGGER = LogManager.getLogger(PaymentFormConfigurationServiceImpl.class);
 
+    JsonService jsonService = JsonService.getInstance();
+
     @Override
     public PaymentFormConfigurationResponse getPaymentFormConfiguration(PaymentFormConfigurationRequest paymentFormConfigurationRequest) {
         PaymentFormConfigurationResponse pfcResponse;
+        List<String> listCountryCode;
+
         try {
             Locale locale = paymentFormConfigurationRequest.getLocale();
 
@@ -35,8 +43,15 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
             if (paymentFormConfigurationRequest.getPluginConfiguration() == null) {
                 throw new InvalidDataException("Plugin configuration must not be null");
             }
-            String countryCode = paymentFormConfigurationRequest.getOrder().getCountry(); // @see https://payline.atlassian.net/browse/PAYLAPMEXT-203
-            List<SelectOption> banks = this.getBanks(paymentFormConfigurationRequest.getPluginConfiguration(), countryCode);
+            // check if the string who contain the list of country is empty
+            String countries = paymentFormConfigurationRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.COUNTRIES).getValue();
+            if (PluginUtils.isEmpty(countries)) {
+                throw new InvalidDataException("country must not be empty");
+            }
+
+            listCountryCode = PluginUtils.createListCountry(countries);
+
+            List<SelectOption> banks = this.getBanks(paymentFormConfigurationRequest.getPluginConfiguration(), listCountryCode);
 
             // Build the payment form
             CustomForm form = BankTransferForm.builder()
@@ -72,36 +87,54 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
      * PAYLAPMEXT-203: filter the list using the countryCode (if provided) to keep only the banks which country code matches.
      *
      * @param pluginConfiguration The PluginConfiguration string
-     * @param countryCode         The 2-letters country code
+     * @param listCountryCode     List of 2-letters country code
      * @return The list of banks, as select options.
      */
-    List<SelectOption> getBanks(String pluginConfiguration, String countryCode) {
+    List<SelectOption> getBanks(String pluginConfiguration, List<String> listCountryCode) {
         final List<SelectOption> options = new ArrayList<>();
-
         if (pluginConfiguration == null) {
             LOGGER.warn("pluginConfiguration is null");
         } else {
-            for (Aspsp aspsp : GetAspspsResponse.fromJson(PluginUtils.extractBanks(pluginConfiguration)).getAspsps()) {
-                // filter by country code
-                if (aspsp.getCountryCode() != null &&
-                        (PluginUtils.isEmpty(countryCode) || countryCode.equalsIgnoreCase(aspsp.getCountryCode()))) {
-                    // build the string to display in the select option value
-                    List<String> values = new ArrayList<>();
-                    if (!PluginUtils.isEmpty(aspsp.getBic())) {
-                        values.add(aspsp.getBic());
+            List<Aspsp> aspsps = jsonService.fromJson(PluginUtils.extractBanks(pluginConfiguration), GetAspspsResponse.class).getAspsps();
+            List<Aspsp> validAspsps = filter(aspsps, listCountryCode);
 
-                        if (aspsp.getName() != null && !aspsp.getName().isEmpty()) {
-                            values.add(aspsp.getName().get(0));
-                        }
-                        // add the ASPSP to the select choices
-                        options.add(SelectOption.SelectOptionBuilder.aSelectOption()
-                                .withKey(aspsp.getBic())
-                                .withValue(String.join(" - ", values))
-                                .build());
-                    }
-                }
+            for (Aspsp aspsp : validAspsps) {
+                options.add(createAspspOption(aspsp));
             }
         }
         return options;
+    }
+
+    private List<Aspsp> filter(List<Aspsp> aspsps, List<String> listCountryCode) {
+        return aspsps.stream()
+                .filter(e -> e.getCountryCode() != null)
+                .filter(e -> listCountryCode.isEmpty() || listCountryCode.contains(e.getCountryCode()))
+                .filter(e -> !PluginUtils.isEmpty(e.getBic()))
+                .filter(e -> {
+                    if (e.getDetails() != null) {
+                        for (Detail e2 : e.getDetails()) {
+                            if ("POST /payments".equals(e2.getApi())
+                                    && (e2.getValue() == null || e2.getValue().contains("Instant"))) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                    return true;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private SelectOption createAspspOption(Aspsp aspsp) {
+        // add the aspsp name if exists
+        StringBuilder valuesBuilder = new StringBuilder(aspsp.getBic());
+        if (aspsp.getName() != null && !aspsp.getName().isEmpty()) {
+            valuesBuilder.append(" - ")
+                    .append(aspsp.getName().get(0));
+        }
+        return SelectOption.SelectOptionBuilder.aSelectOption()
+                .withKey(aspsp.getBic())
+                .withValue(valuesBuilder.toString())
+                .build();
     }
 }

@@ -2,6 +2,7 @@ package com.payline.payment.equens.utils.http;
 
 import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.business.psu.Psu;
+import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-public class PsuHttpClientTest {
+class PsuHttpClientTest {
 
     @Spy
     @InjectMocks
@@ -77,7 +78,9 @@ public class PsuHttpClientTest {
         doReturn( null ).when( config ).get( "api.psu.psus" );
 
         // when: calling the method, then: an exception is thrown
-        assertThrows( InvalidDataException.class, () -> psuHttpClient.createPsu( MockUtils.aPsuCreateRequest(), MockUtils.aRequestConfiguration() ) );
+        PsuCreateRequest request = MockUtils.aPsuCreateRequest();
+        RequestConfiguration requestConfiguration = MockUtils.aRequestConfiguration();
+        assertThrows( InvalidDataException.class, () -> psuHttpClient.createPsu( request , requestConfiguration ) );
     }
 
     @Test
@@ -113,8 +116,10 @@ public class PsuHttpClientTest {
                 .post( anyString(), anyList(), any(HttpEntity.class) );
 
         // when: calling the method
+        PsuCreateRequest request = MockUtils.aPsuCreateRequest();
+        RequestConfiguration requestConfiguration = MockUtils.aRequestConfiguration();
         PluginException thrown = assertThrows(PluginException.class,
-                () -> psuHttpClient.createPsu( MockUtils.aPsuCreateRequest(), MockUtils.aRequestConfiguration() ) );
+                () -> psuHttpClient.createPsu( request, requestConfiguration ) );
         assertNotNull(  thrown.getErrorCode() );
         assertNotNull(  thrown.getFailureCause() );
     }

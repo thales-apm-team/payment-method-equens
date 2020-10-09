@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class EquensHttpClientTest {
+class EquensHttpClientTest {
 
     /**
      * Private class required to test the sbstract class {@link EquensHttpClient}.
@@ -77,7 +77,7 @@ public class EquensHttpClientTest {
     void authorizationHeaders_missingclientName(){
         // given: client name is missing from ContractConfiguration
         String uri = "http://test.domain.fr/path";
-        ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration();
+        ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration(MockUtils.getExampleCountry());
         contractConfiguration.getContractProperties().remove(Constants.ContractConfigurationKeys.CLIENT_NAME);
         RequestConfiguration requestConfiguration = new RequestConfiguration(contractConfiguration, MockUtils.anEnvironment(), MockUtils.aPartnerConfiguration());
 
@@ -89,7 +89,7 @@ public class EquensHttpClientTest {
     void authorizationHeaders_missingOnboardingId(){
         // given: onboarding id is missing from ContractConfiguration
         String uri = "http://test.domain.fr/path";
-        ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration();
+        ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration(MockUtils.getExampleCountry());
         contractConfiguration.getContractProperties().remove(Constants.ContractConfigurationKeys.ONBOARDING_ID);
         RequestConfiguration requestConfiguration = new RequestConfiguration(contractConfiguration, MockUtils.anEnvironment(), MockUtils.aPartnerConfiguration());
 
