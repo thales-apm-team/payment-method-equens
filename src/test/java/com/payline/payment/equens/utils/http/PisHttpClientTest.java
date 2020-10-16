@@ -74,12 +74,15 @@ class PisHttpClientTest {
                 "      \"BIC\":\"TODO\"}" +
                 "  ]" +
                 "}";
+
+        String goodUrl = "https://xs2a.awltest.de/xs2a/routingservice/services/directory/v1/aspsps";
         doReturn(HttpTestUtils.mockStringResponse(200, "OK", responseBody))
                 .when(pisHttpClient)
                 .get(anyString(), anyList());
 
         // when: calling the method
         GetAspspsResponse response = pisHttpClient.getAspsps(MockUtils.aRequestConfiguration());
+        Mockito.verify(pisHttpClient, atLeastOnce()).get(eq(goodUrl), any());
 
         // then: the list contains 1 Aspsp
         assertNotNull(response);
