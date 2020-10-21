@@ -187,6 +187,10 @@ public class GenericPaymentService {
         if (paymentRequest.getOrder() == null) {
             throw new InvalidDataException("paymentRequest.order is required");
         }
+
+        if (paymentRequest.getBuyer() == null || paymentRequest.getBuyer().getFullName() == null){
+            throw new InvalidDataException("paymentRequest.buyer is required");
+        }
     }
 
     void validateIban(GenericPaymentRequest paymentRequest, String bic, String iban) {
@@ -288,7 +292,7 @@ public class GenericPaymentService {
                 .withPsuId(newPsu.getPsuId())
                 .withPaymentProduct(
                         paymentRequest.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT)
-                );
+                ).withDebtorName(paymentRequest.getBuyer().getFullName().getLastName());
 
         // add the debtor account only if he gives his IBAN, to avoid an empty object
         if (!PluginUtils.isEmpty(iban)) {
