@@ -397,7 +397,8 @@ public class MockUtils {
                 .addPreferredScaMethod(ConfigurationServiceImpl.ScaMethod.REDIRECT)
                 .withChargeBearer(ConfigurationServiceImpl.ChargeBearer.SLEV.getBearer())
                 .withPsuId("1")
-                .withPaymentProduct(MockUtils.aPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT));
+                .withPaymentProduct(MockUtils.aPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT))
+                .withDebtorName("Durand");
     }
 
     /**
