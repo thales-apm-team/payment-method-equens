@@ -237,6 +237,7 @@ class GenericPaymentServiceTest {
         Assertions.assertEquals(request.getRiskInformation().getChannelType(), paymentInitiationRequest.getRiskInformation().getChannelType());
         Assertions.assertEquals(request.getRiskInformation().getMerchantCategoryCode(), paymentInitiationRequest.getRiskInformation().getMerchantCategoryCode());
         Assertions.assertEquals(request.getRiskInformation().getMerchantCustomerId(), paymentInitiationRequest.getRiskInformation().getMerchantCustomerId());
+        Assertions.assertEquals(request.getDebtorName(), paymentInitiationRequest.getDebtorName());
     }
 
     @Test

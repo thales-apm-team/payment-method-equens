@@ -88,7 +88,7 @@ class ConfigurationServiceImplTest {
         Map<String, String> errors = service.check( checkRequest );
 
         // then: there is an error for each parameter, each error has a valid message and authorize methods are never called
-        assertEquals(service.getParameters( Locale.getDefault() ).size(), errors.size() );
+        assertEquals(8, errors.size() );
         for( Map.Entry<String, String> error : errors.entrySet() ){
             assertNotNull( error.getValue() );
             assertFalse( error.getValue().contains("???") );

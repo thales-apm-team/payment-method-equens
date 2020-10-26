@@ -106,10 +106,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         parameters.add(this.newInputParameter(Constants.ContractConfigurationKeys.ONBOARDING_ID, true, locale));
 
         // merchant iban
-        parameters.add(this.newInputParameter(Constants.ContractConfigurationKeys.MERCHANT_IBAN, true, locale));
+        parameters.add(this.newInputParameter(Constants.ContractConfigurationKeys.MERCHANT_IBAN, false, locale));
 
         // merchant name
-        parameters.add(this.newInputParameter(Constants.ContractConfigurationKeys.MERCHANT_NAME, true, locale));
+        parameters.add(this.newInputParameter(Constants.ContractConfigurationKeys.MERCHANT_NAME, false, locale));
 
         // channel type
         Map<String, String> channelTypes = new HashMap<>();
