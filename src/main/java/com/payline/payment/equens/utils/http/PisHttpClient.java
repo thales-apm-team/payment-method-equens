@@ -7,6 +7,7 @@ import com.payline.payment.equens.bean.business.payment.PaymentStatusResponse;
 import com.payline.payment.equens.bean.business.reachdirectory.GetAspspsResponse;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.InvalidDataException;
+import com.payline.payment.equens.utils.Constants;
 import com.payline.pmapi.logger.LogManager;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
@@ -22,10 +23,6 @@ import java.util.List;
  */
 public class PisHttpClient extends EquensHttpClient {
     private static final Logger LOGGER = LogManager.getLogger(PisHttpClient.class);
-
-    private static final String API_PATH_ASPSPS = "api.pis.aspsps";
-    private static final String API_PATH_PAYMENTS = "api.pis.payments";
-    private static final String API_PATH_PAYMENTS_STATUS = "api.pis.payments.status";
 
     // --- Singleton Holder pattern + initialization BEGIN
     PisHttpClient() {
@@ -53,8 +50,10 @@ public class PisHttpClient extends EquensHttpClient {
      */
     public GetAspspsResponse getAspsps(RequestConfiguration requestConfiguration) {
         // Service full URL
-        String url = this.getBaseUrl(requestConfiguration.getPartnerConfiguration()) + this.getPath(API_PATH_ASPSPS);
-
+        String url = requestConfiguration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.API_URL_PIS_ASPSPS);
+        if (url == null) {
+            throw new InvalidDataException("Missing API aspsps url in PartnerConfiguration");
+        }
         // Send
         StringResponse response = this.get(url, this.initHeaders(requestConfiguration));
 
@@ -80,13 +79,16 @@ public class PisHttpClient extends EquensHttpClient {
      */
     public PaymentInitiationResponse initPayment(PaymentInitiationRequest paymentInitiationRequest, RequestConfiguration requestConfiguration) {
         // Service full URL
-        String url = this.getBaseUrl(requestConfiguration.getPartnerConfiguration()) + this.getPath(API_PATH_PAYMENTS);
+        String url = requestConfiguration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.API_URL_PIS_PAYMENTS);
+        if (url == null) {
+            throw new InvalidDataException("Missing API payments url in PartnerConfiguration");
+        }
 
         // Init. headers with Authorization (access token)
         List<Header> headers = this.initHeaders(requestConfiguration);
 
         // Body
-        StringEntity body = new StringEntity(jsonService.toJson( paymentInitiationRequest), StandardCharsets.UTF_8);
+        StringEntity body = new StringEntity(jsonService.toJson(paymentInitiationRequest), StandardCharsets.UTF_8);
         headers.add(new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json"));
 
         // Send request
@@ -114,8 +116,11 @@ public class PisHttpClient extends EquensHttpClient {
      */
     public PaymentStatusResponse paymentStatus(String paymentId, RequestConfiguration requestConfiguration, boolean autoConfirm) {
         // Service full URL
-        String url = this.getBaseUrl(requestConfiguration.getPartnerConfiguration())
-                + this.getPath(API_PATH_PAYMENTS_STATUS).replace("{paymentId}", paymentId);
+        String url = requestConfiguration.getPartnerConfiguration().getProperty(Constants.PartnerConfigurationKeys.API_URL_PIS_PAYMENTS_STATUS);
+        if (url == null) {
+            throw new InvalidDataException("Missing API payment status url in PartnerConfiguration");
+        }
+        url = url.replace("{paymentId}", paymentId);
         if (autoConfirm) {
             url += "?confirm=true";
         }
@@ -129,7 +134,7 @@ public class PisHttpClient extends EquensHttpClient {
         }
 
         try {
-            return jsonService.fromJson( response.getContent(), PaymentStatusResponse.class);
+            return jsonService.fromJson(response.getContent(), PaymentStatusResponse.class);
         } catch (JsonSyntaxException e) {
             LOGGER.error("paymentStatus Response is not a JSON: {}", response.getContent(), e);
             throw new InvalidDataException(response.getContent());
