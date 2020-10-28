@@ -112,13 +112,7 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
                 .filter(e -> !PluginUtils.isEmpty(e.getBic()))
                 .filter(e -> {
                     if (e.getDetails() != null) {
-                        for (Detail e2 : e.getDetails()) {
-                            if ("POST /payments".equals(e2.getApi())
-                                    && (e2.getValue() == null || e2.getValue().contains("Instant"))) {
-                                return true;
-                            }
-                        }
-                        return false;
+                        return isCompatible(e.getDetails());
                     }
                     return true;
                 })
@@ -136,5 +130,29 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
                 .withKey(aspsp.getBic())
                 .withValue(valuesBuilder.toString())
                 .build();
+    }
+
+    /**
+     * Check if a bank is compatible with the Normal paymentMode
+     * see PAYLAPMEXT-294
+     *
+     * @param details
+     * @return true if compatible or no info
+     */
+    public boolean isCompatible(List<Detail> details) {
+        boolean containInstant = false;
+        boolean containNormal = false;
+
+        for (Detail detail : details) {
+            if ("PaymentProduct".equalsIgnoreCase(detail.getFieldName()) && detail.getValue() != null) {
+                if (detail.getValue().contains("Normal")) {
+                    containNormal = true;
+                }
+                if (detail.getValue().contains("Instant")) {
+                    containInstant = true;
+                }
+            }
+        }
+        return containInstant || !containNormal;
     }
 }
