@@ -21,6 +21,7 @@ import com.payline.pmapi.bean.payment.ContractProperty;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -122,6 +123,32 @@ class ConfigurationServiceImplTest {
 
         // then: no exception is thrown, but there are some errors
         assertTrue( errors.size() > 0 );
+    }
+
+    @ParameterizedTest(name = "[{index}] pispContract: {0}")
+    @ValueSource(strings = {"", "1234567891023", "azertyuiopqs"})
+    void check_PisContract(String pispContract) {
+        // given: a valid configuration
+        ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration("FR");
+
+        Map<String, ContractProperty> contractProperties = contractConfiguration.getContractProperties();
+        contractProperties.remove(Constants.ContractConfigurationKeys.PISP_CONTRACT);
+
+        contractProperties.put(Constants.ContractConfigurationKeys.PISP_CONTRACT,
+                new ContractProperty(pispContract));
+
+        ContractParametersCheckRequest checkRequest = MockUtils.aContractParametersCheckRequestBuilder()
+                .withAccountInfo(MockUtils.anAccountInfo( new ContractConfiguration("INST EquensWorldline", contractProperties)))
+                .build();
+
+        doReturn(MockUtils.anAuthorization()).when(pisHttpClient).authorize(any(RequestConfiguration.class));
+        doReturn(MockUtils.anAuthorization()).when(psuHttpClient).authorize(any(RequestConfiguration.class));
+
+        // when: checking the configuration
+        Map<String, String> errors = service.check(checkRequest);
+
+        // then: error map contain PISP_CONTRACT
+        assertTrue(errors.containsKey(Constants.ContractConfigurationKeys.PISP_CONTRACT));
     }
 
     @Test
