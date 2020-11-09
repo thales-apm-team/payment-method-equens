@@ -110,12 +110,7 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
                 .filter(e -> e.getCountryCode() != null)
                 .filter(e -> listCountryCode.isEmpty() || listCountryCode.contains(e.getCountryCode()))
                 .filter(e -> !PluginUtils.isEmpty(e.getBic()))
-                .filter(e -> {
-                    if (e.getDetails() != null) {
-                        return isCompatible(e.getDetails());
-                    }
-                    return true;
-                })
+                .filter(e -> isCompatible(e.getDetails()))
                 .collect(Collectors.toList());
     }
 
@@ -133,26 +128,22 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
     }
 
     /**
-     * Check if a bank is compatible with the Normal paymentMode
+     * Check if a bank is compatible with the Instant paymentMode
      * see PAYLAPMEXT-294
      *
      * @param details
      * @return true if compatible or no info
      */
     public boolean isCompatible(List<Detail> details) {
-        boolean containInstant = false;
-        boolean containNormal = false;
+        boolean isCompatible = true;
 
-        for (Detail detail : details) {
-            if ("PaymentProduct".equalsIgnoreCase(detail.getFieldName()) && detail.getValue() != null) {
-                if (detail.getValue().contains("Normal")) {
-                    containNormal = true;
-                }
-                if (detail.getValue().contains("Instant")) {
-                    containInstant = true;
+        if(details != null){
+            for (Detail detail : details) {
+                if ("PaymentProduct".equalsIgnoreCase(detail.getFieldName()) && detail.getValue() != null && !detail.getValue().contains("Instant") && !detail.getValue().isEmpty()) {
+                    isCompatible = false;
                 }
             }
         }
-        return containInstant || !containNormal;
+        return isCompatible;
     }
 }

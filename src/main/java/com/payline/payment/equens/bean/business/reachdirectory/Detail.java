@@ -26,6 +26,7 @@ public class Detail {
     public Detail(String api, String fieldName,String type, String value, String protocolVersion) {
         this.api = api;
         this.fieldName = fieldName;
+        this.type = type;
         this.value = value;
         this.protocolVersion = protocolVersion;
     }

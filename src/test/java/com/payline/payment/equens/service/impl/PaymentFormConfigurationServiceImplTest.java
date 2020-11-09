@@ -190,4 +190,9 @@ class PaymentFormConfigurationServiceImplTest {
 
         Assertions.assertTrue( service.isCompatible(details));
     }
+
+    @Test
+    void isCompatibleNull(){
+        Assertions.assertTrue( service.isCompatible(null));
+    }
 }
