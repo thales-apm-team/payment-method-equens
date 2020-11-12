@@ -48,10 +48,13 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         try {
             // Build RSA holder from PartnerConfiguration
             if( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.CLIENT_CERTIFICATE ) == null ){
-                throw new InvalidDataException("Missing client certificate chain from partner configuration (sentitive properties)");
+                throw new InvalidDataException("Missing client certificate chain from partner configuration (sensitive properties)");
             }
             if( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.CLIENT_PRIVATE_KEY ) == null ){
-                throw new InvalidDataException("Missing client private key from partner configuration (sentitive properties)");
+                throw new InvalidDataException("Missing client private key from partner configuration (sensitive properties)");
+            }
+            if( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.API_URL_TOKEN ) == null ){
+                throw new InvalidDataException("Missing API URL Token from partner configuration");
             }
 
             // Initialize RsaHolder instance

@@ -6,6 +6,7 @@ import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
+import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -116,8 +117,10 @@ class PsuHttpClientTest {
         RequestConfiguration requestConfiguration = MockUtils.aRequestConfiguration();
         PluginException thrown = assertThrows(PluginException.class,
                 () -> psuHttpClient.createPsu(request, requestConfiguration));
-        assertNotNull(thrown.getErrorCode());
-        assertNotNull(thrown.getFailureCause());
+
+        assertEquals("Property messageId : must not be null", thrown.getErrorCode());
+        assertEquals(FailureCause.INVALID_DATA, thrown.getFailureCause());
+
     }
 
 }

@@ -273,7 +273,6 @@ class PisHttpClientTest {
         Assertions.assertEquals(FailureCause.INVALID_DATA, thrown.getFailureCause());
     }
 
-
     private void verifyAuthorizationHeader(List<Header> headers) {
         boolean headerPresent = false;
         for (Header h : headers) {
@@ -282,6 +281,21 @@ class PisHttpClientTest {
             }
         }
         assertTrue(headerPresent);
+    }
+
+    @Test
+    void check_addStringUrlParameter(){
+
+        String url = "https://xs2a.awltest.de/xs2a/routingservice/services/pis/v1/payments/{paymentId}/status";
+
+        url = url.replace("{paymentId}", paymentId);
+        url = pisHttpClient.addStringUrlParameter(url, "Param=value");
+
+        assertTrue(url.contains("?") && !url.contains("&"));
+
+        url = pisHttpClient.addStringUrlParameter(url, "confirm=true");
+
+        assertTrue(url.contains("?") && url.contains("&"));
     }
 
 }
