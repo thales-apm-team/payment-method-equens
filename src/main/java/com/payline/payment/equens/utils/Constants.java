@@ -22,15 +22,19 @@ public class Constants {
         public static final String PISP_CONTRACT = "pisp";
 
         /* Static utility class : no need to instantiate it (Sonar bug fix) */
-        private ContractConfigurationKeys(){}
+        private ContractConfigurationKeys() {
+        }
     }
 
     /**
      * Keys for the entries in PartnerConfiguration maps.
      */
     public static class PartnerConfigurationKeys {
-
-        public static final String API_BASE_URL = "apisUrl";
+        public static final String API_URL_TOKEN = "apisUrl.token";
+        public static final String API_URL_PIS_ASPSPS = "apisUrl.pis.aspsps";
+        public static final String API_URL_PIS_PAYMENTS = "apisUrl.pis.payments";
+        public static final String API_URL_PIS_PAYMENTS_STATUS = "apisUrl.pis.payments.status";
+        public static final String API_URL_PSU_PSUS = "apisUrl.psu.psus";
         public static final String CLIENT_CERTIFICATE = "clientCertificate";
         public static final String CLIENT_PRIVATE_KEY = "clientPrivateKey";
         public static final String PAYLINE_CLIENT_NAME = "paylineclientName";
@@ -38,7 +42,8 @@ public class Constants {
         public static final String PAYMENT_PRODUCT = "paymentProduct";
 
         /* Static utility class : no need to instantiate it (Sonar bug fix) */
-        private PartnerConfigurationKeys(){}
+        private PartnerConfigurationKeys() {
+        }
     }
 
     /**
@@ -49,10 +54,12 @@ public class Constants {
         public static final String PAYMENT_ID = "paymentId";
 
         /* Static utility class : no need to instantiate it (Sonar bug fix) */
-        private RequestContextKeys(){}
+        private RequestContextKeys() {
+        }
     }
 
     /* Static utility class : no need to instantiate it (Sonar bug fix) */
-    private Constants(){}
+    private Constants() {
+    }
 
 }
