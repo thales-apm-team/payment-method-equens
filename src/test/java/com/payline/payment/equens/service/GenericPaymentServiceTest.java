@@ -10,8 +10,8 @@ import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.exception.InvalidDataException;
 import com.payline.payment.equens.exception.PluginException;
-import com.payline.payment.equens.utils.Constants;
 import com.payline.payment.equens.utils.TestUtils;
+import com.payline.payment.equens.utils.constant.ContractConfigurationKeys;
 import com.payline.payment.equens.utils.http.PisHttpClient;
 import com.payline.payment.equens.utils.http.PsuHttpClient;
 import com.payline.pmapi.bean.common.Amount;
@@ -133,7 +133,7 @@ class GenericPaymentServiceTest {
         PaymentData paymentData = MockUtils.aPaymentdata();
         // given: a property is missing from ContractConfiguration
         ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration(MockUtils.getExampleCountry());
-        contractConfiguration.getContractProperties().remove(Constants.ContractConfigurationKeys.MERCHANT_IBAN);
+        contractConfiguration.getContractProperties().remove(ContractConfigurationKeys.MERCHANT_IBAN);
         PaymentRequest paymentRequest = MockUtils.aPaylinePaymentRequestBuilder()
                 .withContractConfiguration(contractConfiguration)
                 .build();
