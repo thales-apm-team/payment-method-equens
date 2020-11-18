@@ -3,8 +3,8 @@ package com.payline.payment.equens.service;
 import com.payline.payment.equens.MockUtils;
 import com.payline.payment.equens.bean.GenericPaymentRequest;
 import com.payline.payment.equens.bean.business.payment.Address;
-import com.payline.payment.equens.bean.business.payment.PaymentInitiationRequest;
 import com.payline.payment.equens.bean.business.payment.PaymentData;
+import com.payline.payment.equens.bean.business.payment.PaymentInitiationRequest;
 import com.payline.payment.equens.bean.business.psu.Psu;
 import com.payline.payment.equens.bean.business.psu.PsuCreateRequest;
 import com.payline.payment.equens.bean.configuration.RequestConfiguration;
@@ -19,6 +19,7 @@ import com.payline.pmapi.bean.common.Buyer;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.payment.ContractConfiguration;
+import com.payline.pmapi.bean.payment.ContractProperty;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
 import com.payline.pmapi.bean.payment.response.PaymentResponse;
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseFailure;
@@ -68,6 +69,102 @@ class GenericPaymentServiceTest {
         // then: the payment response is a success
         assertEquals(PaymentResponseRedirect.class, paymentResponse.getClass());
         TestUtils.checkPaymentResponse((PaymentResponseRedirect) paymentResponse);
+    }
+
+    @Test
+    void paymentRequest_EmptyMerchantName() {
+        doReturn(MockUtils.aPsu()).when(psuHttpclient).createPsu(any(), any());
+        JsonService jsonService = JsonService.getInstance();
+
+        PaymentData paymentData = MockUtils.aPaymentdata();
+        // when: calling paymentRequest() method
+        PaymentRequest paymentRequest = MockUtils.aPaylinePaymentRequest();
+
+        paymentRequest.getContractConfiguration().getContractProperties().remove(Constants.ContractConfigurationKeys.MERCHANT_NAME);
+        paymentRequest.getContractConfiguration().getContractProperties().put(Constants.ContractConfigurationKeys.MERCHANT_NAME, new ContractProperty(""));
+
+        GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(paymentRequest);
+
+        // Build request configuration
+        RequestConfiguration requestConfiguration = new RequestConfiguration(
+                paymentRequest.getContractConfiguration()
+                , paymentRequest.getEnvironment()
+                , paymentRequest.getPartnerConfiguration()
+        );
+
+        // Create a new PSU
+        Psu newPsu = psuHttpclient.createPsu(new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration);
+
+        // Build PaymentInitiationRequest (Equens) from PaymentRequest (Payline)
+        PaymentInitiationRequest request = service.buildPaymentInitiationRequest(genericPaymentRequest, newPsu, paymentData);
+
+        String chaine = jsonService.toJson(request);
+
+        assertTrue(!chaine.contains("CreditorName"));
+
+    }
+
+    @Test
+    void paymentRequest_EmptyMerchantIban() {
+        doReturn(MockUtils.aPsu()).when(psuHttpclient).createPsu(any(), any());
+        JsonService jsonService = JsonService.getInstance();
+
+        PaymentData paymentData = MockUtils.aPaymentdata();
+        // when: calling paymentRequest() method
+        PaymentRequest paymentRequest = MockUtils.aPaylinePaymentRequest();
+
+        paymentRequest.getContractConfiguration().getContractProperties().remove(Constants.ContractConfigurationKeys.MERCHANT_IBAN);
+        paymentRequest.getContractConfiguration().getContractProperties().put(Constants.ContractConfigurationKeys.MERCHANT_IBAN, new ContractProperty(""));
+
+        GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(paymentRequest);
+
+        // Build request configuration
+        RequestConfiguration requestConfiguration = new RequestConfiguration(
+                paymentRequest.getContractConfiguration()
+                , paymentRequest.getEnvironment()
+                , paymentRequest.getPartnerConfiguration()
+        );
+
+        // Create a new PSU
+        Psu newPsu = psuHttpclient.createPsu(new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration);
+
+        // Build PaymentInitiationRequest (Equens) from PaymentRequest (Payline)
+        PaymentInitiationRequest request = service.buildPaymentInitiationRequest(genericPaymentRequest, newPsu, paymentData);
+
+        String chaine = jsonService.toJson(request);
+
+        assertTrue(!chaine.contains("CreditorAccount"));
+
+    }
+
+    @Test
+    void paymentRequest_check_MerchantName_MerchantIban() {
+        doReturn(MockUtils.aPsu()).when(psuHttpclient).createPsu(any(), any());
+        JsonService jsonService = JsonService.getInstance();
+
+        PaymentData paymentData = MockUtils.aPaymentdata();
+        // when: calling paymentRequest() method
+        PaymentRequest paymentRequest = MockUtils.aPaylinePaymentRequest();
+
+        GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(paymentRequest);
+
+        // Build request configuration
+        RequestConfiguration requestConfiguration = new RequestConfiguration(
+                paymentRequest.getContractConfiguration()
+                , paymentRequest.getEnvironment()
+                , paymentRequest.getPartnerConfiguration()
+        );
+
+        // Create a new PSU
+        Psu newPsu = psuHttpclient.createPsu(new PsuCreateRequest.PsuCreateRequestBuilder().build(), requestConfiguration);
+
+        // Build PaymentInitiationRequest (Equens) from PaymentRequest (Payline)
+        PaymentInitiationRequest request = service.buildPaymentInitiationRequest(genericPaymentRequest, newPsu, paymentData);
+
+        String chaine = jsonService.toJson(request);
+
+        assertTrue(chaine.contains("CreditorAccount"));
+        assertTrue(chaine.contains("CreditorName"));
     }
 
     @Test

@@ -202,12 +202,20 @@ public class PaymentInitiationRequest extends EquensApiMessage {
         }
 
         public PaymentInitiationRequestBuilder withCreditorName(String creditorName) {
-            this.creditorName = creditorName;
+            if(creditorName.isEmpty()){
+                this.creditorName = null;
+            }else {
+                this.creditorName = creditorName;
+            }
             return this;
         }
 
         public PaymentInitiationRequestBuilder withCreditorAccount(Account creditorAccount) {
-            this.creditorAccount = creditorAccount;
+            if(creditorAccount.getIdentification().isEmpty()){
+                this.creditorAccount = null;
+            }else {
+                this.creditorAccount = creditorAccount;
+            }
             return this;
         }
 
