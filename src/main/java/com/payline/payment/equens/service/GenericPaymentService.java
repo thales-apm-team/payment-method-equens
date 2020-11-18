@@ -237,6 +237,10 @@ public class GenericPaymentService {
         if (paymentRequest.getBuyer().getAddresses() != null) {
             deliveryAddress = buildAddress(paymentRequest.getBuyer().getAddressForType(Buyer.AddressType.DELIVERY));
         }
+        String merchantName = paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.MERCHANT_NAME).getValue();
+        String creditorName =  PluginUtils.isEmpty(merchantName) ? null : merchantName;
+        String creditorAccountIdentification = paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.MERCHANT_IBAN).getValue();
+        Account creditorAccount =  PluginUtils.isEmpty(creditorAccountIdentification) ?  null : new Account.AccountBuilder().withIdentification(creditorAccountIdentification).build();
 
         String softDescriptor = paymentRequest.getSoftDescriptor();
         String pispContract = paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.PISP_CONTRACT).getValue();
@@ -253,14 +257,10 @@ public class GenericPaymentService {
                                 .build()
                 )
                 .withCreditorAccount(
-                        new Account.AccountBuilder()
-                                .withIdentification(
-                                        paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.MERCHANT_IBAN).getValue()
-                                )
-                                .build()
+                        creditorAccount
                 )
                 .withCreditorName(
-                        paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.MERCHANT_NAME).getValue()
+                       creditorName
                 )
                 .withPaymentAmount(convertAmount(paymentRequest.getAmount()))
                 .withPaymentCurrency(paymentRequest.getAmount().getCurrency().getCurrencyCode())
