@@ -80,8 +80,8 @@ class GenericPaymentServiceTest {
         // when: calling paymentRequest() method
         PaymentRequest paymentRequest = MockUtils.aPaylinePaymentRequest();
 
-        paymentRequest.getContractConfiguration().getContractProperties().remove(Constants.ContractConfigurationKeys.MERCHANT_NAME);
-        paymentRequest.getContractConfiguration().getContractProperties().put(Constants.ContractConfigurationKeys.MERCHANT_NAME, new ContractProperty(""));
+        paymentRequest.getContractConfiguration().getContractProperties().remove(ContractConfigurationKeys.MERCHANT_NAME);
+        paymentRequest.getContractConfiguration().getContractProperties().put(ContractConfigurationKeys.MERCHANT_NAME, new ContractProperty(""));
 
         GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(paymentRequest);
 
@@ -113,8 +113,8 @@ class GenericPaymentServiceTest {
         // when: calling paymentRequest() method
         PaymentRequest paymentRequest = MockUtils.aPaylinePaymentRequest();
 
-        paymentRequest.getContractConfiguration().getContractProperties().remove(Constants.ContractConfigurationKeys.MERCHANT_IBAN);
-        paymentRequest.getContractConfiguration().getContractProperties().put(Constants.ContractConfigurationKeys.MERCHANT_IBAN, new ContractProperty(""));
+        paymentRequest.getContractConfiguration().getContractProperties().remove(ContractConfigurationKeys.MERCHANT_IBAN);
+        paymentRequest.getContractConfiguration().getContractProperties().put(ContractConfigurationKeys.MERCHANT_IBAN, new ContractProperty(""));
 
         GenericPaymentRequest genericPaymentRequest = new GenericPaymentRequest(paymentRequest);
 

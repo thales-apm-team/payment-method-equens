@@ -239,9 +239,9 @@ public class GenericPaymentService {
         if (paymentRequest.getBuyer().getAddresses() != null) {
             deliveryAddress = buildAddress(paymentRequest.getBuyer().getAddressForType(Buyer.AddressType.DELIVERY));
         }
-        String merchantName = paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.MERCHANT_NAME).getValue();
+        String merchantName = paymentRequest.getContractConfiguration().getProperty(ContractConfigurationKeys.MERCHANT_NAME).getValue();
         String creditorName =  PluginUtils.isEmpty(merchantName) ? null : merchantName;
-        String creditorAccountIdentification = paymentRequest.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.MERCHANT_IBAN).getValue();
+        String creditorAccountIdentification = paymentRequest.getContractConfiguration().getProperty(ContractConfigurationKeys.MERCHANT_IBAN).getValue();
         Account creditorAccount =  PluginUtils.isEmpty(creditorAccountIdentification) ?  null : new Account.AccountBuilder().withIdentification(creditorAccountIdentification).build();
 
         String softDescriptor = paymentRequest.getSoftDescriptor();
