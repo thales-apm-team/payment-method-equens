@@ -71,7 +71,7 @@ class PaymentWithRedirectionServiceImplTest {
         return Stream.of(
                 Arguments.of( PaymentStatus.OPEN, PaymentResponseOnHold.class ),
                 Arguments.of( PaymentStatus.AUTHORISED, PaymentResponseOnHold.class ),
-                Arguments.of( PaymentStatus.SETTLEMENT_IN_PROCESS, PaymentResponseOnHold.class ),
+                Arguments.of( PaymentStatus.SETTLEMENT_IN_PROCESS, PaymentResponseSuccess.class ),
                 Arguments.of( PaymentStatus.PENDING, PaymentResponseOnHold.class ),
                 Arguments.of( PaymentStatus.SETTLEMENT_COMPLETED, PaymentResponseSuccess.class ),
                 Arguments.of( PaymentStatus.CANCELLED, PaymentResponseFailure.class ),
