@@ -1,6 +1,7 @@
 package com.payline.payment.equens.service.impl;
 
 import com.payline.payment.equens.MockUtils;
+import com.payline.payment.equens.bean.business.reachdirectory.Detail;
 import com.payline.payment.equens.utils.i18n.I18nService;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.paymentform.bean.field.SelectOption;
@@ -10,6 +11,7 @@ import com.payline.pmapi.bean.paymentform.request.PaymentFormConfigurationReques
 import com.payline.pmapi.bean.paymentform.response.configuration.PaymentFormConfigurationResponse;
 import com.payline.pmapi.bean.paymentform.response.configuration.impl.PaymentFormConfigurationResponseFailure;
 import com.payline.pmapi.bean.paymentform.response.configuration.impl.PaymentFormConfigurationResponseSpecific;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -148,5 +150,49 @@ class PaymentFormConfigurationServiceImplTest {
 
         // then: there is 2 banks choice at the end
         assertEquals(4, result.size());
+    }
+
+    @Test
+    void isCompatibleNormal(){
+        List<Detail> details = new ArrayList<>();
+        details.add(new Detail("API", "foo", "MANDATORY", null, "protocol1"));
+        details.add(new Detail("API", "PaymentProduct", "SUPPORTED", "Normal", "protocol1"));
+        details.add(new Detail("API", "foo2", "MANDATORY", null, "protocol1"));
+
+        Assertions.assertFalse( service.isCompatible(details));
+    }
+
+    @Test
+    void isCompatibleNormalAndInstant(){
+        List<Detail> details = new ArrayList<>();
+        details.add(new Detail("API", "foo", "MANDATORY", null, "protocol1"));
+        details.add(new Detail("API", "PaymentProduct", "SUPPORTED", "Normal|Instant", "protocol1"));
+        details.add(new Detail("API", "foo2", "MANDATORY", null, "protocol1"));
+
+        Assertions.assertTrue( service.isCompatible(details));
+    }
+
+    @Test
+    void isCompatibleInstant(){
+        List<Detail> details = new ArrayList<>();
+        details.add(new Detail("API", "foo", "MANDATORY", null, "protocol1"));
+        details.add(new Detail("API", "PaymentProduct", "SUPPORTED", "Instant", "protocol1"));
+        details.add(new Detail("API", "foo2", "MANDATORY", null, "protocol1"));
+
+        Assertions.assertTrue( service.isCompatible(details));
+    }
+
+    @Test
+    void isCompatibleNone(){
+        List<Detail> details = new ArrayList<>();
+        details.add(new Detail("API", "foo", "MANDATORY", null, "protocol1"));
+        details.add(new Detail("API", "foo2", "MANDATORY", null, "protocol1"));
+
+        Assertions.assertTrue( service.isCompatible(details));
+    }
+
+    @Test
+    void isCompatibleNull(){
+        Assertions.assertTrue( service.isCompatible(null));
     }
 }

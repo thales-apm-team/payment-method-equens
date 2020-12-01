@@ -48,10 +48,13 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         try {
             // Build RSA holder from PartnerConfiguration
             if( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.CLIENT_CERTIFICATE ) == null ){
-                throw new InvalidDataException("Missing client certificate chain from partner configuration (sentitive properties)");
+                throw new InvalidDataException("Missing client certificate chain from partner configuration (sensitive properties)");
             }
             if( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.CLIENT_PRIVATE_KEY ) == null ){
-                throw new InvalidDataException("Missing client private key from partner configuration (sentitive properties)");
+                throw new InvalidDataException("Missing client private key from partner configuration (sensitive properties)");
+            }
+            if( partnerConfiguration.getProperty( Constants.PartnerConfigurationKeys.API_URL_TOKEN ) == null ){
+                throw new InvalidDataException("Missing API URL Token from partner configuration");
             }
 
             // Initialize RsaHolder instance
@@ -65,7 +68,7 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         }
 
         // Build authorization endpoint
-        String authorizationEndpoint = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.API_BASE_URL) + "/authorize/token";
+        String authorizationEndpoint = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.API_URL_TOKEN);
 
         // Pass these elements to the parent method initializer
         super.init(authorizationEndpoint);
@@ -149,20 +152,6 @@ abstract class EquensHttpClient extends OAuthHttpClient {
         }
 
         return signature;
-    }
-
-    /**
-     * Retrieve the API base URL in PartnerConfiguration. Throws an exception if it's not present.
-     *
-     * @param partnerConfiguration The partner configuration
-     * @return The API base URL
-     */
-    protected String getBaseUrl( PartnerConfiguration partnerConfiguration ){
-        String baseUrl = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.API_BASE_URL);
-        if( baseUrl == null ){
-            throw new InvalidDataException( "Missing API base url in PartnerConfiguration" );
-        }
-        return baseUrl;
     }
 
     /**

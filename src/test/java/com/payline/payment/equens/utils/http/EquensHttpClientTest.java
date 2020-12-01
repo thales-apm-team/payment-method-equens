@@ -140,26 +140,6 @@ class EquensHttpClientTest {
         assertTrue( signature.toString().matches( HTTP_SIGNATURE_PATTERN ) );
     }
 
-    // --- Test EquensHttpClient#getBaseUrl ---
-
-    @Test
-    void getBaseUrl_missing(){
-        // given: the PartnerConfiguration does not contain a base URL (or is empty, it works too)
-        PartnerConfiguration partnerConfiguration = new PartnerConfiguration( new HashMap<>(), new HashMap<>() );
-        // when: calling the method
-        // then: an exception is thrown
-        assertThrows( InvalidDataException.class, () -> equensHttpClient.getBaseUrl( partnerConfiguration ) );
-    }
-
-    @Test
-    void getBaseUrl_nominal(){
-        // when: calling the method with a standard RequestConfiguration
-        String baseUrl = equensHttpClient.getBaseUrl( MockUtils.aPartnerConfiguration() );
-
-        // then: the base URL is not null
-        assertNotNull( baseUrl );
-    }
-
     // --- Test EquensHttpClient#handleError ---
 
     @ParameterizedTest

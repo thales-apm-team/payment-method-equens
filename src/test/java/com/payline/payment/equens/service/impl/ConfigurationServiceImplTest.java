@@ -21,6 +21,7 @@ import com.payline.pmapi.bean.payment.ContractProperty;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -122,6 +123,32 @@ class ConfigurationServiceImplTest {
 
         // then: no exception is thrown, but there are some errors
         assertTrue( errors.size() > 0 );
+    }
+
+    @ParameterizedTest(name = "[{index}] pispContract: {0}")
+    @ValueSource(strings = {"", "1234567891023", "azertyuiopqs"})
+    void check_PisContract(String pispContract) {
+        // given: a valid configuration
+        ContractConfiguration contractConfiguration = MockUtils.aContractConfiguration("FR");
+
+        Map<String, ContractProperty> contractProperties = contractConfiguration.getContractProperties();
+        contractProperties.remove(Constants.ContractConfigurationKeys.PISP_CONTRACT);
+
+        contractProperties.put(Constants.ContractConfigurationKeys.PISP_CONTRACT,
+                new ContractProperty(pispContract));
+
+        ContractParametersCheckRequest checkRequest = MockUtils.aContractParametersCheckRequestBuilder()
+                .withAccountInfo(MockUtils.anAccountInfo( new ContractConfiguration("INST EquensWorldline", contractProperties)))
+                .build();
+
+        doReturn(MockUtils.anAuthorization()).when(pisHttpClient).authorize(any(RequestConfiguration.class));
+        doReturn(MockUtils.anAuthorization()).when(psuHttpClient).authorize(any(RequestConfiguration.class));
+
+        // when: checking the configuration
+        Map<String, String> errors = service.check(checkRequest);
+
+        // then: error map contain PISP_CONTRACT
+        assertTrue(errors.containsKey(Constants.ContractConfigurationKeys.PISP_CONTRACT));
     }
 
     @Test
@@ -232,7 +259,11 @@ class ConfigurationServiceImplTest {
     void retrievePluginConfiguration_missingPaylineClientName(){
         // given: the PartnerConfiguration is missing the paylineClientName
         Map<String, String> partnerConfigurationMap = new HashMap<>();
-        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.API_BASE_URL, "https://xs2a.awltest.de/xs2a/routingservice/services" );
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.API_URL_TOKEN, "https://xs2a.awltest.de/xs2a/routingservice/services/authorize/token");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.API_URL_PIS_ASPSPS, "https://xs2a.awltest.de/xs2a/routingservice/services/directory/v1/aspsps?allDetails=true");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.API_URL_PIS_PAYMENTS, "https://xs2a.awltest.de/xs2a/routingservice/services/pis/v1/payments");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.API_URL_PIS_PAYMENTS_STATUS, "https://xs2a.awltest.de/xs2a/routingservice/services/pis/v1/payments/{paymentId}/status");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.API_URL_PSU_PSUS, "https://xs2a.awltest.de/xs2a/routingservice/services/psumgmt/v1/psus");
         partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYLINE_ONBOARDING_ID, "XXXXXX" );
         partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT, "Instant" );
 
@@ -260,7 +291,11 @@ class ConfigurationServiceImplTest {
     void retrievePluginConfiguration_missingPaylineOnboardingId(){
         // given: the PartnerConfiguration is missing the paylineOnboardingId
         Map<String, String> partnerConfigurationMap = new HashMap<>();
-        partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.API_BASE_URL, "https://xs2a.awltest.de/xs2a/routingservice/services" );
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.API_URL_TOKEN, "https://xs2a.awltest.de/xs2a/routingservice/services/authorize/token");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.API_URL_PIS_ASPSPS, "https://xs2a.awltest.de/xs2a/routingservice/services/directory/v1/aspsps?allDetails=true");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.API_URL_PIS_PAYMENTS, "https://xs2a.awltest.de/xs2a/routingservice/services/pis/v1/payments");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.API_URL_PIS_PAYMENTS_STATUS, "https://xs2a.awltest.de/xs2a/routingservice/services/pis/v1/payments/{paymentId}/status");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.API_URL_PSU_PSUS, "https://xs2a.awltest.de/xs2a/routingservice/services/psumgmt/v1/psus");
         partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYLINE_CLIENT_NAME, "MarketPay" );
         partnerConfigurationMap.put( Constants.PartnerConfigurationKeys.PAYMENT_PRODUCT, "Instant" );
 

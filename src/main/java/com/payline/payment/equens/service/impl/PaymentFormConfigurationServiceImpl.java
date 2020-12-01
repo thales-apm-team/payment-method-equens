@@ -110,18 +110,7 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
                 .filter(e -> e.getCountryCode() != null)
                 .filter(e -> listCountryCode.isEmpty() || listCountryCode.contains(e.getCountryCode()))
                 .filter(e -> !PluginUtils.isEmpty(e.getBic()))
-                .filter(e -> {
-                    if (e.getDetails() != null) {
-                        for (Detail e2 : e.getDetails()) {
-                            if ("POST /payments".equals(e2.getApi())
-                                    && (e2.getValue() == null || e2.getValue().contains("Instant"))) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-                    return true;
-                })
+                .filter(e -> isCompatible(e.getDetails()))
                 .collect(Collectors.toList());
     }
 
@@ -136,5 +125,26 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
                 .withKey(aspsp.getBic())
                 .withValue(valuesBuilder.toString())
                 .build();
+    }
+
+    /**
+     * Check if a bank is compatible with the Instant paymentMode
+     * see PAYLAPMEXT-294
+     *
+     * @param details
+     * @return true if compatible or no info
+     */
+    public boolean isCompatible(List<Detail> details) {
+        boolean isCompatible = true;
+
+        if(details != null){
+            for (Detail detail : details) {
+                if (!PluginUtils.isEmpty(detail.getValue()) && !detail.getValue().contains("Instant")) {
+                    isCompatible = false;
+                    break;
+                }
+            }
+        }
+        return isCompatible;
     }
 }

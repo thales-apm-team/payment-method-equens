@@ -166,9 +166,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         // check PISP format (N12)
         String pispContract = accountInfo.get(Constants.ContractConfigurationKeys.PISP_CONTRACT);
-        if (PluginUtils.isEmpty(pispContract)
-                || pispContract.length() != 12
-                || !PluginUtils.isNumeric(pispContract)) {
+        if (PluginUtils.isEmpty(pispContract) ||  pispContract.length() > 12  || !PluginUtils.isNumeric(pispContract)) {
             String message = i18n.getMessage(I18N_CONTRACT_PREFIX + Constants.ContractConfigurationKeys.PISP_CONTRACT + ".badFormat", locale);
             errors.put(Constants.ContractConfigurationKeys.PISP_CONTRACT, message);
         }

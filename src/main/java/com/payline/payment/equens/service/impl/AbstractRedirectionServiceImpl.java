@@ -57,7 +57,6 @@ public abstract class AbstractRedirectionServiceImpl {
             switch(status) {
                 case OPEN:
                 case AUTHORISED:
-                case SETTLEMENT_IN_PROCESS:
                 case PENDING:
                     paymentResponse = PaymentResponseOnHold.PaymentResponseOnHoldBuilder.aPaymentResponseOnHold()
                             .withPartnerTransactionId(paymentId)
@@ -65,7 +64,7 @@ public abstract class AbstractRedirectionServiceImpl {
                             .withStatusCode(status.name())
                             .build();
                     break;
-
+                case SETTLEMENT_IN_PROCESS:
                 case SETTLEMENT_COMPLETED:
                     paymentResponse = PaymentResponseSuccess.PaymentResponseSuccessBuilder.aPaymentResponseSuccess()
                             .withPartnerTransactionId(paymentId)
