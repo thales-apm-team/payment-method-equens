@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class PaymentWithRedirectionServiceImplTest {
+    private static String additionalData = "{\"aspspPaymentId\":\"im7QC5rZ-jyNr237sJb6VqEnBd8uNDnU6b9-rnAYVxTNub1NwmkrY3CBGDMRXsx5BeH6HIP2qhdTTZ1HINXSkg\\u003d\\u003d_\\u003d_psGLvQpt9Q\"}";
 
     @InjectMocks
     private PaymentWithRedirectionServiceImpl service;
@@ -57,10 +58,14 @@ class PaymentWithRedirectionServiceImplTest {
         assertEquals( expectedReturnType, response.getClass() );
         if( response instanceof PaymentResponseSuccess ){
             TestUtils.checkPaymentResponse( (PaymentResponseSuccess) response );
+            assertEquals("123456",((PaymentResponseSuccess) response).getPartnerTransactionId());
+            assertEquals(additionalData,((PaymentResponseSuccess) response).getTransactionAdditionalData());
         } else if( response instanceof PaymentResponseOnHold ){
             TestUtils.checkPaymentResponse( (PaymentResponseOnHold) response );
         } else {
             TestUtils.checkPaymentResponse( (PaymentResponseFailure) response );
+            assertEquals("123456",((PaymentResponseFailure) response).getPartnerTransactionId());
+            assertEquals(additionalData,((PaymentResponseFailure) response).getTransactionAdditionalData());
         }
 
         // verify that mock has been called (to prevent false positive due to a RuntimeException)
