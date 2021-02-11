@@ -106,7 +106,7 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
         if (pluginConfiguration == null) {
             LOGGER.warn("pluginConfiguration is null");
         } else {
-            List<Aspsp> aspsps = jsonService.fromJson(PluginUtils.extractBanks(pluginConfiguration), GetAspspsResponse.class).getAspsps();
+            List<Aspsp> aspsps = jsonService.fromJson(pluginConfiguration, GetAspspsResponse.class).getAspsps();
             List<Aspsp> validAspsps = filter(aspsps, listCountryCode);
 
             for (Aspsp aspsp : validAspsps) {
@@ -150,7 +150,7 @@ public class PaymentFormConfigurationServiceImpl extends LogoPaymentFormConfigur
 
         if(details != null){
             for (Detail detail : details) {
-                if ( !PluginUtils.isEmpty(detail.getValue()) && "PaymentProduct".equalsIgnoreCase(detail.getFieldName()) && !detail.getValue().contains("Instant")) {
+                if (!PluginUtils.isEmpty(detail.getValue()) && !detail.getValue().contains("Instant")) {
                     isCompatible = false;
                     break;
                 }

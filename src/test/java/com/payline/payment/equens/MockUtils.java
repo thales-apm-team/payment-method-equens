@@ -231,6 +231,7 @@ public class MockUtils {
         Map<String, String> sensitiveConfigurationMap = new HashMap<>();
         sensitiveConfigurationMap.put(PartnerConfigurationKeys.CLIENT_CERTIFICATE, aClientCertificatePem());
         sensitiveConfigurationMap.put(PartnerConfigurationKeys.CLIENT_PRIVATE_KEY, aPrivateKeyPem());
+        sensitiveConfigurationMap.put(PartnerConfigurationKeys.ENCRYPTION_KEY, "thisIsAKey");
 
         return new PartnerConfiguration(partnerConfigurationMap, sensitiveConfigurationMap);
     }
@@ -448,8 +449,7 @@ public class MockUtils {
                     "{\"AspspId\":\"1409\",\"Name\":[\"La Banque Postale\"],\"CountryCode\":\"FR\",\"BIC\":\"PSSTFRPP\"}," +
                     "{\"AspspId\":\"1410\",\"Name\":[\"La Banque\"],\"CountryCode\":\"ES\",\"BIC\":\"PSSTFRPT\"}," +
                     "{\"AspspId\":\"1601\",\"Name\":[\"BBVA\"],\"CountryCode\":\"ES\",\"BIC\":\"BBVAESMM\"}" +
-                "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}" +
-                "&&&thisIsAKey";
+                "],\"MessageCreateDateTime\":\"2019-11-15T16:52:37.092+0100\",\"MessageId\":\"6f31954f-7ad6-4a63-950c-a2a363488e\"}";
     }
 
     /**

@@ -6,6 +6,7 @@ import com.payline.payment.equens.bean.business.payment.PaymentData;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.utils.PluginUtils;
+import com.payline.payment.equens.utils.constant.PartnerConfigurationKeys;
 import com.payline.payment.equens.utils.properties.ConfigProperties;
 import com.payline.payment.equens.utils.security.RSAUtils;
 import com.payline.pmapi.bean.common.FailureCause;
@@ -56,7 +57,14 @@ public class WalletServiceImpl implements WalletService {
                     .build();
 
             // encrypt the Json that contains the BIC and the IBAN
-            String key = PluginUtils.extractKey(walletCreateRequest.getPluginConfiguration()).trim();
+            final String keyProp = walletCreateRequest.getPartnerConfiguration()
+                                                       .getProperty(PartnerConfigurationKeys.ENCRYPTION_KEY);
+
+            if (keyProp == null) {
+                throw new PluginException("Missing Encryption Key", FailureCause.INVALID_DATA);
+            }
+            
+            String key = keyProp.trim();
             String paymentData = rsaUtils.encrypt(jsonService.toJson( walletPaymentData), key);
 
             // create wallet
@@ -85,7 +93,8 @@ public class WalletServiceImpl implements WalletService {
             // decrypt the encrypted data (BIC + IBAN)
             String encryptedData = walletDisplayRequest.getWallet().getPluginPaymentData();
 
-            String key = PluginUtils.extractKey(walletDisplayRequest.getPluginConfiguration());
+            String key = walletDisplayRequest.getPartnerConfiguration()
+                    .getProperty(PartnerConfigurationKeys.ENCRYPTION_KEY);
             String data = rsaUtils.decrypt(encryptedData, key);
 
             //Build wallet display fields (BIC and the masked IBAN)

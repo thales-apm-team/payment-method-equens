@@ -6,6 +6,7 @@ import com.payline.payment.equens.bean.configuration.RequestConfiguration;
 import com.payline.payment.equens.bean.pmapi.TransactionAdditionalData;
 import com.payline.payment.equens.exception.PluginException;
 import com.payline.payment.equens.utils.constant.ContractConfigurationKeys;
+import com.payline.payment.equens.service.JsonService;
 import com.payline.payment.equens.utils.http.PisHttpClient;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.common.OnHoldCause;
@@ -21,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 public abstract class AbstractRedirectionServiceImpl {
 
     private PisHttpClient pisHttpClient = PisHttpClient.getInstance();
+    private JsonService jsonService = JsonService.getInstance();
 
     private static final Logger LOGGER = LogManager.getLogger(AbstractRedirectionServiceImpl.class);
     /**
@@ -57,7 +59,6 @@ public abstract class AbstractRedirectionServiceImpl {
             switch(status) {
                 case OPEN:
                 case AUTHORISED:
-                case SETTLEMENT_IN_PROCESS:
                 case PENDING:
                     paymentResponse = PaymentResponseOnHold.PaymentResponseOnHoldBuilder.aPaymentResponseOnHold()
                             .withPartnerTransactionId(paymentId)
@@ -65,7 +66,7 @@ public abstract class AbstractRedirectionServiceImpl {
                             .withStatusCode(status.name())
                             .build();
                     break;
-
+                case SETTLEMENT_IN_PROCESS:
                 case SETTLEMENT_COMPLETED:
                     paymentResponse = PaymentResponseSuccess.PaymentResponseSuccessBuilder.aPaymentResponseSuccess()
                             .withPartnerTransactionId(paymentId)
@@ -73,7 +74,7 @@ public abstract class AbstractRedirectionServiceImpl {
                             .withTransactionDetails(new BankTransfer(
                                     this.getOwnerBankAccount(paymentStatusResponse),
                                     this.getReceiverBankAccount(merchantIban)))
-                            .withTransactionAdditionalData(transactionAdditionalData.toString()).build();
+                            .withTransactionAdditionalData(jsonService.toJson(transactionAdditionalData)).build();
                     break;
 
                 case CANCELLED:
@@ -81,7 +82,7 @@ public abstract class AbstractRedirectionServiceImpl {
                             .withErrorCode("Payment not approved by PSU or insufficient funds")
                             .withFailureCause(FailureCause.CANCEL)
                             .withPartnerTransactionId(paymentId)
-                            .withTransactionAdditionalData(transactionAdditionalData.toString())
+                            .withTransactionAdditionalData(jsonService.toJson(transactionAdditionalData))
                             .build();
                     break;
 
@@ -90,7 +91,7 @@ public abstract class AbstractRedirectionServiceImpl {
                             .withErrorCode("Consent approval has expired")
                             .withFailureCause(FailureCause.SESSION_EXPIRED)
                             .withPartnerTransactionId(paymentId)
-                            .withTransactionAdditionalData(transactionAdditionalData.toString()).build();
+                            .withTransactionAdditionalData(jsonService.toJson(transactionAdditionalData)).build();
                     break;
 
                 case ERROR:
@@ -99,7 +100,7 @@ public abstract class AbstractRedirectionServiceImpl {
                             .withErrorCode("Payment was rejected due to an error")
                             .withFailureCause(FailureCause.REFUSED)
                             .withPartnerTransactionId(paymentId)
-                            .withTransactionAdditionalData(transactionAdditionalData.toString())
+                            .withTransactionAdditionalData(jsonService.toJson(transactionAdditionalData))
                             .build();
                     break;
             }
